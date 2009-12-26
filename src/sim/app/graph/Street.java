@@ -3,34 +3,57 @@
  */
 package sim.app.graph;
 
+import java.util.AbstractQueue;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
+import sim.app.agents.Car;
+import sim.app.utils.Orientation;
+
 public class Street {
-	private final String _label;
-	private final double _distance;
+	private final String ID;
+	private final double LENGTH;
+	private final Orientation _orientation;
+	private static int _streetCount = 0;
+	
+	public List<Car> carsOnStreet;
+	
 
 	/**
-	 * 
-	 * @author Raul Cajias StreetEdge
+	 * Class constructor
+	 * @author biggie
 	 */
-	public Street(String val_, double distance_) {
-		_label = val_;
-		_distance = distance_;
+	public Street(Orientation orientation_, double lenth_) {
+		ID = "Street_"+_streetCount;
+		_streetCount++;
 		
+		LENGTH = lenth_;
+		_orientation = orientation_;
+		carsOnStreet = new LinkedList<Car>();
 	}
 	
 	/**
 	 * Getter method for edge distance
 	 * @return
 	 */
-	public double getDistance()
+	public double getLength()
 	{
-		return _distance;
+		return LENGTH;
 	}
 
 
 	/**
-     * Getter method for 
+     * Class toString 
      */
 	public String toString() {
-		return _label;
+		return ID;
 	}
+	
+	public Orientation getOrientation()
+	{
+	    return _orientation;
+	}
+	
 }
