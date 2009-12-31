@@ -93,14 +93,14 @@ public class Car implements Steppable
      * 
      * @param car
      */
-    private void addCartoCurrStreet ()
+    private void addtoCurrStreet ()
     {
         
         currentStreet().carsOnStreet.add( this );
         
     }
     
-    private void removeCarFromCurrStreet ()
+    private void removeFromCurrStreet ()
     {
         
         _trayectory.getFirst().carsOnStreet.remove( this );
@@ -115,11 +115,22 @@ public class Car implements Steppable
         
         if ( atEndOfStreet() && !_trayectory.isEmpty() )
         {
-            _currLocation = 0;
-            _trayectory.remove();
+            
+            goToNextStreet();
         } else
         {
             _currLocation++;
+        }
+    }
+    
+    private void goToNextStreet ()
+    {
+        _currLocation = 0;
+        removeFromCurrStreet();
+        _trayectory.pop();
+        if ( !_trayectory.isEmpty() )
+        {
+            addtoCurrStreet();
         }
     }
     
@@ -172,27 +183,25 @@ public class Car implements Steppable
         
         Orientation or = currentStreet().getOrientation();
         
-        Car nextCar = getNextCar();
-
+        Car prevCar = getPrevCar();
         
         if ( !atEndOfStreet() )
         {
-            // If this is the first car, no other cars before it
-                if ( null == nextCar )
-                {
-                    Car nextCar = st.carsOnStreet.get( nextCarIdx );
-                    // TODO replace this static value for how much the car would
-                    // move.
-                    // TODO if the car cant move, it stops i.e speed = 0
-                    if ( this._currLocation + 1 != nextCar._currLocation )
-                    {
-                        canMove = true;
-                    }
-                    
-                } else
+            // If this is not the first car.
+            if ( null != prevCar )
+            {
+                // TODO replace this static value for how much the car would
+                // move.
+                // TODO if the car cant move, it stops i.e speed = 0
+                if ( this._currLocation + 1 < prevCar._currLocation )
                 {
                     canMove = true;
                 }
+                
+            } else
+            {
+                canMove = true;
+            }
         } else
         {
             canMove = TrafficLightState.RED != currentXing( state_ ).getTrafficLight().getState( or );
@@ -201,28 +210,29 @@ public class Car implements Steppable
     }
     
     /**
-     * Get the next car in  line
+     * Get the next car in line
+     * 
      * @return null if this is the first car
      */
-    private Car getNextCar ()
+    private Car getPrevCar ()
     {
         Car nextCar = null;
         // Get next car
         try
         {
-
+            
             int thisCarIdx = currentStreet().carsOnStreet.indexOf( this );
-            nextCar = currentStreet().carsOnStreet.get( thisCarIdx + 1 );
+            nextCar = currentStreet().carsOnStreet.get( thisCarIdx - 1 );
         } catch ( IndexOutOfBoundsException e )
         {
-            //ignore
+            // ignore
         }
         return nextCar;
     }
-
+    
     /**
-     * Overrite toString to print car id:
-     * car_[number in simulation]_[number in city < MAX_CAR ]
+     * Overrite toString to print car id: car_[number in simulation]_[number in
+     * city < MAX_CAR ]
      */
     public String toString ()
     {
@@ -230,7 +240,6 @@ public class Car implements Steppable
     }
     
     /**
-     * 
      * @param state_
      * @return
      */
