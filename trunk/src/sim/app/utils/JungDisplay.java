@@ -30,6 +30,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -58,21 +59,28 @@ import edu.uci.ics.jung.algorithms.layout.DAGLayout;
 import edu.uci.ics.jung.algorithms.layout.FRLayout2;
 import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.annotations.AnnotatingGraphMousePlugin;
+import edu.uci.ics.jung.visualization.annotations.AnnotatingModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.CrossoverScalingControl;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.control.ViewScalingControl;
+import edu.uci.ics.jung.visualization.decorators.PickableVertexPaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 
 public class JungDisplay extends JComponent implements Steppable
 {
     
-    public static final ImageIcon CAMERA_ICON = iconFor ( "Camera.png" );
+    public static final ImageIcon CAMERA_ICON = iconFor( "Camera.png" );
     
-    public static final ImageIcon CAMERA_ICON_P = iconFor ( "CameraPressed.png" );
+    public static final ImageIcon CAMERA_ICON_P = iconFor( "CameraPressed.png" );
     
     private static final long serialVersionUID = 1L;
     
@@ -99,20 +107,20 @@ public class JungDisplay extends JComponent implements Steppable
     JButton snapshotButton;
     
     /* Set to true if we're running on a Mac */
-    public static final boolean isMacOSX = isMacOSX ();
+    public static final boolean isMacOSX = isMacOSX();
     
     /* Set to true if we're running on Windows */
-    public static final boolean isWindows = isWindows ();
+    public static final boolean isWindows = isWindows();
     
     static ImageIcon iconFor ( String name )
     {
-        return new ImageIcon ( Display2D.class.getResource ( name ) );
+        return new ImageIcon( Display2D.class.getResource( name ) );
     }
     
     public void step ( SimState state )
     {
         
-        double currentTime = simulation.state.schedule.time ();
+        double currentTime = simulation.state.schedule.time();
         
         /*
          * Check if it is apropriate time to update, draw only if the display
@@ -122,12 +130,12 @@ public class JungDisplay extends JComponent implements Steppable
         if ( ( currentTime > nextUpdate ) )
         {
             
-            if ( frame.isShowing () )
+            if ( frame.isShowing() )
             {
                 
-                layout.reset ();
+                layout.reset();
                 
-                viewer.repaint ();
+                viewer.repaint();
             }
             
             // Compute nextUpdate time.
@@ -140,104 +148,124 @@ public class JungDisplay extends JComponent implements Steppable
     {
         
         this.simulation = simulation;
-        this.frame = new JFrame ();
+        this.frame = new JFrame();
         
         /*
          * Layout is the JUNG's procedure which plans how the graph will be
          * drawn. Check out other layouts, by default we will use Kamada-Kawai.
          */
-        Graph<StreetXing, Street> city = ( (CitySimState) simulation.state ).getCity ();
-        DijkstraDistance<StreetXing, Street> distance = new DijkstraDistance<StreetXing, Street> ( city );
-        layout = new KKLayout<StreetXing, Street> ( city, distance );
-        
+        Graph<StreetXing, Street> city = ( (CitySimState) simulation.state ).getCity();
+        DijkstraDistance<StreetXing, Street> distance = new DijkstraDistance<StreetXing, Street>( city );
+        layout = new KKLayout<StreetXing, Street>( city, distance );
+               
         /*
          * Viewer is AWT Component subclass, doing the rendering, which can be
          * directly added to a JPanel.
          */
-        viewer = new VisualizationViewer ( layout, new Dimension ( 600, 600 ) );
-        viewer.getRenderContext ().setVertexLabelTransformer ( new ToStringLabeller<String> () );
-        viewer.getRenderer ().getVertexLabelRenderer ().setPosition ( Renderer.VertexLabel.Position.AUTO );
-        Container content = frame.getContentPane ();
-        JPanel panel = new JPanel ( new BorderLayout () );
-        panel.add ( viewer );
-        content.add ( panel );
+        viewer = new VisualizationViewer( layout, new Dimension( 600, 600 ) );
+        viewer.getRenderContext().setVertexLabelTransformer( new ToStringLabeller<String>() );
+        viewer.getRenderContext().setVertexFillPaintTransformer(
+                new PickableVertexPaintTransformer<String>( viewer.getPickedVertexState(), Color.red, Color.red ) );
         
-        /*
-         * Additional BirdsEyeView for zooming / panning the graph will be
-         * created. See JUNG's ZoomDemo for explanations.
-         */
+        viewer.getRenderContext().setEdgeLabelTransformer( new ToStringLabeller<String>() );
+        viewer.getRenderer().getVertexLabelRenderer().setPosition( Renderer.VertexLabel.Position.AUTO );
 
-        dialog = new JDialog ( frame );
-        content = dialog.getContentPane ();
+         
+        Container content = frame.getContentPane();
+        JPanel panel = new JPanel( new BorderLayout() );
+        GraphZoomScrollPane gzsp = new GraphZoomScrollPane( viewer );
+        panel.add( gzsp );
+        // panel.add ( viewer );
+        content.add( panel );
         
-        final ScalingControl scaler = new ViewScalingControl ();
-        JButton plus = new JButton ( "+" );
-        plus.addActionListener ( new ActionListener ()
+        // ------
+        RenderContext<String, Number> rc = viewer.getRenderContext();
+        AnnotatingGraphMousePlugin<String, Number> annotatingPlugin = new AnnotatingGraphMousePlugin<String, Number>(
+                rc );
+        
+        // create a GraphMouse for the main view
+        // 
+        final AnnotatingModalGraphMouse<String, Number> graphMouse = new AnnotatingModalGraphMouse<String, Number>( rc,
+                annotatingPlugin );
+        graphMouse.setMode( ModalGraphMouse.Mode.PICKING );
+        viewer.setGraphMouse( graphMouse );
+        viewer.addKeyListener( graphMouse.getModeKeyListener() );
+        // --------
+        dialog = new JDialog( frame );
+        content = dialog.getContentPane();
+        
+        final ScalingControl scaler = new CrossoverScalingControl();
+        JButton plus = new JButton( "+" );
+        plus.addActionListener( new ActionListener()
         {
             public void actionPerformed ( ActionEvent e )
             {
-                scaler.scale ( viewer, 1.1f, viewer.getCenter () );
+                scaler.scale( viewer, 1.1f, viewer.getCenter() );
             }
         } );
-        JButton minus = new JButton ( "-" );
-        minus.addActionListener ( new ActionListener ()
+        JButton minus = new JButton( "-" );
+        minus.addActionListener( new ActionListener()
         {
             public void actionPerformed ( ActionEvent e )
             {
-                scaler.scale ( viewer, 0.9f, viewer.getCenter () );
+                scaler.scale( viewer, 0.9f, viewer.getCenter() );
             }
         } );
-        JButton help = new JButton ( "Help" );
-        help.addActionListener ( new ActionListener ()
+        
+        
+        JButton help = new JButton( "Help" );
+        help.addActionListener( new ActionListener()
         {
             public void actionPerformed ( ActionEvent e )
             {
                 String zoomHelp = "<html><center>Drag the rectangle to pan<p>"
                         + "Drag one side of the rectangle to zoom</center></html>";
-                JOptionPane.showMessageDialog ( dialog, zoomHelp );
+                JOptionPane.showMessageDialog( dialog, zoomHelp );
+               
             }
         } );
-        JPanel controls = new JPanel ( new GridLayout ( 2, 2 ) );
-        controls.add ( plus );
-        controls.add ( minus );
-        controls.add ( help );
-        content.add ( controls, BorderLayout.SOUTH );
+        JPanel controls = new JPanel( new GridLayout( 2, 2 ) );
+        controls.add( plus );
+        controls.add( minus );
+        controls.add( help );
+        content.add( controls, BorderLayout.SOUTH );
         
-        JButton zoomer = new JButton ( "Show Zoom Window" );
-        zoomer.addActionListener ( new ActionListener ()
+        JButton zoomer = new JButton( "Show Zoom Window" );
+        zoomer.addActionListener( new ActionListener()
         {
             public void actionPerformed ( ActionEvent e )
             {
-                dialog.pack ();
-                dialog.setLocation ( (int) ( frame.getLocationOnScreen ().getX () + frame.getWidth () ), (int) frame
-                        .getLocationOnScreen ().getY () );
-                dialog.show ();
+                dialog.pack();
+                dialog.setLocation( (int) ( frame.getLocationOnScreen().getX() + frame.getWidth() ), (int) frame
+                        .getLocationOnScreen().getY() );
+                dialog.show();
             }
         } );
         
-        header = new Box ( BoxLayout.X_AXIS );
-        JPanel p = new JPanel ();
-        p.add ( zoomer );
-        header.add ( p );
+        header = new Box( BoxLayout.X_AXIS );
+        JPanel p = new JPanel();
+        p.add( zoomer );
+        header.add( p );
         
         // Add the snapshot button for making pictures of graph.
-        snapshotButton = new JButton ( CAMERA_ICON );
-        snapshotButton.setPressedIcon ( CAMERA_ICON_P );
-        snapshotButton.setBorder ( BorderFactory.createEmptyBorder ( 4, 4, 4, 4 ) );
-        snapshotButton.setToolTipText ( "Create a snapshot (as a PNG file)" );
-        snapshotButton.addActionListener ( new ActionListener ()
+        snapshotButton = new JButton( CAMERA_ICON );
+        snapshotButton.setPressedIcon( CAMERA_ICON_P );
+        snapshotButton.setBorder( BorderFactory.createEmptyBorder( 4, 4, 4, 4 ) );
+        snapshotButton.setToolTipText( "Create a snapshot (as a PNG file)" );
+        snapshotButton.addActionListener( new ActionListener()
         {
             public void actionPerformed ( ActionEvent e )
             {
-                takeSnapshot ();
+                takeSnapshot();
             }
         } );
-        header.add ( snapshotButton );
+        header.add( snapshotButton );
         
-        frame.getContentPane ().add ( header, BorderLayout.NORTH );
-        frame.setDefaultCloseOperation ( JFrame.EXIT_ON_CLOSE );
-        frame.setSize ( 600, 600 );
-        frame.show ();
+        frame.getContentPane().add( header, BorderLayout.NORTH );
+        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setSize( 600, 600 );
+        frame.pack();
+        frame.setVisible( true );
         
     }
     
@@ -246,10 +274,10 @@ public class JungDisplay extends JComponent implements Steppable
         
         if ( stopper != null )
         {
-            stopper.stop ();
+            stopper.stop();
         }
         
-        stopper = simulation.scheduleImmediateRepeat ( true, this );
+        stopper = simulation.scheduleImmediateRepeat( true, this );
         this.nextUpdate = 0;
         
     }
@@ -257,7 +285,7 @@ public class JungDisplay extends JComponent implements Steppable
     public void quit ()
     {
         if ( stopper != null )
-            stopper.stop ();
+            stopper.stop();
         stopper = null;
     }
     
@@ -266,7 +294,7 @@ public class JungDisplay extends JComponent implements Steppable
         try
         // we'll try to get certain properties if the security permits it
         {
-            return ( System.getProperty ( "mrj.version" ) != null ); // Apple's
+            return ( System.getProperty( "mrj.version" ) != null ); // Apple's
             // official approach
         } catch ( Throwable e )
         {
@@ -279,7 +307,7 @@ public class JungDisplay extends JComponent implements Steppable
         try
         // we'll try to get certain properties if the security permits it
         {
-            return !isMacOSX () && ( System.getProperty ( "os.name" ).startsWith ( "Win" ) );
+            return !isMacOSX() && ( System.getProperty( "os.name" ).startsWith( "Win" ) );
         } catch ( Throwable e )
         {
             return false;
@@ -290,7 +318,7 @@ public class JungDisplay extends JComponent implements Steppable
     {
         try
         {
-            return System.getProperty ( "java.version" );
+            return System.getProperty( "java.version" );
         } catch ( Throwable e )
         {
             return "unknown";
@@ -302,41 +330,41 @@ public class JungDisplay extends JComponent implements Steppable
         if ( SimApplet.isApplet )
         {
             Object[] options = { "Oops" };
-            JOptionPane.showOptionDialog ( this, "You cannot save snapshots from an applet.",
+            JOptionPane.showOptionDialog( this, "You cannot save snapshots from an applet.",
                     "MASON Applet Restriction", JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE, null, options,
                     options[0] );
             return;
         }
         
-        int width = viewer.getSize ().width;
+        int width = viewer.getSize().width;
         
-        System.out.println ( width );
+        System.out.println( width );
         
-        int height = viewer.getSize ().height;
-        Color bg = getBackground ();
+        int height = viewer.getSize().height;
+        Color bg = getBackground();
         
-        BufferedImage bi = new BufferedImage ( width, height, BufferedImage.TYPE_INT_BGR );
-        Graphics2D graphics = bi.createGraphics ();
-        graphics.setColor ( bg );
-        graphics.fillRect ( 0, 0, width, height );
-        viewer.paint ( graphics );
+        BufferedImage bi = new BufferedImage( width, height, BufferedImage.TYPE_INT_BGR );
+        Graphics2D graphics = bi.createGraphics();
+        graphics.setColor( bg );
+        graphics.fillRect( 0, 0, width, height );
+        viewer.paint( graphics );
         
         // NOW pop up the save window
-        FileDialog fd = new FileDialog ( this.frame, "Save Snapshot as 24-bit PNG...", FileDialog.SAVE );
-        fd.setFile ( "Untitled.png" );
-        fd.setVisible ( true );
+        FileDialog fd = new FileDialog( this.frame, "Save Snapshot as 24-bit PNG...", FileDialog.SAVE );
+        fd.setFile( "Untitled.png" );
+        fd.setVisible( true );
         
-        if ( fd.getFile () != null )
+        if ( fd.getFile() != null )
             try
             {
-                OutputStream stream = new BufferedOutputStream ( new FileOutputStream ( new File ( fd.getDirectory (),
-                        Utilities.ensureFileEndsWith ( fd.getFile (), ".png" ) ) ) );
-                PngEncoder tmpEncoder = new PngEncoder ( bi, false, PngEncoder.FILTER_NONE, 9 );
-                stream.write ( tmpEncoder.pngEncode () );
-                stream.close ();
+                OutputStream stream = new BufferedOutputStream( new FileOutputStream( new File( fd.getDirectory(),
+                        Utilities.ensureFileEndsWith( fd.getFile(), ".png" ) ) ) );
+                PngEncoder tmpEncoder = new PngEncoder( bi, false, PngEncoder.FILTER_NONE, 9 );
+                stream.write( tmpEncoder.pngEncode() );
+                stream.close();
             } catch ( Exception e )
             {
-                e.printStackTrace ();
+                e.printStackTrace();
             }
     }
     
