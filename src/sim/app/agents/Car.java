@@ -6,8 +6,6 @@ package sim.app.agents;
 import java.util.LinkedList;
 import java.util.List;
 
-import sim.app.TrafficSim;
-import sim.app.antsforage.AntsForage;
 import sim.app.graph.CitySimState;
 import sim.app.graph.Street;
 import sim.app.graph.StreetXing;
@@ -37,8 +35,6 @@ public class Car implements Steppable
     private double _currSpeed;
     private LinkedList<Street> _trayectory;
     private final String ID;
-    private long lastTime = 0;
-    
     /**
      * Class constructor.
      * 
@@ -99,7 +95,9 @@ public class Car implements Steppable
         currentStreet().carsOnStreet.add( this );
         
     }
-    
+    /**
+     * Wrapper method to remove this car from the street queue
+     */
     private void removeFromCurrStreet ()
     {
         
@@ -110,7 +108,7 @@ public class Car implements Steppable
      * Move the car. If at the end of the street, move to the next street in
      * trayectory. Car start at location 0
      */
-    private void move ()
+    protected void move ()
     {
         
         if ( atEndOfStreet() && !_trayectory.isEmpty() )
@@ -123,6 +121,9 @@ public class Car implements Steppable
         }
     }
     
+    /**
+     * Move car from one street to the next
+     */
     private void goToNextStreet ()
     {
         _currLocation = 0;
@@ -135,6 +136,7 @@ public class Car implements Steppable
     }
     
     /**
+     * TODO
      * Calculate new Speed
      */
     private void accelerate ()
@@ -169,6 +171,10 @@ public class Car implements Steppable
             toDiePointer.stop();
     }
     
+    /**
+     * Returns number of cars currently in play
+     * @return
+     */
     public static int getNumberOfCars ()
     {
         return _carCount;
@@ -177,7 +183,7 @@ public class Car implements Steppable
     /**
      * Returns true if car in front is not too close.
      */
-    public boolean canMove ( CitySimState state_ )
+    protected boolean canMove ( CitySimState state_ )
     {
         boolean canMove = false;
         
@@ -247,12 +253,19 @@ public class Car implements Steppable
     {
         return state_.getCity().getDest( currentStreet() );
     }
-    
+    /**
+     * 
+     * @return current street
+     */
     private Street currentStreet ()
     {
         return _trayectory.getFirst();
     }
     
+    /**
+     * 
+     * @return true if current location >= street lenght
+     */
     private boolean atEndOfStreet ()
     {
         return _currLocation >= currentStreet().getLength();
