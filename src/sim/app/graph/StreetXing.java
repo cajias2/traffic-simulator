@@ -7,12 +7,14 @@ import java.awt.Font;
 import java.util.Queue;
 
 import sim.app.agents.TrafficLight;
+import sim.app.utils.Orientation;
+import sim.app.utils.TrafficLightState;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Double2D;
 
 @SuppressWarnings ( "serial" )
-public class StreetXing implements Steppable
+public class StreetXing 
 {
     
     private final String ID;
@@ -27,16 +29,23 @@ public class StreetXing implements Steppable
      * 
      * @author biggie
      */
+    @Deprecated
     public StreetXing()
     {
         ID = "Xing_" + _xingCount;
         _xingCount++;
     }
-    
+    @Deprecated
     public StreetXing(TrafficLight tf_)
     {
         this();
         _trafficLight = tf_;
+    }
+    
+    public StreetXing( String id_)
+    {
+        ID = id_;
+        _xingCount++;        
     }
     
     /**
@@ -44,15 +53,24 @@ public class StreetXing implements Steppable
      */
     public String toString ()
     {
-        return ID;
-    }
-    
-    public void step ( SimState state )
-    {
-        // TODO Auto-generated method stub
         
+        StringBuffer echo = new StringBuffer(ID + "\n");
+        if ( hasTrafficLight() )
+        {
+            for ( Orientation or : Orientation.values() )
+            {
+                TrafficLightState state = _trafficLight.getState( or );
+                if ( state != null )
+                {
+                    echo.append(or + ": " + state);
+                }
+                echo.append( "__" );
+                
+            }
+        }
+        return echo.toString();
     }
-    
+
     public void setTrafficLight ( TrafficLight tf_ )
     {
         _trafficLight = tf_;
