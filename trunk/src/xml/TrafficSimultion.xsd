@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"><!--
 
 
 	<xs:element name="simulations">
@@ -10,7 +10,7 @@
 		</xs:complexType>
 	</xs:element>
 
-	<xs:element name="simulation">
+	--><xs:element name="simulation">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="crossings" minOccurs='0' maxOccurs='unbounded' />
@@ -24,33 +24,44 @@
 	<xs:element name="crossings">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="crossing" minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element ref="crossing" minOccurs="1" maxOccurs="unbounded" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<xs:element name="crossing">
 		<xs:complexType id="crossing">
 			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="hasTrafficLight" type="xs:boolean" use="optional" default="false"/>
+			<xs:attribute name="startingOdds" type="xs:decimal" use="optional" default="0"/>
+			<xs:attribute name="endingOdds" type="xs:decimal" use="optional" default="0"/>
+			
 		</xs:complexType>
 	</xs:element>
 
 	<xs:element name="connections">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="connection" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="connection" minOccurs="0" maxOccurs="unbounded" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<xs:element name="connection">
 		<xs:complexType>
 			<xs:attribute name="from" type="xs:string" use="required" />
-			<xs:attribute name="to" type="xs:string" use="required"/>
+			<xs:attribute name="to" type="xs:string" use="required" />
+			<xs:attribute name="orientation" type="orType" use="required" />
+			<xs:attribute name="length" type="xs:double" use="required"/>
 		</xs:complexType>
 	</xs:element>
 
-
+	<xs:simpleType name="orType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NS"/>
+			<xs:enumeration value="EW"/>
+		</xs:restriction>
+	</xs:simpleType>
 
 
 
