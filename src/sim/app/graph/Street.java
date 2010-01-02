@@ -3,11 +3,8 @@
  */
 package sim.app.graph;
 
-import java.util.AbstractQueue;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 import sim.app.agents.Car;
 import sim.app.utils.Orientation;
@@ -48,7 +45,7 @@ public class Street {
      * Class toString 
      */
 	public String toString() {
-		return ID;
+		return _orientation + "__"+ carsOnStreet.size();
 	}
 	
 	public Orientation getOrientation()
