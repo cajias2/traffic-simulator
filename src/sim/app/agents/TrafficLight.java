@@ -5,9 +5,7 @@ package sim.app.agents;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -22,9 +20,10 @@ import sim.engine.Steppable;
 public class TrafficLight implements Steppable
 {
     
+    private static final long serialVersionUID = 1829654668132095868L;
+    
     private static int _lightCount = 0;
     private Map<Orientation, Map<Attr, Object>> _stateMap;
-    private int _timeLeftInState;
     
     private final String ID;
     
@@ -42,7 +41,6 @@ public class TrafficLight implements Steppable
         _stateMap = new HashMap<Orientation, Map<Attr, Object>>( 2 );
         _stateMap.put( Orientation.EAST_WEST, new HashMap<Attr, Object>() );
         _stateMap.put( Orientation.NORTH_SOUTH, new HashMap<Attr, Object>() );
-                
         
         // Initialize state map internals
         for ( Entry<Orientation, Map<Attr, Object>> entry : _stateMap.entrySet() )
@@ -51,10 +49,11 @@ public class TrafficLight implements Steppable
             entry.getValue().put( Attr.TIME_LEFT, 10 );
         }
         // Set state list. One should be green, all others red.
-        LinkedList<TrafficLightState> nsStates = new LinkedList<TrafficLightState>( Arrays.asList( TrafficLightState.GREEN,
-                TrafficLightState.RED ) );
+        LinkedList<TrafficLightState> nsStates = new LinkedList<TrafficLightState>( Arrays.asList(
+                TrafficLightState.GREEN, TrafficLightState.RED ) );
         _stateMap.get( Orientation.NORTH_SOUTH ).put( Attr.STATE, nsStates );
-        LinkedList<TrafficLightState> ewStates = new LinkedList<TrafficLightState>( Arrays.asList( TrafficLightState.RED, TrafficLightState.GREEN) );
+        LinkedList<TrafficLightState> ewStates = new LinkedList<TrafficLightState>( Arrays.asList(
+                TrafficLightState.RED, TrafficLightState.GREEN ) );
         _stateMap.get( Orientation.EAST_WEST ).put( Attr.STATE, ewStates );
         
     }
@@ -72,9 +71,9 @@ public class TrafficLight implements Steppable
             // If time ran out.. reset time and update state
             if ( timeLeft < 0 )
             {
-                System.out.print(this+" Was: "+getState(entry.getKey()));
+                System.out.print( this + " Was: " + getState( entry.getKey() ) );
                 upateState( entry.getKey() );
-                System.out.println(" Now:"+ getState(entry.getKey())); 
+                System.out.println( " Now:" + getState( entry.getKey() ) );
                 
             }
         }
@@ -86,9 +85,10 @@ public class TrafficLight implements Steppable
      * 
      * @return
      */
+    @SuppressWarnings ( "unchecked" )
     public TrafficLightState getState ( Orientation or_ )
     {
-        return ((LinkedList<TrafficLightState>)_stateMap.get( or_ ).get( Attr.STATE )).getFirst();
+        return ( (LinkedList<TrafficLightState>) _stateMap.get( or_ ).get( Attr.STATE ) ).getFirst();
     }
     
     /**
@@ -97,23 +97,20 @@ public class TrafficLight implements Steppable
      * 
      * @param or_
      */
+    @SuppressWarnings ( "unchecked" )
     private void upateState ( Orientation or_ )
     {
         // Cicle through the state list
         TrafficLightState state = (TrafficLightState) ( (LinkedList<TrafficLightState>) _stateMap.get( or_ ).get(
                 Attr.STATE ) ).poll();
         ( (LinkedList<TrafficLightState>) _stateMap.get( or_ ).get( Attr.STATE ) ).add( state );
- 
-
         
         // Copy duration over
         int duration = (Integer) _stateMap.get( or_ ).get( Attr.DURATION );
         _stateMap.get( or_ ).put( Attr.TIME_LEFT, duration );
     }
     
-
-    
-    public String toString()
+    public String toString ()
     {
         return ID;
     }
