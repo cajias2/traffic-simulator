@@ -17,7 +17,8 @@
 				<xs:element ref="connections" minOccurs='0' maxOccurs="unbounded" />
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="optional"
-				default="Simulation" />
+				default="Simulation" />			
+			<xs:attribute name="maxCars" type="xs:decimal" use="required" />
 		</xs:complexType>
 	</xs:element>
 

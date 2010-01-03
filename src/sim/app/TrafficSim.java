@@ -1,6 +1,7 @@
 package sim.app;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import sim.app.graph.CitySimState;
 import sim.app.graph.Street;
 import sim.app.graph.StreetXing;
 import sim.app.utils.Orientation;
+import sim.app.xml.XmlParseService;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -35,141 +37,40 @@ public class TrafficSim extends CitySimState
     
     private static String clazz = TrafficSim.class.getSimpleName();
     private static String _cityXml;
-    
-    final static String NODE_SIM = "simulation";
-    final static String NODE_XINGS = "crossing";
-    final static String NODE_CONS = "connection";
-    
-    final static String ATTR_NAME = "name";
-    final static String ATTR_XING_HASTF = "hasTrafficLight";
-    final static String ATTR_XING_START_ODDS = "startingOdds";
-    final static String ATTR_XING_END_ODDS = "endingOdds";
-    final static String ATTR_CONN_FROM = "from";
-    final static String ATTR_CONN_TO = "to";
-    final static String ATTR_CONN_OR = "orientation";
-    final static String ATTR_CONN_LEN = "length";
-    
-    private static final int CITY_SIZE = 5; // Number of intersections in the
-    // city.
+    private List<StreetXing> _sourceXings;
+    private List<StreetXing> _destXings;
+ 
     public static final double XMIN = 0;
     public static final double XMAX = 800;
     public static final double YMIN = 0;
     public static final double YMAX = 600;
-    public static final int MAX_CAR_COUNT = 2;
+    public static int MAX_CAR_COUNT;
+    
+    /**
+     * Creates a TrafficSim simulation with the given random number seed.
+     */
+    public TrafficSim(long seed, String cityXmlFileName_)
+    {
+        super( seed );
+        XmlParseService parsedGraph = new XmlParseService( cityXmlFileName_ );
+        setCity( parsedGraph.getGraph() );
+        MAX_CAR_COUNT = parsedGraph.getMaxCars();
+        _sourceXings = parsedGraph.getSourceXings();
+        _destXings = parsedGraph.getDestXings();
+    }
     
     /**
      * Creates a NetworkTest simulation with the given random number seed.
+     * _cityXml must be set first!
      */
     public TrafficSim(long seed)
     {
         super( seed );
-        setCity( new DirectedSparseGraph<StreetXing, Street>() );
-    }
-    
-    /**
-     * Create a city based on the xml file passed in
-     */
-    private void createCity ()
-    {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db;
-        
-        try
-        {
-            db = dbf.newDocumentBuilder();
-            
-            Document doc = db.parse( _cityXml );
-            doc.getDocumentElement().normalize();
-            Map<String, StreetXing> xingMap = new HashMap<String, StreetXing>();
-            
-            /*
-             * Create crossing instances from the xml.
-             */
-            NodeList xingNodes = doc.getElementsByTagName( NODE_XINGS );
-            for ( int i = 0; i < xingNodes.getLength(); i++ )
-            {
-                Node xingNode = xingNodes.item( i );
-                String xingName = xingNode.getAttributes().getNamedItem( ATTR_NAME ).getNodeValue();
-                StreetXing xing = new StreetXing( xingName );
-                
-                Node tfNode = xingNode.getAttributes().getNamedItem( ATTR_XING_HASTF );
-                if ( null != tfNode &&
-                        (( null != tfNode.getNodeValue() || !"".equals( tfNode.getNodeValue() ) ) 
-                                && true == Boolean.parseBoolean( tfNode.getNodeValue() ) ))
-                {
-                    xing.setTrafficLight( new TrafficLight() );
-                }
-                
-                Node startNode = xingNode.getAttributes().getNamedItem( ATTR_XING_START_ODDS );
-                if ( null != startNode && ( null != startNode.getNodeValue() || !"".equals( startNode.getNodeValue() ) ) )
-                {
-                    // TODO use startOdds
-                    double startOdds = Double.parseDouble( startNode.getNodeValue() );
-                }
-                Node endNode = xingNode.getAttributes().getNamedItem( ATTR_XING_END_ODDS );
-                if ( null != endNode && ( null != endNode.getNodeValue() || !"".equals( endNode.getNodeValue() ) ) )
-                {
-                    // TODO use endOdds
-                    double endOdds = Double.parseDouble( endNode.getNodeValue() );
-                }
-                xingMap.put( xingName, xing );
-                // Finally, add the vertex.
-                getCity().addVertex( xing );
-            }
-            
-            /*
-             * Create all the connections
-             */
-            NodeList connNodes = doc.getElementsByTagName( NODE_CONS );
-            for ( int i = 0; i < connNodes.getLength(); i++ )
-            {
-                Node connNode = connNodes.item( i );
-                String fromXing = connNode.getAttributes().getNamedItem( ATTR_CONN_FROM ).getNodeValue();
-                String toXing = connNode.getAttributes().getNamedItem( ATTR_CONN_TO ).getNodeValue();
-                Orientation or = translateOr( connNode.getAttributes().getNamedItem( ATTR_CONN_OR ).getNodeValue() );
-                double length = Double.parseDouble( connNode.getAttributes().getNamedItem( ATTR_CONN_LEN )
-                        .getNodeValue() );
-                
-                Pair<StreetXing> edge = new Pair<StreetXing>( xingMap.get( fromXing ), xingMap.get( toXing ) );
-                Street street = new Street( or, length );
-                // Finally, add the edge
-                getCity().addEdge( street, edge );
-            }
-        } catch ( SAXException e )
-        {
-            System.err.println( clazz + ".jar: File: " + _cityXml + " Does not conform to xsd."
-                    + "See TrafficSimulation.xsd for details" );
-            e.printStackTrace();
-            System.exit( 1 );
-        } catch ( IOException e )
-        {
-            System.err.println( clazz + ".jar: File: " + _cityXml + " Could not be opened." );
-            System.exit( 1 );
-        } catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-        
-    }
-    
-    /**
-     * Translates orientation ENUM from {@link TrafficSimulation.xsd}
-     * 
-     * @param orString
-     *            'NS' || 'EW'
-     * @return
-     */
-    private Orientation translateOr ( String orString )
-    {
-        Orientation or;
-        if ( "NS".equals( orString ) )
-        {
-            or = Orientation.NORTH_SOUTH;
-        } else
-        {
-            or = Orientation.EAST_WEST;
-        }
-        return or;
+        XmlParseService parsedGraph = new XmlParseService( _cityXml );
+        setCity( parsedGraph.getGraph() );
+        MAX_CAR_COUNT = parsedGraph.getMaxCars();
+        _sourceXings = parsedGraph.getSourceXings();
+        _destXings = parsedGraph.getDestXings();
     }
     
     /**
@@ -178,46 +79,10 @@ public class TrafficSim extends CitySimState
     @Override
     public void start ()
     {
-        super.start(); // clear out the schedule
+        super.start();      
+        schedule.reset();   // clear out the schedule  
         
-        schedule.reset();
-        createCity();
         scheduleTrafficLights();
-        // List<StreetXing> xings = new ArrayList<StreetXing>( CITY_SIZE );
-        // for ( int i = 0; i < CITY_SIZE; i++ )
-        // {
-        // xings.add( new StreetXing() );
-        // getCity().addVertex( xings.get( i ) );
-        // }
-        //        
-        // Pair edge1 = new Pair( xings.get( 0 ), xings.get( 1 ) );
-        // Pair edge2 = new Pair( xings.get( 0 ), xings.get( 2 ) );
-        // Pair edge3 = new Pair( xings.get( 0 ), xings.get( 3 ) );
-        // Pair edge4 = new Pair( xings.get( 0 ), xings.get( 4 ) );
-        //        
-        // Pair edge5 = new Pair( xings.get( 1 ), xings.get( 0 ) );
-        // Pair edge6 = new Pair( xings.get( 2 ), xings.get( 0 ) );
-        // Pair edge7 = new Pair( xings.get( 3 ), xings.get( 0 ) );
-        // Pair edge8 = new Pair( xings.get( 4 ), xings.get( 0 ) );
-        //        
-        // // Edges going into 0
-        // getCity().addEdge( new Street( Orientation.NORTH_SOUTH, 10 ), edge1
-        // );
-        // getCity().addEdge( new Street( Orientation.NORTH_SOUTH, 10 ), edge2
-        // );
-        // getCity().addEdge( new Street( Orientation.EAST_WEST, 10 ), edge3 );
-        // getCity().addEdge( new Street( Orientation.EAST_WEST, 10 ), edge4 );
-        // // Edges going out of 0
-        // getCity().addEdge( new Street( Orientation.NORTH_SOUTH, 10 ), edge5
-        // );
-        // getCity().addEdge( new Street( Orientation.NORTH_SOUTH, 10 ), edge6
-        // );
-        // getCity().addEdge( new Street( Orientation.EAST_WEST, 10 ), edge7 );
-        // getCity().addEdge( new Street( Orientation.EAST_WEST, 10 ), edge8 );
-        // // Set traffic Light in middle intersection
-        // TrafficLight tf = new TrafficLight();
-        // ( (StreetXing) xings.get( 0 ) ).setTrafficLight( tf );
-        // schedule.scheduleRepeating( tf );
         
         Steppable carGenerator = new Steppable()
         {
@@ -229,6 +94,11 @@ public class TrafficSim extends CitySimState
                 {
                     StreetXing source = getSource();
                     StreetXing target = getTarget();
+                    // Make sure start and end are different. Otherwise... what's the point?
+                    while( source.getId().equals( target.getId() ))
+                    {
+                      target = getTarget();  
+                    }
                     List<Street> trayectory = routeMap.getPath( source, target );
                     Car car = new Car( trayectory );
                     car.toDiePointer = schedule.scheduleRepeating( schedule.getTime(), Car.getNumberOfCars(), car );
@@ -259,25 +129,56 @@ public class TrafficSim extends CitySimState
     }
     
     /**
-     * @return Target
+     * Return a random car destination based on the {@code endOdds} attribute in the city xml.
+     * <p/>
+     * See {@link TraffiSimulation.xsd} for more info
+     * @return Destination
      */
     private StreetXing getTarget ()
     {
-        // TODO set random seed;
+        StreetXing pickedXing = null;
         Random rand = new Random( System.currentTimeMillis() );
-        int targetIndex = 1 + rand.nextInt( getCity().getVertexCount() - 1 );
+        int targetIndex = rand.nextInt( 100 );
+        int currentIndex = 0;
         
-        return (StreetXing) ( getCity().getVertices().toArray() )[targetIndex];
+        for(StreetXing xing: _sourceXings)
+        {
+            currentIndex += xing.getStartOdds();
+            if(currentIndex >= targetIndex)
+            {
+                pickedXing = xing;
+                break;
+            }
+        }
+        
+        return pickedXing;
     }
     
     /**
-     * TODO: hardcoded to 0... need to be configurable = xml
+     * Return a random car begining based on the {@code startingOdds} attribute in the city xml.
+     * <p/>
+     * See {@link TraffiSimulation.xsd} for more info
      * 
      * @return
      */
     private StreetXing getSource ()
     {
-        return (StreetXing) ( getCity().getVertices().toArray() )[0];
+        StreetXing pickedXing = null;
+        Random rand = new Random( System.currentTimeMillis() );
+        int targetIndex = rand.nextInt( 100 );
+        int currentIndex = 0;
+        
+        for(StreetXing xing: _destXings)
+        {
+            currentIndex += xing.getEndOdds();
+            if(currentIndex >= targetIndex)
+            {
+                pickedXing = xing;
+                break;
+            }
+        }
+        
+        return pickedXing;
     }
     
     /**
@@ -294,6 +195,7 @@ public class TrafficSim extends CitySimState
     }
     
     /**
+     * Main
      * @param args
      */
     public static void main ( String[] args )
@@ -305,8 +207,7 @@ public class TrafficSim extends CitySimState
             System.exit( 1 );
             
         }
-        _cityXml = args[1];
-        
+        _cityXml = args[1];        
         doLoop( TrafficSim.class, args );
     }
 }

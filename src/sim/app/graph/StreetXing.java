@@ -18,9 +18,10 @@ public class StreetXing
 {
     
     private final String ID;
-    private final int _steps = 0;
     private TrafficLight _trafficLight;
     private static int _xingCount = 0;
+    private static double _startOdds = 0;
+    private static double _endOdds = 0;
     
     public Font nodeFont = new Font( "SansSerif", Font.PLAIN, 12 );
     
@@ -42,6 +43,10 @@ public class StreetXing
         _trafficLight = tf_;
     }
     
+    /**
+     * Class Constructor
+     * @param id_
+     */
     public StreetXing( String id_)
     {
         ID = id_;
@@ -95,6 +100,39 @@ public class StreetXing
     public boolean hasTrafficLight ()
     {
         return _trafficLight != null;
+    }
+    /**
+     * @param startOdds_ the _startOdds to set
+     */
+    public void setStartOdds ( double startOdds_ )
+    {
+        StreetXing._startOdds = startOdds_;
+    }
+    /**
+     * @return the _startOdds
+     */
+    public double getStartOdds ()
+    {
+        return _startOdds;
+    }
+    /**
+     * @param endOdds_ the _endOdds to set
+     */
+    public void setEndOdds ( double endOdds_ )
+    {
+        StreetXing._endOdds = endOdds_;
+    }
+    /**
+     * @return the _endOdds
+     */
+    public double getEndOdds ()
+    {
+        return _endOdds;
+    }
+    
+    public String getId()
+    {
+        return ID;
     }
     
 }
