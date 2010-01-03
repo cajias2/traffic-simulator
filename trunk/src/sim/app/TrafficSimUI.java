@@ -9,23 +9,22 @@ import sim.engine.SimState;
 public class TrafficSimUI extends GUIState {
 
 	public JungDisplay jDisplay;
+	private static TrafficSim _trafficSim;
+    
+    private static final String clazz = TrafficSimUI.class.getSimpleName();
 
-
-	/**
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		TrafficSimUI vid = new TrafficSimUI();
-		Console c = new Console(vid);
-		c.setVisible(true);
-	}
 
 	/**
 	 * Class constructor
 	 */
+	@Deprecated
 	public TrafficSimUI() {
 		super(new TrafficSim(System.currentTimeMillis()));
+	}
+	
+	public TrafficSimUI(TrafficSim _sim)
+	{
+	    super(_sim);
 	}
 
 	/**
@@ -84,4 +83,23 @@ public class TrafficSimUI extends GUIState {
 		jDisplay.frame = null;
 		jDisplay = null;
 	}
+
+    /**
+     * 
+     * @param args
+     */
+    public static void main(String[] args) {
+        
+        if ( args.length != 2 || "city".equals( args[0] ) )
+        {
+            System.err.println( "Usage: java " + clazz + ".jar -city [xml file]\n"
+                    + "See TrafficSimulation.xsd for details" );
+            System.exit( 1 );
+            
+        }
+        _trafficSim = new TrafficSim(System.currentTimeMillis(), args[1]);
+    	TrafficSimUI vid = new TrafficSimUI(_trafficSim);
+    	Console c = new Console(vid);
+    	c.setVisible(true);
+    }
 }

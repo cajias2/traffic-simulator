@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<simulation name="Simulation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TrafficSimultion.xsd">
+<simulation name="Simulation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TrafficSimultion.xsd"
+ maxCars="100">
     
     <!--
     	 	 xing2 (Start)
@@ -13,7 +14,7 @@
         <crossing name="xing1" hasTrafficLight="true"/>
 		
         <crossing name="xing2" startingOdds="50"/>
-        <crossing name="xing3" endingOds="50"/>
+        <crossing name="xing3" endingOdds="50"/>
         <crossing name="xing4" endingOdds="50"/>
         <crossing name="xing5" startingOdds="50"/>
     </crossings>
