@@ -20,14 +20,9 @@
     </crossings>
     
     <connections>       
-        <connection from="xing1" to="xing2" orientation="NS" length="10"/>
-        <connection from="xing2" to="xing1" orientation="NS" length="10"/>
-        <connection from="xing1" to="xing4" orientation="NS" length="10"/>
-        <connection from="xing4" to="xing1" orientation="NS" length="10"/>
-        
-        <connection from="xing1" to="xing3" orientation="EW" length="10"/>
-        <connection from="xing3" to="xing1" orientation="EW" length="10"/>
-        <connection from="xing1" to="xing5" orientation="EW" length="10"/>
-        <connection from="xing5" to="xing1" orientation="EW" length="10"/>      
+        <connection from="xing1" to="xing2" orientation="NS" length="10" dir="2way"/>
+        <connection from="xing1" to="xing4" orientation="NS" length="10" dir="2way"/>        
+        <connection from="xing1" to="xing3" orientation="EW" length="10" dir="2way"/>
+        <connection from="xing1" to="xing5" orientation="EW" length="10" dir="2way"/>     
     </connections>
 </simulation>

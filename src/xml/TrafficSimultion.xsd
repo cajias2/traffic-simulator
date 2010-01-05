@@ -54,6 +54,8 @@
 			<xs:attribute name="to" type="xs:string" use="required" />
 			<xs:attribute name="orientation" type="orType" use="required" />
 			<xs:attribute name="length" type="xs:double" use="required"/>
+			<xs:attribute name="dir" type="dirType" use="required"/>
+			<xs:attribute name="lanes" type="xs:decimal" use="required" default="1"/>
 		</xs:complexType>
 	</xs:element>
 
@@ -63,6 +65,14 @@
 			<xs:enumeration value="EW"/>
 		</xs:restriction>
 	</xs:simpleType>
+
+	<xs:simpleType name="dirType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="1way"/>
+			<xs:enumeration value="2way"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
 
 
 
