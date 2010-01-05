@@ -5,6 +5,8 @@ package sim.app.agents;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import sim.app.graph.CitySimState;
 import sim.app.graph.Street;
@@ -23,16 +25,17 @@ public class Car implements Steppable
     
     public Stoppable toDiePointer = null;
     
-    private final double ACCELERATION = 5.0;
-    private final double MAX_SPEED = 35.0;
+    private final double ACCELERATION = 6.25;
+    private final double MAX_SPEED = 80.0;
     private final int SIZE = 2;
     
     private static int _carCount = 0;
-    private static int _idToken = 0; // ID token always grows== ensure id
-    // uniqueness.
+    private static int _idToken = 0; // ID token always grows== ensure id uniqueness.
+    private static Logger _log;
     
     private double _currLocation; // How close to next intersection
     private double _currSpeed;
+    private int _time;
     private LinkedList<Street> _trayectory;
     private final String ID;
     /**
@@ -40,7 +43,7 @@ public class Car implements Steppable
      * 
      * @param trayectory_
      */
-    public Car(List<Street> trayectory_)
+    public Car(List<Street> trayectory_, Logger log_)
     {
         
         ID = "Car_" + _idToken + "_" + _carCount;
@@ -49,9 +52,11 @@ public class Car implements Steppable
         _trayectory = new LinkedList<Street>( trayectory_ );
         _currLocation = 0;
         _currSpeed = 0;
+        _time = 0;
+        _log = log_;
         // Add car to the streetQue
         currentStreet().carsOnStreet.add( this );
-        System.out.println( "Created: " + this );
+        _log.log( Level.INFO, "Created: " + this );
     };
     
     /**
@@ -59,6 +64,7 @@ public class Car implements Steppable
      */
     public void step ( SimState state )
     {
+        
         if ( !_trayectory.isEmpty() )
         {
             // does next xing have a tf?
@@ -69,14 +75,18 @@ public class Car implements Steppable
                     move();
                 } else
                 {
+                    // Car stops. Reset time and speed. 
+                    _time = 0;
+                    _currSpeed = 0;
                     // wait for it.
-                    System.out.println( this + " stopped!" );
+                    _log.log(Level.INFO, this + " stopped!" );
                     
                 }
             } else
             {
                 move();
             }
+            _time++;
             
         } else
         {
@@ -141,21 +151,14 @@ public class Car implements Steppable
      */
     private void accelerate ()
     {
-        if ( _currSpeed < MAX_SPEED )
+        if ( _currSpeed < currentStreet().getMaxSpeed() &&_currSpeed < MAX_SPEED )
         {
-            
+            _currSpeed = ACCELERATION*_time;
         }
         
     }
     
-    /**
-     * Not implemented yet because too complicated. v2.0? TODO
-     */
-    @Deprecated
-    private void breaking ()
-    {
-        
-    }
+
     
     /**
      * Delete the car from schedule loop.
@@ -164,7 +167,7 @@ public class Car implements Steppable
      */
     public void die ( final SimState state )
     {
-        System.out.println( this + "Dying..." );
+        _log.log( Level.INFO, this + "Dying..." );
         _carCount--;
         
         if ( toDiePointer != null )
@@ -196,9 +199,6 @@ public class Car implements Steppable
             // If this is not the first car.
             if ( null != prevCar )
             {
-                // TODO replace this static value for how much the car would
-                // move.
-                // TODO if the car cant move, it stops i.e speed = 0
                 if ( this._currLocation + 1 < prevCar._currLocation )
                 {
                     canMove = true;

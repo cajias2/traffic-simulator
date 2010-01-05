@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import sim.app.utils.Orientation;
 import sim.app.utils.TrafficLightState;
@@ -21,9 +23,10 @@ public class TrafficLight implements Steppable
 {
     
     private static final long serialVersionUID = 1829654668132095868L;
-    
+    private static Logger _log;
     private static int _lightCount = 0;
     private Map<Orientation, Map<Attr, Object>> _stateMap;
+    
     
     private final String ID;
     
@@ -32,8 +35,9 @@ public class TrafficLight implements Steppable
         DURATION, TIME_LEFT, STATE
     };
     
-    public TrafficLight()
+    public TrafficLight(Logger log_)
     {
+        _log = log_;
         ID = "Light_" + _lightCount;
         _lightCount++;
         
@@ -71,9 +75,9 @@ public class TrafficLight implements Steppable
             // If time ran out.. reset time and update state
             if ( timeLeft < 0 )
             {
-                System.out.print( this + " Was: " + getState( entry.getKey() ) );
+                _log.log( Level.INFO, this + " Was: " + getState( entry.getKey() ) );
                 upateState( entry.getKey() );
-                System.out.println( " Now:" + getState( entry.getKey() ) );
+                _log.log( Level.INFO, " Now:" + getState( entry.getKey() ) );
                 
             }
         }

@@ -1,5 +1,10 @@
 package sim.app;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
 import sim.app.utils.JungDisplay;
 import sim.display.Console;
 import sim.display.Controller;
@@ -10,7 +15,7 @@ public class TrafficSimUI extends GUIState {
 
 	public JungDisplay jDisplay;
 	private static TrafficSim _trafficSim;
-    
+    private static Logger _log;
     private static final String clazz = TrafficSimUI.class.getSimpleName();
 
 
@@ -90,14 +95,38 @@ public class TrafficSimUI extends GUIState {
      */
     public static void main(String[] args) {
         
-        if ( args.length != 2 || "city".equals( args[0] ) )
+        _log = Logger.getLogger( "SimLogger" );
+        _log.setLevel( Level.SEVERE );      
+       
+        if ( args.length < 2 || "city".equals( args[0] ) )
         {
-            System.err.println( "Usage: java " + clazz + ".jar -city [xml file]\n"
+            System.err.println( "Usage: java -jar " + clazz + ".jar -city [xml file]\n"
                     + "See TrafficSimulation.xsd for details" );
             System.exit( 1 );
             
         }
-        _trafficSim = new TrafficSim(System.currentTimeMillis(), args[1]);
+        String cityXml = null;
+        for(int i = 0; i< args.length; i++)
+        {
+            if("-city".equals( args[i] ))
+            {
+                cityXml = args[++i]; 
+            }
+            else if( "-verbose".equals( args[i] ) || "-v".equals( args[i] ))
+            {
+                _log.setLevel( Level.INFO );
+            }else if("-debug".equals( args[i] ))
+            {
+                _log.setLevel( Level.FINE );
+            }
+        }
+        if(null == cityXml || "".equals( cityXml ))
+        {
+            System.err.println( "Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+                    + "See TrafficSimulation.xsd for details" );
+            System.exit( 1 );
+        }
+        _trafficSim = new TrafficSim(System.currentTimeMillis(), cityXml, _log);
     	TrafficSimUI vid = new TrafficSimUI(_trafficSim);
     	Console c = new Console(vid);
     	c.setVisible(true);
