@@ -1,45 +1,32 @@
 package sim.app;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
+import static java.lang.Math.sin;
+import static java.lang.Math.floor;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import sim.app.agents.Car;
-import sim.app.agents.TrafficLight;
 import sim.app.graph.CitySimState;
 import sim.app.graph.Street;
 import sim.app.graph.StreetXing;
-import sim.app.utils.Orientation;
 import sim.app.xml.XmlParseService;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.util.Pair;
 
 @SuppressWarnings ( "serial" )
 public class TrafficSim extends CitySimState
 {
-    
+    private static Logger _log;
     private static String clazz = TrafficSim.class.getSimpleName();
     private static String _cityXml;
     private List<StreetXing> _sourceXings;
     private List<StreetXing> _destXings;
- 
+    
     public static final double XMIN = 0;
     public static final double XMAX = 800;
     public static final double YMIN = 0;
@@ -49,14 +36,15 @@ public class TrafficSim extends CitySimState
     /**
      * Creates a TrafficSim simulation with the given random number seed.
      */
-    public TrafficSim(long seed, String cityXmlFileName_)
+    public TrafficSim(long seed, String cityXmlFileName_, Logger log_)
     {
         super( seed );
-        XmlParseService parsedGraph = new XmlParseService( cityXmlFileName_ );
+        XmlParseService parsedGraph = new XmlParseService( cityXmlFileName_, log_ );
         setCity( parsedGraph.getGraph() );
         MAX_CAR_COUNT = parsedGraph.getMaxCars();
         _sourceXings = parsedGraph.getSourceXings();
         _destXings = parsedGraph.getDestXings();
+        _log = log_;
     }
     
     /**
@@ -66,7 +54,7 @@ public class TrafficSim extends CitySimState
     public TrafficSim(long seed)
     {
         super( seed );
-        XmlParseService parsedGraph = new XmlParseService( _cityXml );
+        XmlParseService parsedGraph = new XmlParseService( _cityXml, _log );
         setCity( parsedGraph.getGraph() );
         MAX_CAR_COUNT = parsedGraph.getMaxCars();
         _sourceXings = parsedGraph.getSourceXings();
@@ -79,8 +67,8 @@ public class TrafficSim extends CitySimState
     @Override
     public void start ()
     {
-        super.start();      
-        schedule.reset();   // clear out the schedule  
+        super.start();
+        schedule.reset(); // clear out the schedule
         
         scheduleTrafficLights();
         
@@ -90,17 +78,19 @@ public class TrafficSim extends CitySimState
             
             public void step ( SimState state )
             {
-                for ( int i = 0; i < carFlow() && Car.getNumberOfCars() < MAX_CAR_COUNT; i++ )
+                double carsThisStep = carFlow();
+                for ( int i = 0; Car.getNumberOfCars() < MAX_CAR_COUNT && i < carsThisStep ; i++ )
                 {
                     StreetXing source = getSource();
                     StreetXing target = getTarget();
-                    // Make sure start and end are different. Otherwise... what's the point?
-                    while( source.getId().equals( target.getId() ))
+                    // Make sure start and end are different. Otherwise...
+                    // what's the point?
+                    while ( source.getId().equals( target.getId() ) )
                     {
-                      target = getTarget();  
+                        target = getTarget();
                     }
                     List<Street> trayectory = routeMap.getPath( source, target );
-                    Car car = new Car( trayectory );
+                    Car car = new Car( trayectory, _log );
                     car.toDiePointer = schedule.scheduleRepeating( schedule.getTime(), Car.getNumberOfCars(), car );
                 }
             }
@@ -117,10 +107,10 @@ public class TrafficSim extends CitySimState
     private void scheduleTrafficLights ()
     {
         Iterator<StreetXing> iter = getCity().getVertices().iterator();
-        while ( iter.hasNext())
-        {            
+        while ( iter.hasNext() )
+        {
             StreetXing xing = iter.next();
-            if(xing.hasTrafficLight())
+            if ( xing.hasTrafficLight() )
             {
                 schedule.scheduleRepeating( xing.getTrafficLight() );
             }
@@ -129,9 +119,11 @@ public class TrafficSim extends CitySimState
     }
     
     /**
-     * Return a random car destination based on the {@code endOdds} attribute in the city xml.
+     * Return a random car destination based on the {@code endOdds} attribute in
+     * the city xml.
      * <p/>
      * See {@link TraffiSimulation.xsd} for more info
+     * 
      * @return Destination
      */
     private StreetXing getTarget ()
@@ -141,21 +133,21 @@ public class TrafficSim extends CitySimState
         int targetIndex = rand.nextInt( 100 );
         int currentIndex = 0;
         
-        for(StreetXing xing: _sourceXings)
+        for ( StreetXing xing : _sourceXings )
         {
             currentIndex += xing.getStartOdds();
-            if(currentIndex >= targetIndex)
+            if ( currentIndex >= targetIndex )
             {
                 pickedXing = xing;
                 break;
             }
         }
-        
         return pickedXing;
     }
     
     /**
-     * Return a random car begining based on the {@code startingOdds} attribute in the city xml.
+     * Return a random car begining based on the {@code startingOdds} attribute
+     * in the city xml.
      * <p/>
      * See {@link TraffiSimulation.xsd} for more info
      * 
@@ -168,10 +160,10 @@ public class TrafficSim extends CitySimState
         int targetIndex = rand.nextInt( 100 );
         int currentIndex = 0;
         
-        for(StreetXing xing: _destXings)
+        for ( StreetXing xing : _destXings )
         {
             currentIndex += xing.getEndOdds();
-            if(currentIndex >= targetIndex)
+            if ( currentIndex >= targetIndex )
             {
                 pickedXing = xing;
                 break;
@@ -183,31 +175,57 @@ public class TrafficSim extends CitySimState
     
     /**
      * Return number of cars to generate per step... Should follow a sinoidal
-     * function to mimic traffic waves. TODO hardcoded to 2.. should change as
-     * per comment.
+     * function to mimic traffic waves.     
      * 
      * @return cars to generate per step
      */
-    private int carFlow ()
+    private double carFlow ()
     {
-        schedule.getTime();
-        return 1;
+        double carPerStep= floor(sin((schedule.getTime()+473)/100) *( MAX_CAR_COUNT/2) +  MAX_CAR_COUNT/2);
+        _log.log( Level.FINE, "Will try to create: "+carPerStep+"cars" );
+        return carPerStep;
+        
     }
     
     /**
      * Main
+     * 
      * @param args
      */
     public static void main ( String[] args )
     {
-        if ( args.length != 2 || "city".equals( args[0] ) )
+        _log = Logger.getLogger( "SimLogger" );
+        _log.setLevel( Level.SEVERE );
+
+        
+        if ( args.length < 2 || "city".equals( args[0] ) )
         {
-            System.err.println( "Usage: java " + clazz + ".jar -city [xml file]\n"
+            System.err.println( "Usage: java -jar " + clazz + ".jar -city [xml file]\n"
                     + "See TrafficSimulation.xsd for details" );
             System.exit( 1 );
             
         }
-        _cityXml = args[1];        
+        for ( int i = 0; i < args.length; i++ )
+        {
+            if ( "-city".equals( args[i] ) )
+            {
+                _cityXml = args[++i];
+            } 
+            else if( "-verbose".equals( args[i] ) || "-v".equals( args[i] ))
+            {
+                _log.setLevel( Level.INFO );
+            } else if ( "-debug".equals( args[i] ) )
+            {
+                _log.setLevel( Level.FINE );
+            }
+        }
+        if ( null == _cityXml || "".equals( _cityXml ) )
+        {
+            System.err.println( "Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+                    + "See TrafficSimulation.xsd for details" );
+            System.exit( 1 );
+        }
+        
         doLoop( TrafficSim.class, args );
     }
 }

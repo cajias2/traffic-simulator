@@ -5,6 +5,7 @@ package sim.app.graph;
  */
 import java.awt.Font;
 import java.util.Queue;
+import java.util.logging.Logger;
 
 import sim.app.agents.TrafficLight;
 import sim.app.utils.Orientation;
@@ -18,6 +19,7 @@ public class StreetXing
 {
     
     private final String ID;
+    private static Logger _log;
     private TrafficLight _trafficLight;
     private static int _xingCount = 0;
     private static double _startOdds = 0;
@@ -31,15 +33,14 @@ public class StreetXing
      * @author biggie
      */
     @Deprecated
-    public StreetXing()
+    public StreetXing(Logger log_)
     {
-        ID = "Xing_" + _xingCount;
-        _xingCount++;
+        this("Xing_" + _xingCount, log_);
     }
     @Deprecated
-    public StreetXing(TrafficLight tf_)
+    public StreetXing(TrafficLight tf_, Logger log_)
     {
-        this();
+        this(log_);
         _trafficLight = tf_;
     }
     
@@ -47,7 +48,7 @@ public class StreetXing
      * Class Constructor
      * @param id_
      */
-    public StreetXing( String id_)
+    public StreetXing( String id_, Logger log_)
     {
         ID = id_;
         _xingCount++;        
