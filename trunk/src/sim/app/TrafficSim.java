@@ -85,7 +85,9 @@ public class TrafficSim extends CitySimState
                     StreetXing target = getTarget();
                     // Make sure start and end are different. Otherwise...
                     // what's the point?
-                    while ( source.getId().equals( target.getId() ) )
+                    // Fixed nullpointer exception by checking target=?null.
+                    while (( target == null || target.getId() ==  null) ||
+                            source.getId().equals( target.getId() ) )
                     {
                         target = getTarget();
                     }
