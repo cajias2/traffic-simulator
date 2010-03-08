@@ -8,18 +8,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import sim.app.utils.Orientation;
 import sim.app.utils.TrafficLightState;
-import sim.engine.SimState;
-import sim.engine.Steppable;
 
 /**
  * @author biggie
  */
-public class TrafficLight implements Steppable
+public class TrafficLight
 {
     
     private static final long serialVersionUID = 1829654668132095868L;
@@ -65,24 +62,24 @@ public class TrafficLight implements Steppable
     /**
      * Something that can be stepped
      */
-    public void step ( SimState state )
-    {
-        // Reduce time left at each stage
-        for ( Entry<Orientation, Map<Attr, Object>> entry : _stateMap.entrySet() )
-        {
-            int timeLeft = (Integer) entry.getValue().get( Attr.TIME_LEFT ) - 1;
-            entry.getValue().put( Attr.TIME_LEFT, timeLeft );
-            // If time ran out.. reset time and update state
-            if ( timeLeft < 0 )
-            {
-                _log.log( Level.INFO, this + " Was: " + getState( entry.getKey() ) );
-                upateState( entry.getKey() );
-                _log.log( Level.INFO, " Now:" + getState( entry.getKey() ) );
-                
-            }
-        }
-        
-    }
+//    public void step ( SimState state )
+//    {
+//        // Reduce time left at each stage
+//        for ( Entry<Orientation, Map<Attr, Object>> entry : _stateMap.entrySet() )
+//        {
+//            int timeLeft = (Integer) entry.getValue().get( Attr.TIME_LEFT ) - 1;
+//            entry.getValue().put( Attr.TIME_LEFT, timeLeft );
+//            // If time ran out.. reset time and update state
+//            if ( timeLeft < 0 )
+//            {
+//                _log.log( Level.INFO, this + " Was: " + getState( entry.getKey() ) );
+//                upateState( entry.getKey() );
+//                _log.log( Level.INFO, " Now:" + getState( entry.getKey() ) );
+//                
+//            }
+//        }
+//        
+//    }
     
     /**
      * Returns the current state of the traffic light
