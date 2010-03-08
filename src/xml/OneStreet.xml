@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simulation name="Simulation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TrafficSimultion.xsd"
+ maxCars="100">
+    
+    <!--
+    	 	 xing1 (Start)
+   		   		  ||
+    		 xing2 (End)<TF>
+    -->
+    <crossings>
+        <crossing name="xing1" startingOdds="100"/>
+        <crossing name="xing2"  endingOdds="100" hasTrafficLight="true"/>		
+    </crossings>
+    
+    <connections>       
+        <connection from="xing1" to="xing2" lanes="1" orientation="NS" length="10" dir="2way"/>  
+    </connections>
+</simulation>

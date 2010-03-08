@@ -3,8 +3,10 @@
  */
 package sim.app.xml;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +20,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import processing.core.PApplet;
+
 import sim.app.agents.TrafficLight;
+import sim.app.graph.Road;
 import sim.app.graph.Street;
 import sim.app.graph.StreetXing;
 import sim.app.utils.Orientation;
@@ -51,10 +56,11 @@ public class XmlParseService
     final static String ATTR_CONN_DIR = "dir";
     final static String ONE_WAY = "1way";
     final static String TWO_WAY = "2way";
-    
+  
+    private static PApplet _pDisplay;    
     private static Logger _logger;
     private String _fileName;
-    private Graph<StreetXing, Street> _g = new DirectedSparseGraph<StreetXing, Street>();
+    private Graph<StreetXing, Road> _g = new DirectedSparseGraph<StreetXing, Road>();
     private List<StreetXing> _sourceXings = new LinkedList<StreetXing>();
     private List<StreetXing> _destXings = new LinkedList<StreetXing>();
     private int _maxCarsInSim;
@@ -64,10 +70,15 @@ public class XmlParseService
      * 
      * @param fileName_
      */
-    public XmlParseService(String fileName_, Logger logger_)
+    public XmlParseService(String fileName_, PApplet pDisplay_, Logger logger_)
     {
         _fileName = fileName_;
         _logger = logger_;
+        // use a unique display
+        if(_pDisplay == null)
+        {
+            _pDisplay = pDisplay_;
+        }
         createGraph();
     }
     
@@ -132,7 +143,7 @@ public class XmlParseService
      * @param doc_
      * @param xingMap_
      */
-    private void parseXings ( Graph<StreetXing, Street> g_, Document doc_, Map<String, StreetXing> xingMap_ )
+    private void parseXings ( Graph<StreetXing, Road> g_, Document doc_, Map<String, StreetXing> xingMap_ )
     {
         NodeList xingNodes = doc_.getElementsByTagName( NODE_XINGS );
         for ( int i = 0; i < xingNodes.getLength(); i++ )
@@ -171,12 +182,12 @@ public class XmlParseService
     
     /**
      * Parse attributes of the {@code connection} node
-     * 
+     * TODO fix this shitty logic
      * @param g_
      * @param doc_
      * @param xingMap_
      */
-    private void parseConnections ( Graph<StreetXing, Street> g_, Document doc_, Map<String, StreetXing> xingMap_ )
+    private void parseConnections ( Graph<StreetXing, Road> g_, Document doc_, Map<String, StreetXing> xingMap_ )
     {
         NodeList connNodes = doc_.getElementsByTagName( NODE_CONS );
         for ( int i = 0; i < connNodes.getLength(); i++ )
@@ -189,26 +200,45 @@ public class XmlParseService
             double length = Double.parseDouble( connNode.getAttributes().getNamedItem( ATTR_CONN_LEN ).getNodeValue() );
             
             Pair<StreetXing> edge = new Pair<StreetXing>( xingMap_.get( fromXing ), xingMap_.get( toXing ) );
-            Street street = new Street( or, length, _logger );
+            LinkedList<Point2D> pointList = (LinkedList<Point2D>)getPointList();
+            Street street = new Street("test", pointList, _pDisplay, _logger );
             // Finally, add the edge
             g_.addEdge( street, edge );
             // Add edge other way around for 2way
             if(TWO_WAY.equals( dir ))
             {
                 Pair<StreetXing> edge2 = new Pair<StreetXing>( xingMap_.get( toXing ), xingMap_.get( fromXing ) );
-                Street street2 = new Street( or, length, _logger );
+                Iterator<Point2D> iter = (Iterator<Point2D>)pointList.descendingIterator();
+                LinkedList<Point2D> reversePointList = new LinkedList<Point2D>();
+                while(iter.hasNext())
+                {
+                    reversePointList.add(iter.next());
+                }
+                Street street2 = new Street( "test",reversePointList, _pDisplay, _logger );
                 // Finally, add the edge
                 g_.addEdge( street2, edge2 );               
             }
         }
     }
-    
+
+    /**
+     * TODO helper method. REMOVE!!
+     * @return
+     */
+    private List<Point2D> getPointList() {
+	List<Point2D> points = new LinkedList<Point2D>();
+	// Seg 1
+	points.add(new Point2D.Float(20, _pDisplay.random(_pDisplay.height - 20)));
+	points.add(new Point2D.Float(_pDisplay.width - 20, _pDisplay.random(20, _pDisplay.height - 20)));
+	// points.add(new Point2D.Float(20, random(height-20)));
+	return points;
+    }
     /**
      * Return the graph generated from the xml file passed in constructor.
      * 
      * @return
      */
-    public Graph<StreetXing, Street> getGraph ()
+    public Graph<StreetXing, Road> getGraph ()
     {
         return _g;
     }
