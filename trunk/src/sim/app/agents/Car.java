@@ -6,34 +6,50 @@ package sim.app.agents;
 import java.util.List;
 import java.util.logging.Logger;
 
-import edu.uci.ics.jung.graph.Graph;
-
 import processing.core.PApplet;
-import sim.app.graph.Road;
-import sim.app.graph.Street;
-import sim.app.graph.StreetXing;
+import sim.app.geography.Road;
+import sim.app.geography.StreetXing;
+import sim.app.geography.distance.Distance;
+import sim.app.geography.distance.Kilometers;
+import sim.app.geography.distance.Meters;
+import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
  */
 public class Car extends Vehicle {
 
-	private final double ACCELERATION = 6.25;
-	private final double MAX_VELOCITY = 80.0;
-	private final int SIZE = 2;
+    private final Distance ACCELERATION = new Kilometers(6.25);
+    private final Distance MAX_VELOCITY = new Kilometers(100.0);
+    private final Distance SIZE = new Meters(4.0);
 
-	public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_,
-			Logger log_, PApplet parent_) {
-		super(trayectory_, city_, log_, parent_);
-	}
+    public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_,
+	    Logger log_, PApplet parent_) {
+	super(trayectory_, city_, log_, parent_);
+    }
 
-	public double getMaxVelocity() {
-		return MAX_VELOCITY;
-	}
+    /**
+     * Given in K. Assumed to be K/s
+     */
+    @Override
+    public Distance getMaxVelocity() {
+	return MAX_VELOCITY;
+    }
 
-	public double getAcceleration() {
-		// TODO Auto-generated method stub
-		return ACCELERATION;
-	}
+    /**
+     * Given in K. Assumed to be K/s^2
+     */
+    @Override
+    public Distance getAcceleration() {
+	return ACCELERATION;
+    }
+
+    /**
+     * Given in m.
+     */
+    @Override
+    public Distance getSize() {
+	return SIZE;
+    }
 
 }

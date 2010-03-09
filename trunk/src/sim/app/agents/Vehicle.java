@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.uci.ics.jung.graph.Graph;
-
 import processing.core.PApplet;
-import sim.app.graph.Road;
-import sim.app.graph.Street;
-import sim.app.graph.StreetXing;
+import sim.app.geography.Road;
+import sim.app.geography.Street;
+import sim.app.geography.StreetXing;
+import sim.app.geography.distance.Distance;
+import sim.app.geography.distance.Kilometers;
+import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
@@ -34,15 +35,24 @@ public abstract class Vehicle {
 	private static Graph<StreetXing, Road> _city;
 
 	private double _currLocation; // How close to next intersection
-	private double _currSpeed;
+	private Distance _currSpeed;
 	private long _time;
 	private LinkedList<Road> _trayectory;
 	private final String ID;
 	private boolean _isAlive;
 
-	public abstract double getMaxVelocity();
-
-	public abstract double getAcceleration();
+	/**
+	 * Given in K. Assumed to be K/s
+	 */
+	public abstract Distance getMaxVelocity();
+	/**
+	 * Given in K. Assumed to be K/s^2
+	 */
+	public abstract Distance getAcceleration();
+	/**
+	 * Given in m.
+	 */
+	public abstract Distance getSize();
 
 	/**
 	 * Class constructor.
@@ -65,7 +75,7 @@ public abstract class Vehicle {
 		_idToken++;
 		_trayectory = new LinkedList<Road>(trayectory_);
 		_currLocation = 0;
-		_currSpeed = 0;
+		_currSpeed = new Kilometers(0.0);
 		_time = System.currentTimeMillis();
 		_log = log_;
 		// Add car to the streetQue
@@ -143,9 +153,9 @@ public abstract class Vehicle {
 	 * TODO Calculate new Speed
 	 */
 	private void accelerate() {
-		if (_currSpeed < currentRoad().getMaxVelocity()
-				&& _currSpeed < getMaxVelocity()) {
-			_currSpeed = getAcceleration() * _time;
+		if (_currSpeed.toMeters() < currentRoad().getMaxVelocity().toMeters()
+				&& _currSpeed.toMeters() < getMaxVelocity().toMeters()) {
+			_currSpeed.setVal( getAcceleration().getVal() * _time);
 		}
 
 	}
@@ -270,7 +280,7 @@ public abstract class Vehicle {
 					// Car stops. Reset time and speed.
 					// TODO bug!!!!!v
 					_time = System.currentTimeMillis();
-					_currSpeed = 0;
+					_currSpeed.setVal(0.0);
 					// wait for it.
 					_log.log(Level.INFO, this + " stopped!");
 

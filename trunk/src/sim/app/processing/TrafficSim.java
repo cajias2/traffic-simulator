@@ -14,9 +14,9 @@ import edu.uci.ics.jung.graph.Graph;
 import processing.core.PApplet;
 import sim.app.agents.Car;
 import sim.app.agents.Vehicle;
-import sim.app.graph.Road;
-import sim.app.graph.Street;
-import sim.app.graph.StreetXing;
+import sim.app.geography.Road;
+import sim.app.geography.Street;
+import sim.app.geography.StreetXing;
 import sim.app.xml.XmlParseService;
 
 @SuppressWarnings("serial")
