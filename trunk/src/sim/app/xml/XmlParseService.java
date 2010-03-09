@@ -23,9 +23,9 @@ import org.xml.sax.SAXException;
 import processing.core.PApplet;
 
 import sim.app.agents.TrafficLight;
-import sim.app.geography.Road;
-import sim.app.geography.Street;
-import sim.app.geography.StreetXing;
+import sim.app.geo.Road;
+import sim.app.geo.Street;
+import sim.app.geo.StreetXing;
 import sim.app.utils.Orientation;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;

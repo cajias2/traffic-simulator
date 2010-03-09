@@ -1,4 +1,4 @@
-package sim.app.geography;
+package sim.app.geo;
 
 /*
  * @author Raul Cajias

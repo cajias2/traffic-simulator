@@ -1,4 +1,4 @@
-package sim.app.geography.distance;
+package sim.app.geo.distance;
 
 
 public class Meters extends Distance {
@@ -24,6 +24,12 @@ public class Meters extends Distance {
     public void setVal(double x_) {
 	_lenght = x_;
 	
+    }
+
+
+    @Override
+    public String toString() {
+	return _lenght + "m";
     }
 
 }
