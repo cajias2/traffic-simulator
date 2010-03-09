@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.geography;
+package sim.app.geo;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -12,24 +12,28 @@ import java.util.List;
 
 import processing.core.PApplet;
 import sim.app.agents.Vehicle;
-import sim.app.geography.distance.Distance;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Kilometers;
+import sim.app.geo.distance.Meters;
 
 /**
  * @author biggie
  * 
  */
 public abstract class Road {
-    private static final double LAYER_SEG = 10;
+    private static final Distance LAYER_SEG = new Meters(100);
 
     private final String ID;
 
     private static PApplet _parent;
 
     private List<Line2D> _lineList;
-    private double _roadLength = 0;
+    private double _realLength = 0;
     private List<Double> _velocityLayer;
     private LinkedList<List<Line2D>> _segmentList;
     private List<Vehicle> _vehiclesOnRoad;
+
+    private Distance _geoLength;
 
     public abstract Distance getMaxVelocity();
 
@@ -44,8 +48,7 @@ public abstract class Road {
 	_vehiclesOnRoad = new LinkedList<Vehicle>();
 	createRoad(pointList_);
 	// Use total street length to determine layer size.
-	_velocityLayer = new ArrayList<Double>((int) Math.ceil(_roadLength
-		/ LAYER_SEG));
+	_velocityLayer = new ArrayList<Double>((int) Math.ceil(_realLength/ LAYER_SEG.getVal()));
 	processRoadSegments();
     }
 
@@ -63,7 +66,7 @@ public abstract class Road {
 		    / (currLine.getX2() - currLine.getX1());
 	    double slopeDeg = Math.atan(slope);
 	    double lineLength = currLine.getP1().distance(currLine.getP2());
-	    double runLen = Math.abs(Math.cos(slopeDeg) * LAYER_SEG);
+	    double runLen = Math.abs(Math.cos(slopeDeg) * LAYER_SEG.getVal());
 	    // Select direction to move in.
 	    int direction = 1;
 	    if (currLine.getX1() > currLine.getX2())
@@ -71,7 +74,7 @@ public abstract class Road {
 
 	    // Divide the line into segments and store them in a map
 	    _segmentList.add(new LinkedList<Line2D>());
-	    int totalSegments = (int) Math.ceil(lineLength / LAYER_SEG);
+	    int totalSegments = (int) Math.ceil(lineLength / LAYER_SEG.getVal());
 
 	    Point2D segOrig = null;
 	    Point2D segDest = null;
@@ -119,17 +122,20 @@ public abstract class Road {
 		orig = current;
 	    } else {
 		_lineList.add(new Line2D.Float(orig, dest));
-		_roadLength += orig.distance(dest);
+		_realLength += orig.distance(dest);
 		orig = dest;
 	    }
 	}
+	_geoLength = new Kilometers(_realLength);
+	System.out.println("Pixel Lenght:" +_realLength);
+	System.out.println("Scale Length: "+ _geoLength);
     }
 
     /**
      * @return the _roadLength
      */
     public double getRoadLength() {
-	return _roadLength;
+	return _realLength;
     }
 
     /**

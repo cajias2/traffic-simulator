@@ -1,15 +1,15 @@
 /**
  * 
  */
-package sim.app.geography;
+package sim.app.geo;
 
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.app.geography.distance.Distance;
-import sim.app.geography.distance.Kilometers;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Kilometers;
 
 public class Street extends Road {
     private static int _streetCount = 0;

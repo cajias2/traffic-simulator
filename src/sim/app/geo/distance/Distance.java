@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.geography.distance;
+package sim.app.geo.distance;
 
 /**
  * @author biggie
@@ -29,5 +29,6 @@ public abstract class Distance {
     public abstract double getVal();
     public abstract void setVal(double x_);
     public abstract double toMeters();
+    public abstract String toString();
 
 }

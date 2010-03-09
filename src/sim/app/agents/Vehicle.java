@@ -9,11 +9,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.app.geography.Road;
-import sim.app.geography.Street;
-import sim.app.geography.StreetXing;
-import sim.app.geography.distance.Distance;
-import sim.app.geography.distance.Kilometers;
+import sim.app.geo.Road;
+import sim.app.geo.Street;
+import sim.app.geo.StreetXing;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Kilometers;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -283,7 +283,6 @@ public abstract class Vehicle {
 					_currSpeed.setVal(0.0);
 					// wait for it.
 					_log.log(Level.INFO, this + " stopped!");
-
 				}
 			} else {
 				moveVehicle();

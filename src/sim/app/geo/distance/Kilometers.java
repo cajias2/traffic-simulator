@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.geography.distance;
+package sim.app.geo.distance;
 
 /**
  * @author biggie
@@ -15,7 +15,7 @@ public class Kilometers extends Distance {
     }
 
     /* (non-Javadoc)
-     * @see sim.app.geography.distance.Distance#toMeters()
+     * @see sim.app.geo.distance.Distance#toMeters()
      */
     @Override
     public double toMeters() {
@@ -23,7 +23,7 @@ public class Kilometers extends Distance {
     }
 
     /* (non-Javadoc)
-     * @see sim.app.geography.distance.Distance#val()
+     * @see sim.app.geo.distance.Distance#val()
      */
     @Override
     public double getVal() {
@@ -32,8 +32,12 @@ public class Kilometers extends Distance {
 
     @Override
     public void setVal(double x_) {
-	// TODO Auto-generated method stub
 	_lenght = x_;
+    }
+
+    @Override
+    public String toString() {
+	return _lenght + "K";
     }
 
 }

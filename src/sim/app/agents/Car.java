@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.app.geography.Road;
-import sim.app.geography.StreetXing;
-import sim.app.geography.distance.Distance;
-import sim.app.geography.distance.Kilometers;
-import sim.app.geography.distance.Meters;
+import sim.app.geo.Road;
+import sim.app.geo.StreetXing;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Kilometers;
+import sim.app.geo.distance.Meters;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
