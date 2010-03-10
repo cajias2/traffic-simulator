@@ -4,6 +4,7 @@ package sim.app.geo;
  * @author Raul Cajias
  */
 import java.awt.Font;
+import java.awt.geom.Point2D;
 import java.util.logging.Logger;
 
 import sim.app.agents.TrafficLight;
@@ -20,6 +21,7 @@ public class StreetXing
     private static int _xingCount = 0;
     private static double _startOdds = 0;
     private static double _endOdds = 0;
+    private final Point2D _location;
     
     public Font nodeFont = new Font( "SansSerif", Font.PLAIN, 12 );
     
@@ -28,26 +30,13 @@ public class StreetXing
      * 
      * @author biggie
      */
-    @Deprecated
-    public StreetXing(Logger log_)
-    {
-        this("Xing_" + _xingCount, log_);
-    }
-    @Deprecated
-    public StreetXing(TrafficLight tf_, Logger log_)
-    {
-        this(log_);
-        _trafficLight = tf_;
-    }
-    
-    /**
-     * Class Constructor
-     * @param id_
-     */
-    public StreetXing( String id_, Logger log_)
+
+    public StreetXing( String id_, Point2D loc_)
     {
         ID = id_;
-        _xingCount++;        
+        _xingCount++; 
+        _location = loc_;
+        
     }
     
     /**
@@ -130,6 +119,13 @@ public class StreetXing
     public String getId()
     {
         return ID;
+    }
+
+    /**
+     * @return the _location
+     */
+    public Point2D getLocation() {
+	return _location;
     }
     
 }

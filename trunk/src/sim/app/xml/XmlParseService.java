@@ -97,7 +97,7 @@ public class XmlParseService
             doc.getDocumentElement().normalize();
             Map<String, StreetXing> xingMap = new HashMap<String, StreetXing>();
             parseSim( doc );
-            parseXings( _g, doc, xingMap );
+//            parseXings( _g, doc, xingMap );
             parseConnections( _g, doc, xingMap );
             
         } catch ( SAXException e )
@@ -143,42 +143,42 @@ public class XmlParseService
      * @param doc_
      * @param xingMap_
      */
-    private void parseXings ( Graph<StreetXing, Road> g_, Document doc_, Map<String, StreetXing> xingMap_ )
-    {
-        NodeList xingNodes = doc_.getElementsByTagName( NODE_XINGS );
-        for ( int i = 0; i < xingNodes.getLength(); i++ )
-        {
-            Node xingNode = xingNodes.item( i );
-            String xingName = xingNode.getAttributes().getNamedItem( ATTR_NAME ).getNodeValue();
-            StreetXing xing = new StreetXing( xingName, _logger );
-            
-            Node tfNode = xingNode.getAttributes().getNamedItem( ATTR_XING_HASTF );
-            if ( null != tfNode
-                    && ( ( null != tfNode.getNodeValue() || !"".equals( tfNode.getNodeValue() ) ) && true == Boolean
-                            .parseBoolean( tfNode.getNodeValue() ) ) )
-            {
-                xing.setTrafficLight( new TrafficLight(_logger) );
-            }
-            
-            Node startNode = xingNode.getAttributes().getNamedItem( ATTR_XING_START_ODDS );
-            if ( null != startNode && ( null != startNode.getNodeValue() || !"".equals( startNode.getNodeValue() ) ) )
-            {
-                double startOdds = Double.parseDouble( startNode.getNodeValue() );
-                xing.setStartOdds( startOdds );
-                _sourceXings.add( xing );
-            }
-            Node endNode = xingNode.getAttributes().getNamedItem( ATTR_XING_END_ODDS );
-            if ( null != endNode && ( null != endNode.getNodeValue() || !"".equals( endNode.getNodeValue() ) ) )
-            {
-                double endOdds = Double.parseDouble( endNode.getNodeValue() );
-                xing.setEndOdds( endOdds );
-                _destXings.add( xing );
-            }
-            xingMap_.put( xingName, xing );
-            // Finally, add the vertex.
-            g_.addVertex( xing );
-        }
-    }
+//    private void parseXings ( Graph<StreetXing, Road> g_, Document doc_, Map<String, StreetXing> xingMap_ )
+//    {
+//        NodeList xingNodes = doc_.getElementsByTagName( NODE_XINGS );
+//        for ( int i = 0; i < xingNodes.getLength(); i++ )
+//        {
+//            Node xingNode = xingNodes.item( i );
+//            String xingName = xingNode.getAttributes().getNamedItem( ATTR_NAME ).getNodeValue();
+//            StreetXing xing = new StreetXing( xingName, _logger );
+//            
+//            Node tfNode = xingNode.getAttributes().getNamedItem( ATTR_XING_HASTF );
+//            if ( null != tfNode
+//                    && ( ( null != tfNode.getNodeValue() || !"".equals( tfNode.getNodeValue() ) ) && true == Boolean
+//                            .parseBoolean( tfNode.getNodeValue() ) ) )
+//            {
+//                xing.setTrafficLight( new TrafficLight(_logger) );
+//            }
+//            
+//            Node startNode = xingNode.getAttributes().getNamedItem( ATTR_XING_START_ODDS );
+//            if ( null != startNode && ( null != startNode.getNodeValue() || !"".equals( startNode.getNodeValue() ) ) )
+//            {
+//                double startOdds = Double.parseDouble( startNode.getNodeValue() );
+//                xing.setStartOdds( startOdds );
+//                _sourceXings.add( xing );
+//            }
+//            Node endNode = xingNode.getAttributes().getNamedItem( ATTR_XING_END_ODDS );
+//            if ( null != endNode && ( null != endNode.getNodeValue() || !"".equals( endNode.getNodeValue() ) ) )
+//            {
+//                double endOdds = Double.parseDouble( endNode.getNodeValue() );
+//                xing.setEndOdds( endOdds );
+//                _destXings.add( xing );
+//            }
+//            xingMap_.put( xingName, xing );
+//            // Finally, add the vertex.
+//            g_.addVertex( xing );
+//        }
+//    }
     
     /**
      * Parse attributes of the {@code connection} node
@@ -199,11 +199,15 @@ public class XmlParseService
             String dir = connNode.getAttributes().getNamedItem( ATTR_CONN_DIR ).getNodeValue();
             double length = Double.parseDouble( connNode.getAttributes().getNamedItem( ATTR_CONN_LEN ).getNodeValue() );
             
-            Pair<StreetXing> edge = new Pair<StreetXing>( xingMap_.get( fromXing ), xingMap_.get( toXing ) );
+            
             LinkedList<Point2D> pointList = (LinkedList<Point2D>)getPointList();
-            Street street = new Street("test", pointList, _pDisplay, _logger );
+            Road street = new Street("test", pointList, _pDisplay, _logger );
+            StreetXing startXing = new StreetXing(street.ID+"_start", street.startLoc());
+            StreetXing endXing = new StreetXing(street.ID+"_end", street.endLoc());
+            Pair<StreetXing> edge = new Pair<StreetXing>( startXing, endXing );
+            
             // Finally, add the edge
-            g_.addEdge( street, edge );
+            g_.addEdge( street, edge ); 
             // Add edge other way around for 2way
             if(TWO_WAY.equals( dir ))
             {
