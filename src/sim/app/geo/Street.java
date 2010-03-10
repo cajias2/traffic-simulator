@@ -29,17 +29,15 @@ public class Street extends Road {
 	_streetCount++;
     }
 
-    /**
-     * Road type.
-     * 
-     * @return
-     */
-    public int getType() {
-	return TYPE;
-    }
 
     public Distance getMaxVelocity() {
 	return MAX_VELOCITY;
     }
+    
+
+	@Override
+	protected int getStrokeWeight() {
+		return TYPE;
+	}
 
 }
