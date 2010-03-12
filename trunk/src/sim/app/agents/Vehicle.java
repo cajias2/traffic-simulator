@@ -37,6 +37,7 @@ public abstract class Vehicle {
 
     private Point2D _currLocation; // How close to next intersection
     private Distance _currSpeed;
+    private double distCurrLine = 0;
     private long _time;
     private LinkedList<Road> _trayectory;
     private final String ID;
@@ -264,9 +265,8 @@ public abstract class Vehicle {
      */
     private boolean atEndOfRoad() {
 	// TODO either x or y? x and y?
-	
-	return (_currLocation.getX() >= currentRoad().endLoc().getX() || _currLocation
-		.getY() >= currentRoad().endLoc().getY());
+    Point2D dest = _city.getDest(currentRoad()).getLocation();
+	return (_currLocation.distance(dest) <= 1);
 
     }
 
@@ -312,7 +312,7 @@ public abstract class Vehicle {
 	    goToNextStreet();
 	} else {
 	    _currLocation = currentRoad()
-		    .getNewLocation(_currLocation, 1, false);
+		    .getNewLocation(_currLocation, 1);
 //	    x += speed;
 	}
     }

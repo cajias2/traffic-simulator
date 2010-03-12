@@ -62,24 +62,24 @@ public class TrafficLight
     /**
      * Something that can be stepped
      */
-//    public void step ( SimState state )
-//    {
-//        // Reduce time left at each stage
-//        for ( Entry<Orientation, Map<Attr, Object>> entry : _stateMap.entrySet() )
-//        {
-//            int timeLeft = (Integer) entry.getValue().get( Attr.TIME_LEFT ) - 1;
-//            entry.getValue().put( Attr.TIME_LEFT, timeLeft );
-//            // If time ran out.. reset time and update state
-//            if ( timeLeft < 0 )
-//            {
+    public void move ()
+    {
+        // Reduce time left at each stage
+        for ( Entry<Orientation, Map<Attr, Object>> entry : _stateMap.entrySet() )
+        {
+            int timeLeft = (Integer) entry.getValue().get( Attr.TIME_LEFT ) - 1;
+            entry.getValue().put( Attr.TIME_LEFT, timeLeft );
+            // If time ran out.. reset time and update state
+            if ( timeLeft < 0 )
+            {
 //                _log.log( Level.INFO, this + " Was: " + getState( entry.getKey() ) );
-//                upateState( entry.getKey() );
+                upateState( entry.getKey() );
 //                _log.log( Level.INFO, " Now:" + getState( entry.getKey() ) );
-//                
-//            }
-//        }
-//        
-//    }
+                
+            }
+        }
+        
+    }
     
     /**
      * Returns the current state of the traffic light

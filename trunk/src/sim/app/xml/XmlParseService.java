@@ -97,8 +97,8 @@ public class XmlParseService
             doc.getDocumentElement().normalize();
             Map<String, StreetXing> xingMap = new HashMap<String, StreetXing>();
             parseSim( doc );
-//            parseXings( _g, doc, xingMap );
             parseConnections( _g, doc, xingMap );
+//            parseXings( _g, doc, xingMap );
             
         } catch ( SAXException e )
         {
@@ -150,7 +150,7 @@ public class XmlParseService
 //        {
 //            Node xingNode = xingNodes.item( i );
 //            String xingName = xingNode.getAttributes().getNamedItem( ATTR_NAME ).getNodeValue();
-//            StreetXing xing = new StreetXing( xingName, _logger );
+//            StreetXing xing = new StreetXing( xingName);
 //            
 //            Node tfNode = xingNode.getAttributes().getNamedItem( ATTR_XING_HASTF );
 //            if ( null != tfNode
@@ -179,7 +179,7 @@ public class XmlParseService
 //            g_.addVertex( xing );
 //        }
 //    }
-    
+//    
     /**
      * Parse attributes of the {@code connection} node
      * TODO fix this shitty logic
@@ -204,14 +204,18 @@ public class XmlParseService
             Road street = new Street("test", pointList, _pDisplay, _logger );
             StreetXing startXing = new StreetXing(street.ID+"_start", street.startLoc());
             StreetXing endXing = new StreetXing(street.ID+"_end", street.endLoc());
-            Pair<StreetXing> edge = new Pair<StreetXing>( startXing, endXing );
+            startXing.setStartOdds(100);
+            _sourceXings.add(startXing);
+            endXing.setEndOdds(100);
+            _destXings.add(endXing);
+            Pair<StreetXing> vertexCollection = new Pair<StreetXing>( startXing, endXing );
             
             // Finally, add the edge
-            g_.addEdge( street, edge ); 
+            g_.addEdge( street, vertexCollection ); 
             // Add edge other way around for 2way
             if(TWO_WAY.equals( dir ))
             {
-                Pair<StreetXing> edge2 = new Pair<StreetXing>( xingMap_.get( toXing ), xingMap_.get( fromXing ) );
+                Pair<StreetXing> edge2 = new Pair<StreetXing>( endXing, startXing );
                 Iterator<Point2D> iter = (Iterator<Point2D>)pointList.descendingIterator();
                 LinkedList<Point2D> reversePointList = new LinkedList<Point2D>();
                 while(iter.hasNext())
@@ -234,7 +238,7 @@ public class XmlParseService
 	// Seg 1
 	points.add(new Point2D.Float(20, _pDisplay.random(_pDisplay.height - 20)));
 	points.add(new Point2D.Float(_pDisplay.width - 20, _pDisplay.random(20, _pDisplay.height - 20)));
-	// points.add(new Point2D.Float(20, random(height-20)));
+	 points.add(new Point2D.Float(20, _pDisplay.random(_pDisplay.height-20)));
 	return points;
     }
     /**
