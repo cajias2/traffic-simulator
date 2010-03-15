@@ -15,12 +15,13 @@ import sim.app.geo.Street;
 import sim.app.geo.StreetXing;
 import sim.app.geo.distance.Distance;
 import sim.app.geo.distance.Kilometers;
+import sim.app.processing.Displayable;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
  */
-public abstract class Vehicle {
+public abstract class Vehicle implements Displayable{
     PApplet parent;
     // ************************
     float x;
@@ -35,12 +36,12 @@ public abstract class Vehicle {
     private static Logger _log;
     private static Graph<StreetXing, Road> _city;
 
+    private final String ID;
     private Point2D _currLocation; // How close to next intersection
     private Distance _currSpeed;
     private double distCurrLine = 0;
     private long _time;
     private LinkedList<Road> _trayectory;
-    private final String ID;
     private boolean _isAlive;
 
     /**
@@ -123,6 +124,77 @@ public abstract class Vehicle {
     // }
 
     /**
+     * 
+     */
+    public void display() {
+        parent.stroke(255);
+        parent.strokeWeight(3);
+        parent
+        	.point((float) _currLocation.getX(), (float) _currLocation
+        		.getY());
+    }
+
+    public void move() {
+    
+        if (!_trayectory.isEmpty()) {
+            // does next xing have a tf?
+            if (currentXing().hasTrafficLight()) {
+        	if (canMove()) {
+        	    moveVehicle();
+        	} else {
+        	    // Car stops. Reset time and speed.
+        	    // TODO bug!!!!!v
+        	    _time = System.currentTimeMillis();
+        	    _currSpeed.setVal(0.0);
+        	    // wait for it.
+        	    _log.log(Level.INFO, this + " stopped!");
+        	}
+            } else {
+        	moveVehicle();
+            }
+            _time++;
+    
+        } else {
+            die();
+        }
+    }
+
+    public boolean isAlive() {
+        return _isAlive;
+    }
+
+    /**
+     * Delete the car from schedule loop.
+     * 
+     * @param state
+     */
+    // public void die ( final SimState state )
+    // {
+    // _log.log( Level.INFO, this + "Dying..." );
+    // _carCount--;
+    //        
+    // if ( toDiePointer != null )
+    // toDiePointer.stop();
+    // }
+    
+    /**
+     * Returns number of cars currently in play
+     * 
+     * @return
+     */
+    public static int getNumberOfCars() {
+        return _vhclCount;
+    }
+
+    /**
+     * Overrite toString to print car id: car_[number in simulation]_[number in
+     * city < MAX_CAR ]
+     */
+    public String toString() {
+        return ID;
+    }
+
+    /**
      * Add this car to the current street it's cruising
      * 
      * @param car
@@ -179,15 +251,6 @@ public abstract class Vehicle {
     // }
 
     /**
-     * Returns number of cars currently in play
-     * 
-     * @return
-     */
-    public static int getNumberOfCars() {
-	return _vhclCount;
-    }
-
-    /**
      * Returns true if car in front is not too close.
      */
     protected boolean canMove() {
@@ -236,14 +299,6 @@ public abstract class Vehicle {
     }
 
     /**
-     * Overrite toString to print car id: car_[number in simulation]_[number in
-     * city < MAX_CAR ]
-     */
-    public String toString() {
-	return ID;
-    }
-
-    /**
      * @param state_
      * @return
      */
@@ -265,44 +320,8 @@ public abstract class Vehicle {
      */
     private boolean atEndOfRoad() {
 	// TODO either x or y? x and y?
-    Point2D dest = _city.getDest(currentRoad()).getLocation();
+	Point2D dest = _city.getDest(currentRoad()).getLocation();
 	return (_currLocation.distance(dest) <= 1);
-
-    }
-
-    /**
-	 * 
-	 */
-    public void display() {
-	parent.stroke(255);
-	parent.strokeWeight(3);
-	parent.point((float) _currLocation.getX(), 
-		(float) _currLocation.getY());
-    }
-
-    public void move() {
-
-	if (!_trayectory.isEmpty()) {
-	    // does next xing have a tf?
-	    if (currentXing().hasTrafficLight()) {
-		if (canMove()) {
-		    moveVehicle();
-		} else {
-		    // Car stops. Reset time and speed.
-		    // TODO bug!!!!!v
-		    _time = System.currentTimeMillis();
-		    _currSpeed.setVal(0.0);
-		    // wait for it.
-		    _log.log(Level.INFO, this + " stopped!");
-		}
-	    } else {
-		moveVehicle();
-	    }
-	    _time++;
-
-	} else {
-	    die();
-	}
     }
 
     private void moveVehicle() {
@@ -311,17 +330,12 @@ public abstract class Vehicle {
 
 	    goToNextStreet();
 	} else {
-	    _currLocation = currentRoad()
-		    .getNewLocation(_currLocation, 1);
-//	    x += speed;
+	    _currLocation = currentRoad().getNewLocation(_currLocation, 1);
+	    // x += speed;
 	}
     }
 
     private void die() {
 	_isAlive = false;
-    }
-
-    public boolean isAlive() {
-	return _isAlive;
     }
 }
