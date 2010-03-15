@@ -52,4 +52,9 @@ public class Car extends Vehicle {
 	return SIZE;
     }
 
+    @Override
+    public void Display() {
+	super.display();	
+    }
+
 }

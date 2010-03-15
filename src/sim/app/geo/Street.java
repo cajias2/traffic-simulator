@@ -2,7 +2,6 @@
  * 
  */
 package sim.app.geo;
-
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.logging.Logger;
@@ -38,6 +37,12 @@ public class Street extends Road {
 	@Override
 	protected int getStrokeWeight() {
 		return TYPE;
+	}
+
+
+	@Override
+	public void Display() {
+	    super.display();	    
 	}
 
 }

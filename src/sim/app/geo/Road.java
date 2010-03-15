@@ -15,12 +15,13 @@ import sim.app.agents.Vehicle;
 import sim.app.geo.distance.Distance;
 import sim.app.geo.distance.Kilometers;
 import sim.app.geo.distance.Meters;
+import sim.app.processing.Displayable;
 
 /**
  * @author biggie
  * 
  */
-public abstract class Road {
+public abstract class Road implements Displayable{
 	private static final Distance LAYER_SEG = new Meters(100);
 
 	private static final double DISTANCE_THRESHOLD = 0.001;
