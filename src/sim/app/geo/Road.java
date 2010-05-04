@@ -6,9 +6,11 @@ package sim.app.geo;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import processing.core.PApplet;
 import sim.app.agents.Vehicle;
@@ -22,18 +24,27 @@ import sim.app.processing.Displayable;
  * 
  */
 public abstract class Road implements Displayable{
-	private static final Distance LAYER_SEG = new Meters(100);
+	private static final Distance LAYER_SEG = new Meters(10);
 
-	private static final double DISTANCE_THRESHOLD = 0.001;
+	/*
+	 * If something is this far way from something else, they are considered to
+	 * be in the same place.
+	 */
+	public static final double DISTANCE_THRESHOLD = 0.001;
 
 	public final String ID;
 
 	private static PApplet _parent;
 
 	private List<Line2D> _lineList;
+	public List<Line2D> getLineList() {
+		return _lineList;
+	}
+
 	private double _realLength = 0;
-	private List<Double> _velocityLayer;
 	private LinkedList<List<Line2D>> _segmentList;
+	private HashMap<Line2D, List<Vehicle>> _vehicleOnSeg;
+	
 	private List<Vehicle> _vehiclesOnRoad;
 
 	private Distance _geoLength;
@@ -52,9 +63,6 @@ public abstract class Road implements Displayable{
 		ID = id_;
 		_vehiclesOnRoad = new LinkedList<Vehicle>();
 		createRoad(pointList_);
-		// Use total street length to determine layer size.
-		_velocityLayer = new ArrayList<Double>((int) Math.ceil(_realLength
-				/ LAYER_SEG.getVal()));
 		processRoadSegments();
 	}
 
@@ -63,15 +71,12 @@ public abstract class Road implements Displayable{
 	 */
 	private void processRoadSegments() {
 		_segmentList = new LinkedList<List<Line2D>>();
+		_vehicleOnSeg = new HashMap<Line2D, List<Vehicle>>();
 
 		for (Line2D currLine : _lineList) {
-			double lineLength = currLine.getP1().distance(currLine.getP2());
-
 			// Divide the line into segments and store them in a map
 			_segmentList.add(new LinkedList<Line2D>());
-			int totalSegments = (int) Math
-					.ceil(lineLength / LAYER_SEG.getVal());
-			findRoadSegment(currLine, totalSegments);
+			findRoadSegment(currLine);
 		}
 	}
 
@@ -82,25 +87,27 @@ public abstract class Road implements Displayable{
 	 * @param totalSegments_
 	 * @return
 	 */
-	private void findRoadSegment(Line2D line_, int totalSegments_) {
-
-
-
+	private void findRoadSegment(Line2D line_) {
 		Point2D segOrig = null;
 		Point2D segDest = null;
-
-		for (int i = 0; i < totalSegments_; i++) {
+		
+		double lineLength = line_.getP1().distance(line_.getP2());		
+		int totalSegments = (int) Math.ceil(lineLength / LAYER_SEG.getVal());
+		
+		for (int i = 0; i < totalSegments; i++) {
 			if (segOrig == null) { // If this is the first round...
 				segOrig = line_.getP1();
 			} else {
 				segOrig = segDest;
 			}
-			if ((i + 1) >= totalSegments_) { // Last Round
+			if ((i + 1) >= totalSegments) { // Last Round
 				segDest = line_.getP2();
 			} else {
 				segDest = getNewLocation(segOrig, line_, LAYER_SEG.getVal());
 			}
-			_segmentList.getLast().add(new Line2D.Double(segOrig, segDest));
+			Line2D segment = new Line2D.Double(segOrig, segDest);
+			_segmentList.getLast().add(segment);
+			_vehicleOnSeg.put(segment, new LinkedList<Vehicle>());
 		}
 	}
 
@@ -130,6 +137,18 @@ public abstract class Road implements Displayable{
 		}
 
 		return currLine;
+	}
+	private int getLineFromPoint(Point2D curLoc)
+	{
+		int idx = 0;
+
+		for (Line2D line : _lineList) {
+			if (line.ptLineDist(curLoc) < DISTANCE_THRESHOLD) {
+				break;
+			}
+			idx++;
+		}
+		return idx;
 	}
 
 	/**
@@ -165,9 +184,14 @@ public abstract class Road implements Displayable{
 		// Am I over the boundary  of the line?
 		if(curLoc_.distance(line_.getP2()) < curLoc_.distance(newLoc_))
 		{
-//			List<Line2D> subList = _lineList.subList(_lineList.indexOf(line_), _lineList.size());
-			Line2D nextLine = _lineList.get(_lineList.indexOf(line_) + 1);
-			newLoc_ = getNewLocation(nextLine.getP1(), nextLine, len_ - (curLoc_.distance(nextLine.getP1())));
+			int nextLineIdx = _lineList.indexOf(line_) + 1;
+			if (nextLineIdx < _lineList.size()) {
+				Line2D nextLine = _lineList.get(_lineList.indexOf(line_) + 1);
+				newLoc_ = getNewLocation(nextLine.getP1(), nextLine, len_
+						- (curLoc_.distance(nextLine.getP1())));
+			} else {
+				newLoc_ = curLoc_;
+			}
 		}
 
 		if (newLoc_ == null)
@@ -224,31 +248,74 @@ public abstract class Road implements Displayable{
 					.getP1().getY(), (float) currSeg.getP2().getX(),
 					(float) currSeg.getP2().getY());
 		}
-		/*
-		 * Paint each line from _segment list on top of the street we just
-		 * painted. These segments will vary in color/weight depending on the
-		 * cars cruising it.
-		 */
-		// TODO
-		// for(Vehicle vhcl: _vehiclesOnRoad)
-		// {
-		// if(vhcl.)
-		// }
-		for (List<Line2D> line : _segmentList) {
-			Iterator<Line2D> iter = line.iterator();
+		for (Entry<Line2D, List<Vehicle>> e : _vehicleOnSeg.entrySet()) {
+			
+			Line2D seg = e.getKey();
+			List<Vehicle> vList = e.getValue();
 			float color = 1;
+			
+			if (color >= 10)
+				color = 5;
+			_parent.stroke(255);
+			_parent.strokeWeight(vList.size());
+			_parent.line((float)seg.getX1(), (float) seg.getY1(), (float)seg.getX2(), (float)seg.getY2());
+			color += 0.1;
+		}
+	}
 
-			while (iter.hasNext()) {
-				Line2D seg = (Line2D) iter.next();
-				if (color >= 10)
-					color = 1;
-				_parent.stroke(255);
-				_parent.strokeWeight(color);
-				_parent.point((float) seg.getX1(), (float) seg.getY1());
-				_parent.point((float) seg.getX2(), (float) seg.getY2());
-				color += 0.1;
+	/**
+	 * 
+	 */
+	public void update()
+	{
+		for (Vehicle v : _vehiclesOnRoad)
+		{
+			Line2D currLine = v.getLine();
+			int segIdx = (int) Math.ceil((currLine.getP1().distance(v.getLocation())/LAYER_SEG.getVal()));
+			Line2D seg = _segmentList.get(v.getLineIdx()).get(segIdx);
+			_vehicleOnSeg.get(seg).add(v);
+		}
+	}
+	/**
+	 * 
+	 * @param v_
+	 * @throws Exception 
+	 */
+	public void updateVehicle(Vehicle v_) throws Exception {
+		Line2D line = v_.getLine();
+		int segIdx = getSegIdx(v_.getLine(), v_.getLocation());
+		Line2D seg = _segmentList.get(v_.getLineIdx()).get(segIdx);
+		// Check if the car is not on this segment yet
+		if (!_vehicleOnSeg.get(seg).contains(v_)) {
+			// Remove it from the previous seg
+			/*
+			 * If the car is on the first segment of a line, add it to that segment.
+			 * For all cases other than base case, we need to remove it from the last
+			 * segment of the previous line. 
+			 */
+			if (segIdx == 0) {
+				_vehicleOnSeg.get(seg).add(v_);
+				if(v_.getLineIdx() > 0)
+				{
+					int prevLineIdx = v_.getLineIdx() - 1;
+					int prevSegIdx = _segmentList.get(prevLineIdx).size() -1;
+					Line2D prevSeg = _segmentList.get(prevLineIdx).get(prevSegIdx);
+					if(_vehicleOnSeg.get(prevSeg).contains(v_))
+					{
+						_vehicleOnSeg.get(prevSeg).remove(v_);
+					}
+				}
+
+			} else {
+				Line2D prevSeg = _segmentList.get(v_.getLineIdx()).get(
+						segIdx - 1);
+				if (_vehicleOnSeg.get(prevSeg).contains(v_)) {
+					_vehicleOnSeg.get(prevSeg).remove(v_);
+					_vehicleOnSeg.get(seg).add(v_);
+				}
 			}
 		}
+
 	}
 
 	/**
@@ -279,7 +346,7 @@ public abstract class Road implements Displayable{
 				/ det;
 		p = new Point2D.Double(px, py);
 		return p;
-	}
+	}	
 
 	public Point2D startLoc() {
 		return _lineList.get(0).getP1();
@@ -302,4 +369,30 @@ public abstract class Road implements Displayable{
 	public String toString() {
 		return ID + "__" + _vehiclesOnRoad.size();
 	}
+
+	public void removeVFromRoad(Vehicle v_) throws Exception {
+		_vehiclesOnRoad.remove(v_);
+
+		int segIdx = getSegIdx(v_.getLine(), v_.getLocation());
+		Line2D seg = _segmentList.get(v_.getLineIdx()).get(segIdx);
+		if (_vehicleOnSeg.get(seg).contains(v_)) {
+			_vehicleOnSeg.get(seg).remove(v_);
+		}				
+		
+	}
+	
+	private int getSegIdx(Line2D l_, Point2D pt_) throws Exception
+	{
+		int seg;
+		
+		if (l_.ptLineDist(pt_) <= DISTANCE_THRESHOLD)
+		{
+			seg = (int) (l_.getP1().distance(pt_) / LAYER_SEG
+					.getVal());
+		}else
+			throw new Exception("Point not in line");
+		
+		return seg;
+	}
+
 }
