@@ -6,4 +6,7 @@
 	 	- La distacia == al grosor de la primera linea, para que quede al lado.
 	 	
 	 	
-+ Crear una
++ Detectar intersecciones.
+
++ Implementar luz de trafico
++ 

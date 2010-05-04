@@ -56,8 +56,7 @@ public class XmlParseService
     final static String ATTR_CONN_DIR = "dir";
     final static String ONE_WAY = "1way";
     final static String TWO_WAY = "2way";
-  
-    private static PApplet _pDisplay;    
+    
     private static Logger _logger;
     private String _fileName;
     private Graph<StreetXing, Road> _g = new DirectedSparseGraph<StreetXing, Road>();
@@ -70,15 +69,11 @@ public class XmlParseService
      * 
      * @param fileName_
      */
-    public XmlParseService(String fileName_, PApplet pDisplay_, Logger logger_)
+    public XmlParseService(String fileName_, Logger logger_)
     {
         _fileName = fileName_;
         _logger = logger_;
         // use a unique display
-        if(_pDisplay == null)
-        {
-            _pDisplay = pDisplay_;
-        }
         createGraph();
     }
     
@@ -200,47 +195,35 @@ public class XmlParseService
             double length = Double.parseDouble( connNode.getAttributes().getNamedItem( ATTR_CONN_LEN ).getNodeValue() );
             
             
-            LinkedList<Point2D> pointList = (LinkedList<Point2D>)getPointList();
-            Road street = new Street("test", pointList, _pDisplay, _logger );
-            StreetXing startXing = new StreetXing(street.ID+"_start", street.startLoc());
-            StreetXing endXing = new StreetXing(street.ID+"_end", street.endLoc());
-            startXing.setStartOdds(100);
-            _sourceXings.add(startXing);
-            endXing.setEndOdds(100);
-            _destXings.add(endXing);
-            Pair<StreetXing> vertexCollection = new Pair<StreetXing>( startXing, endXing );
-            
-            // Finally, add the edge
-            g_.addEdge( street, vertexCollection ); 
-            // Add edge other way around for 2way
-            if(TWO_WAY.equals( dir ))
-            {
-                Pair<StreetXing> edge2 = new Pair<StreetXing>( endXing, startXing );
-                Iterator<Point2D> iter = (Iterator<Point2D>)pointList.descendingIterator();
-                LinkedList<Point2D> reversePointList = new LinkedList<Point2D>();
-                while(iter.hasNext())
-                {
-                    reversePointList.add(iter.next());
-                }
-                Street street2 = new Street( "test",reversePointList, _pDisplay, _logger );
-                // Finally, add the edge
-                g_.addEdge( street2, edge2 );               
-            }
+//            LinkedList<Point2D> pointList = (LinkedList<Point2D>)getPointList();
+//            Road street = new Street("test", pointList, _pDisplay, _logger );
+//            StreetXing startXing = new StreetXing(street.ID+"_start", street.startLoc());
+//            StreetXing endXing = new StreetXing(street.ID+"_end", street.endLoc());
+//            startXing.setStartOdds(100);
+//            _sourceXings.add(startXing);
+//            endXing.setEndOdds(100);
+//            _destXings.add(endXing);
+//            Pair<StreetXing> vertexCollection = new Pair<StreetXing>( startXing, endXing );
+//            
+//            // Finally, add the edge
+//            g_.addEdge( street, vertexCollection ); 
+//            // Add edge other way around for 2way
+//            if(TWO_WAY.equals( dir ))
+//            {
+//                Pair<StreetXing> edge2 = new Pair<StreetXing>( endXing, startXing );
+//                Iterator<Point2D> iter = (Iterator<Point2D>)pointList.descendingIterator();
+//                LinkedList<Point2D> reversePointList = new LinkedList<Point2D>();
+//                while(iter.hasNext())
+//                {
+//                    reversePointList.add(iter.next());
+//                }
+//                Street street2 = new Street( "test",reversePointList, _pDisplay, _logger );
+//                // Finally, add the edge
+//                g_.addEdge( street2, edge2 );               
+//            }
         }
     }
 
-    /**
-     * TODO helper method. REMOVE!!
-     * @return
-     */
-    private List<Point2D> getPointList() {
-	List<Point2D> points = new LinkedList<Point2D>();
-	// Seg 1
-	points.add(new Point2D.Float(20, _pDisplay.random(_pDisplay.height - 20)));
-	points.add(new Point2D.Float(_pDisplay.width - 20, _pDisplay.random(20, _pDisplay.height - 20)));
-	 points.add(new Point2D.Float(20, _pDisplay.random(_pDisplay.height-20)));
-	return points;
-    }
     /**
      * Return the graph generated from the xml file passed in constructor.
      * 
