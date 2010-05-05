@@ -7,7 +7,8 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.app.agents.Vehicle;
+import sim.app.agents.Agent;
+import sim.app.agents.vehicle.Vehicle;
 import sim.app.geo.Road;
 import sim.app.geo.StreetXing;
 import sim.app.xml.XmlParseService;
@@ -47,14 +48,16 @@ public abstract class TrafficSim {
 		for (Road rd : getRoads()) {
 			rd.display();
 		}
-		Iterator<Vehicle> iter = getVehicles().iterator();
+		
+		Iterator<Agent> iter = getAgents().iterator();
 		while (iter.hasNext()) {
-			Vehicle vhcl = iter.next();
-			if (vhcl.isAlive()) {
-				vhcl.move();
-				vhcl.display();
-			} else {
+			Agent agent = iter.next();
+			// If we're dealing with a car, remove it if it's dead.
+			if (agent instanceof Vehicle && !((Vehicle) agent).isAlive()) {
 				iter.remove();
+			} else {
+				agent.move();
+				agent.display();
 			}
 		}
 	}
@@ -120,7 +123,7 @@ public abstract class TrafficSim {
 
 	protected abstract void generateCity();
 
-	protected abstract List<Vehicle> getVehicles();
+	protected abstract List<Agent> getAgents();
 
 	protected abstract List<Road> getRoads();
 }
