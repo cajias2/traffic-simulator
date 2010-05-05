@@ -13,8 +13,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.app.agents.Car;
-import sim.app.agents.Vehicle;
+import sim.app.agents.Agent;
+import sim.app.agents.TrafficLight;
+import sim.app.agents.vehicle.Car;
+import sim.app.agents.vehicle.Vehicle;
 import sim.app.geo.Road;
 import sim.app.geo.Street;
 import sim.app.geo.StreetXing;
@@ -32,37 +34,69 @@ public class Sim1 extends TrafficSim {
 	private static String _cityDir = "/../src/xml/OneStreet.xml";
 
 	private final PApplet _applet;
-	private LinkedList<Vehicle> _vehicleAgents;
+	private LinkedList<Vehicle> _vehicleList;
 	private LinkedList<Road> _roads;
 	private final Logger _log;
+	private List<Agent> _agentsList;
+
+	public PApplet getApplet() {
+		return _applet;
+	}
 
 	public Sim1(PApplet applet_, Logger log_) {
 		_applet = applet_;
 		_log = log_;
-		_vehicleAgents = new LinkedList<Vehicle>();
+		_vehicleList = new LinkedList<Vehicle>();
+		_agentsList = new LinkedList<Agent>();
 		generateCity();
 		// parseGraph(_cityDir);
 		for (int i = 0; i < 1; i++) {
-			_vehicleAgents.add(generateVehicle());
+			Agent agent = generateVehicle();
+			getAgents().add(agent);
+//			addVehicle().add((Vehicle)agent);
 		}
 
 		_roads = new LinkedList<Road>(_city.getEdges());
 	}
 
 	@Override
-	protected boolean addVhclP() {
+		public void update() {
+			if (addVhclP()) {
+				Agent agent = generateVehicle();
+				getAgents().add(agent);
+//				addVehicle().add((Vehicle)agent);
+			}
+	//		int carsGenerated = carFlow();
+	//		System.out.println("Cars this step: " +carsGenerated);
+	//		for (int i = 0; i < carsGenerated; i++)
+	//		{
+	//			getVehicles().add(generateVehicle());
+	//		}
+		}
 
-		if (Math.random() < NEW_VHCL_RATIO)
-			return true;
-		return false;
-		// double carPerStep = Math.floor(Math
-		// .sin((System.currentTimeMillis() + 473) / 100)
-		// * (MAX_CAR_COUNT / 2) + MAX_CAR_COUNT / 2);
-		// _log.log( Level.FINE, "Will try to create: "+carPerStep+"cars" );
-		// return carPerStep;
-
+	@Override
+	public int getFrameRate() {
+		return FRAME_RATE;
 	}
 
+	@Override
+	public int getHeight() {
+		return HEIGHT;
+	}
+
+	/**
+	 * (non-Javadoc)
+	 * @see sim.app.simulations.TrafficSim#getWidth()
+	 */
+	@Override
+	public int getWidth() {
+		return WIDTH;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	protected int carFlow() {
 		int carPerStep = (int) (floor(sin(getApplet().frameCount)) * (MAX_CAR_COUNT / 2 + MAX_CAR_COUNT / 2));
 		_log.log(Level.FINE, "Will try to create: " + carPerStep + "cars");
@@ -70,6 +104,9 @@ public class Sim1 extends TrafficSim {
 
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	protected void generateCity() {
 		LinkedList<Point2D> pointList = (LinkedList<Point2D>) getPointList();
@@ -77,6 +114,9 @@ public class Sim1 extends TrafficSim {
 		StreetXing startXing = new StreetXing(street.ID + "_start", street
 				.startLoc());
 		StreetXing endXing = new StreetXing(street.ID + "_end", street.endLoc());
+		TrafficLight light = new TrafficLight(_log);
+		_agentsList.add(light);
+		endXing.setTrafficLight(light);
 		startXing.setStartOdds(100);
 		_sourceXings.add(startXing);
 		endXing.setEndOdds(100);
@@ -104,8 +144,38 @@ public class Sim1 extends TrafficSim {
 		// }
 	}
 
-	public PApplet getApplet() {
-		return _applet;
+	@Override
+	protected boolean addVhclP() {
+	
+		if (Math.random() < NEW_VHCL_RATIO)
+			return true;
+		return false;
+		// double carPerStep = Math.floor(Math
+		// .sin((System.currentTimeMillis() + 473) / 100)
+		// * (MAX_CAR_COUNT / 2) + MAX_CAR_COUNT / 2);
+		// _log.log( Level.FINE, "Will try to create: "+carPerStep+"cars" );
+		// return carPerStep;
+	
+	}
+
+	@Override
+	protected List<Road> getRoads() {
+		return _roads;
+	}
+//
+//	protected void addVehicle(Vehicle v_) {
+//		 _vehicleList.add(v_);
+//		 _agentsList.add(v_);
+//	}
+
+
+	@Override
+	protected List<Agent> getAgents(){
+		return _agentsList;
+	}
+	@Override
+	protected Logger getLogger() {
+		return _log;
 	}
 
 	/**
@@ -145,48 +215,5 @@ public class Sim1 extends TrafficSim {
 				getHeight() - 20)));
 		points.add(new Point2D.Float(20, ap.random(getHeight() - 20)));
 		return points;
-	}
-
-	@Override
-	protected List<Road> getRoads() {
-		return _roads;
-	}
-
-	@Override
-	protected List<Vehicle> getVehicles() {
-		return _vehicleAgents;
-	}
-
-	@Override
-	protected Logger getLogger() {
-		return _log;
-	}
-
-	@Override
-	public void update() {
-		if (addVhclP()) {
-			getVehicles().add(generateVehicle());
-		}
-//		int carsGenerated = carFlow();
-//		System.out.println("Cars this step: " +carsGenerated);
-//		for (int i = 0; i < carsGenerated; i++)
-//		{
-//			getVehicles().add(generateVehicle());
-//		}
-	}
-
-	@Override
-	public int getFrameRate() {
-		return FRAME_RATE;
-	}
-
-	@Override
-	public int getHeight() {
-		return HEIGHT;
-	}
-
-	@Override
-	public int getWidth() {
-		return WIDTH;
 	}
 }

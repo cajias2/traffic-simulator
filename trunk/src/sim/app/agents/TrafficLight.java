@@ -16,7 +16,7 @@ import sim.app.utils.TrafficLightState;
 /**
  * @author biggie
  */
-public class TrafficLight
+public class TrafficLight extends Agent
 {
     
     private static final long serialVersionUID = 1829654668132095868L;
@@ -115,4 +115,10 @@ public class TrafficLight
     {
         return ID;
     }
+
+	@Override
+	public void display() {
+		// TODO Auto-generated method stub
+		
+	}
 }

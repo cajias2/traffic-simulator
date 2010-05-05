@@ -5,15 +5,13 @@ package sim.app.geo;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
 import processing.core.PApplet;
-import sim.app.agents.Vehicle;
+import sim.app.agents.vehicle.Vehicle;
 import sim.app.geo.distance.Distance;
 import sim.app.geo.distance.Kilometers;
 import sim.app.geo.distance.Meters;
@@ -281,7 +279,7 @@ public abstract class Road implements Displayable{
 	 * @param v_
 	 * @throws Exception 
 	 */
-	public void updateVehicle(Vehicle v_) throws Exception {
+	public void updateVehicle(Vehicle v_){
 		Line2D line = v_.getLine();
 		int segIdx = getSegIdx(v_.getLine(), v_.getLocation());
 		Line2D seg = _segmentList.get(v_.getLineIdx()).get(segIdx);
@@ -370,18 +368,24 @@ public abstract class Road implements Displayable{
 		return ID + "__" + _vehiclesOnRoad.size();
 	}
 
-	public void removeVFromRoad(Vehicle v_) throws Exception {
+	/**
+	 * Remove vehicle from  this road
+	 * @param v_	Vehicle instance
+	 */
+	public void removeVFromRoad(Vehicle v_) {
 		_vehiclesOnRoad.remove(v_);
 
-		int segIdx = getSegIdx(v_.getLine(), v_.getLocation());
+		int segIdx;
+		segIdx = getSegIdx(v_.getLine(), v_.getLocation());
+
 		Line2D seg = _segmentList.get(v_.getLineIdx()).get(segIdx);
 		if (_vehicleOnSeg.get(seg).contains(v_)) {
 			_vehicleOnSeg.get(seg).remove(v_);
-		}				
-		
+		}
+
 	}
 	
-	private int getSegIdx(Line2D l_, Point2D pt_) throws Exception
+	private int getSegIdx(Line2D l_, Point2D pt_)
 	{
 		int seg;
 		
@@ -390,7 +394,7 @@ public abstract class Road implements Displayable{
 			seg = (int) (l_.getP1().distance(pt_) / LAYER_SEG
 					.getVal());
 		}else
-			throw new Exception("Point not in line");
+			throw new RuntimeException("Point not in line");
 		
 		return seg;
 	}
