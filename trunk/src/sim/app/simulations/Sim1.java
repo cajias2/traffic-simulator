@@ -14,9 +14,9 @@ import java.util.logging.Logger;
 
 import processing.core.PApplet;
 import sim.app.agents.Agent;
-import sim.app.agents.TrafficLight;
-import sim.app.agents.vehicle.Car;
-import sim.app.agents.vehicle.Vehicle;
+import sim.app.agents.display.lights.TrafficLightAgent;
+import sim.app.agents.display.vehicle.Car;
+import sim.app.agents.display.vehicle.Vehicle;
 import sim.app.geo.Road;
 import sim.app.geo.Street;
 import sim.app.geo.StreetXing;
@@ -111,10 +111,9 @@ public class Sim1 extends TrafficSim {
 	protected void generateCity() {
 		LinkedList<Point2D> pointList = (LinkedList<Point2D>) getPointList();
 		Road street = new Street("test", pointList, _applet, _log);
-		StreetXing startXing = new StreetXing(street.ID + "_start", street
-				.startLoc());
-		StreetXing endXing = new StreetXing(street.ID + "_end", street.endLoc());
-		TrafficLight light = new TrafficLight(_log);
+		StreetXing startXing = new StreetXing(street.startLoc(), street);
+		StreetXing endXing = new StreetXing(street.endLoc(), street);
+		TrafficLightAgent light = new TrafficLightAgent(getApplet(), _log);
 		_agentsList.add(light);
 		endXing.setTrafficLight(light);
 		startXing.setStartOdds(100);
@@ -162,12 +161,6 @@ public class Sim1 extends TrafficSim {
 	protected List<Road> getRoads() {
 		return _roads;
 	}
-//
-//	protected void addVehicle(Vehicle v_) {
-//		 _vehicleList.add(v_);
-//		 _agentsList.add(v_);
-//	}
-
 
 	@Override
 	protected List<Agent> getAgents(){
@@ -189,8 +182,7 @@ public class Sim1 extends TrafficSim {
 				_city);
 		StreetXing source = getSource();
 		StreetXing target = getDest();
-		// Make sure start and end are different. Otherwise...
-		// what's the point?
+		// Make sure start and end are different. 
 		// Fixed nullpointer exception by checking target=?null.
 		while ((target == null || target.getId() == null)
 				|| source.getId().equals(target.getId())) {
@@ -202,7 +194,7 @@ public class Sim1 extends TrafficSim {
 	}
 
 	/**
-	 * TODO helper method. REMOVE!!
+	 * TODO helper method, remove
 	 * 
 	 * @return
 	 */

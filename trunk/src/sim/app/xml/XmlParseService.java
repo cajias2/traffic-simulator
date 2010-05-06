@@ -22,7 +22,7 @@ import org.xml.sax.SAXException;
 
 import processing.core.PApplet;
 
-import sim.app.agents.TrafficLight;
+import sim.app.agents.display.lights.TrafficLightAgent;
 import sim.app.geo.Road;
 import sim.app.geo.Street;
 import sim.app.geo.StreetXing;

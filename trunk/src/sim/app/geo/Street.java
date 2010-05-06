@@ -41,7 +41,7 @@ public class Street extends Road {
 
 
 	@Override
-	public void Display() {
+	public void display() {
 	    super.display();	    
 	}
 
