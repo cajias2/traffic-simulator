@@ -8,7 +8,8 @@ import java.util.logging.Logger;
 
 import processing.core.PApplet;
 import sim.app.agents.Agent;
-import sim.app.agents.vehicle.Vehicle;
+import sim.app.agents.display.DisplayableAgent;
+import sim.app.agents.display.vehicle.Vehicle;
 import sim.app.geo.Road;
 import sim.app.geo.StreetXing;
 import sim.app.xml.XmlParseService;
@@ -57,10 +58,20 @@ public abstract class TrafficSim {
 				iter.remove();
 			} else {
 				agent.move();
-				agent.display();
+				if (agent instanceof DisplayableAgent) {
+					((DisplayableAgent)agent).display();
+				}
 			}
 		}
 	}
+
+	public abstract void update();
+
+	public abstract int getWidth();
+
+	public abstract int getHeight();
+
+	public abstract int getFrameRate();
 
 	/**
 	 * 
@@ -71,7 +82,7 @@ public abstract class TrafficSim {
 		Random rand = new Random(System.currentTimeMillis());
 		int targetIndex = rand.nextInt(100);
 		int currentIndex = 0;
-
+	
 		for (StreetXing xing : _sourceXings) {
 			currentIndex += xing.getStartOdds();
 			if (currentIndex >= targetIndex) {
@@ -95,7 +106,7 @@ public abstract class TrafficSim {
 		Random rand = new Random(System.currentTimeMillis());
 		int targetIndex = rand.nextInt(100);
 		int currentIndex = 0;
-
+	
 		for (StreetXing xing : _destXings) {
 			currentIndex += xing.getEndOdds();
 			if (currentIndex >= targetIndex) {
@@ -103,17 +114,9 @@ public abstract class TrafficSim {
 				break;
 			}
 		}
-
+	
 		return pickedXing;
 	}
-
-	public abstract void update();
-
-	public abstract int getWidth();
-
-	public abstract int getHeight();
-
-	public abstract int getFrameRate();
 
 	protected abstract Logger getLogger();
 

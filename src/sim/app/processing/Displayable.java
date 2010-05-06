@@ -1,6 +1,5 @@
 package sim.app.processing;
 
 public interface Displayable {
-    public void Display();
-
+    public void display();
 }

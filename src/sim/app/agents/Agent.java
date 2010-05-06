@@ -10,14 +10,7 @@ package sim.app.agents;
 public abstract class Agent {
 	
 	/**
-	 * Update the sate of this agent.
-	 * Ideally this is called before display
+	 * Update the state of this agent.
 	 */
 	public abstract void move();
-	
-	/**
-	 * Display an agent. 
-	 */
-	public abstract void display();
-
 }
