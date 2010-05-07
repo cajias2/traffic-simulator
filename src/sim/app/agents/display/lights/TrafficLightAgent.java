@@ -41,7 +41,7 @@ public class TrafficLightAgent extends DisplayableAgent {
 		_log = log_;
 		ID = "Light_" + _lightCount;
 		_lightCount++;
-		_duration = 10;
+		_duration = 100;
 
 		// Initialize state map
 		_stateMap = new HashMap<Orientation, TrafficLight>(2);
@@ -82,6 +82,7 @@ public class TrafficLightAgent extends DisplayableAgent {
 			{
 				applet.fill(0, 255, 0);				
 			}
+			applet.strokeWeight(0);
 			applet.ellipse(((Double) _location.getX()).floatValue(),
 					((Double) _location.getY()).floatValue(), 4, 4);
 		}

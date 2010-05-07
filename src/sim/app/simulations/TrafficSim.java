@@ -18,7 +18,6 @@ import edu.uci.ics.jung.graph.Graph;
 
 public abstract class TrafficSim {
 
-	public static final double NEW_VHCL_RATIO = .6;
 	public static int MAX_CAR_COUNT = 3;
 	protected Graph<StreetXing, Road> _city = new DirectedSparseGraph<StreetXing, Road>();
 	protected List<StreetXing> _sourceXings = new LinkedList<StreetXing>();

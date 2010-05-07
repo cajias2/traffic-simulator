@@ -48,6 +48,8 @@ public abstract class Road implements Displayable {
 
 	protected abstract int getStrokeWeight();
 
+	abstract protected int getMaxVhclSeg();
+
 	/**
 	 * Constructor
 	 */
@@ -63,6 +65,13 @@ public abstract class Road implements Displayable {
 
 	public List<Line2D> getLineList() {
 		return _lineList;
+	}
+
+	/**
+	 * @return the _segmentList
+	 */
+	public LinkedList<List<Line2D>> getSegmentList() {
+		return _segmentList;
 	}
 
 	public abstract Distance getMaxVelocity();
@@ -175,10 +184,10 @@ public abstract class Road implements Displayable {
 	 */
 	public void update() {
 		for (Vehicle v : _vehiclesOnRoad) {
-			Line2D currLine = v.getLine();
+			Line2D currLine = v.getRoadLine();
 			int segIdx = (int) Math.ceil((currLine.getP1().distance(
 					v.getLocation()) / LAYER_SEG.getVal()));
-			Line2D seg = _segmentList.get(v.getLineIdx()).get(segIdx);
+			Line2D seg = _segmentList.get(v.getRoadLineIdx()).get(segIdx);
 			_vehicleOnSeg.get(seg).add(v);
 		}
 	}
@@ -189,8 +198,8 @@ public abstract class Road implements Displayable {
 	 * @throws Exception
 	 */
 	public void updateVehicle(Vehicle v_) {
-		int segIdx = getSegIdx(v_.getLine(), v_.getLocation());
-		Line2D seg = _segmentList.get(v_.getLineIdx()).get(segIdx);
+		int segIdx = getSegIdx(v_.getRoadLine(), v_.getLocation());
+		Line2D seg = _segmentList.get(v_.getRoadLineIdx()).get(segIdx);
 		// Check if the car is not on this segment yet
 		if (!_vehicleOnSeg.get(seg).contains(v_)) {
 			// Remove it from the previous seg
@@ -201,8 +210,8 @@ public abstract class Road implements Displayable {
 			 */
 			if (segIdx == 0) {
 				_vehicleOnSeg.get(seg).add(v_);
-				if (v_.getLineIdx() > 0) {
-					int prevLineIdx = v_.getLineIdx() - 1;
+				if (v_.getRoadLineIdx() > 0) {
+					int prevLineIdx = v_.getRoadLineIdx() - 1;
 					int prevSegIdx = _segmentList.get(prevLineIdx).size() - 1;
 					Line2D prevSeg = _segmentList.get(prevLineIdx).get(
 							prevSegIdx);
@@ -212,7 +221,7 @@ public abstract class Road implements Displayable {
 				}
 
 			} else {
-				Line2D prevSeg = _segmentList.get(v_.getLineIdx()).get(
+				Line2D prevSeg = _segmentList.get(v_.getRoadLineIdx()).get(
 						segIdx - 1);
 				if (_vehicleOnSeg.get(prevSeg).contains(v_)) {
 					_vehicleOnSeg.get(prevSeg).remove(v_);
@@ -255,13 +264,43 @@ public abstract class Road implements Displayable {
 		_vehiclesOnRoad.remove(v_);
 
 		int segIdx;
-		segIdx = getSegIdx(v_.getLine(), v_.getLocation());
+		segIdx = getSegIdx(v_.getRoadLine(), v_.getLocation());
 
-		Line2D seg = _segmentList.get(v_.getLineIdx()).get(segIdx);
+		Line2D seg = _segmentList.get(v_.getRoadLineIdx()).get(segIdx);
 		if (_vehicleOnSeg.get(seg).contains(v_)) {
 			_vehicleOnSeg.get(seg).remove(v_);
 		}
 
+	}
+
+	/**
+	 * Find the intersection point between this and another road
+	 * @param b_
+	 * @return
+	 */
+	public Point2D findIntersection(Road b_) {
+		Point2D intersectPoint = null;
+		for(Line2D bLine: b_.getLineList())
+		{
+			for(Line2D thisLine: this.getLineList())
+			{
+				intersectPoint = intersectionPoint(thisLine, bLine);
+				if(null != intersectPoint)
+					break;
+			}
+		}
+		return intersectPoint;
+	}
+	
+	/**
+	 * Return true if segment has reached maximum capacity
+	 * TODO: make this a function of vhcl size, not vhcl number.
+	 * @param roadSeg_
+	 * @return
+	 */
+	public boolean isSegSaturated(Line2D roadSeg_)
+	{
+		return _vehicleOnSeg.get(roadSeg_).size() >= getMaxVhclSeg();
 	}
 
 	/**
@@ -388,7 +427,7 @@ public abstract class Road implements Displayable {
 		return p;
 	}
 
-	private int getSegIdx(Line2D l_, Point2D pt_) {
+	public int getSegIdx(Line2D l_, Point2D pt_) {
 		int seg;
 
 		if (l_.ptLineDist(pt_) <= DISTANCE_THRESHOLD) {
@@ -397,25 +436,6 @@ public abstract class Road implements Displayable {
 			throw new RuntimeException("Point not in line");
 
 		return seg;
-	}
-
-	/**
-	 * Find the intersection point between this and another road
-	 * @param b_
-	 * @return
-	 */
-	public Point2D findIntersection(Road b_) {
-		Point2D intersectPoint = null;
-		for(Line2D bLine: b_.getLineList())
-		{
-			for(Line2D thisLine: this.getLineList())
-			{
-				intersectPoint = intersectionPoint(thisLine, bLine);
-				if(null != intersectPoint)
-					break;
-			}
-		}
-		return intersectPoint;
 	}
 
 }

@@ -14,6 +14,7 @@ public class Street extends Road {
     private static int _streetCount = 0;
     private static final int TYPE = 1;
     private static final Distance MAX_VELOCITY = new Kilometers(45.0);
+    private static final int MAX_VHCL_PER_SEG = 1;
 
 
     /**
@@ -35,14 +36,20 @@ public class Street extends Road {
     
 
 	@Override
+	public void display() {
+	    super.display();	    
+	}
+
+
+	@Override
 	protected int getStrokeWeight() {
 		return TYPE;
 	}
 
 
 	@Override
-	public void display() {
-	    super.display();	    
+	protected int getMaxVhclSeg() {
+		return MAX_VHCL_PER_SEG;
 	}
 
 }
