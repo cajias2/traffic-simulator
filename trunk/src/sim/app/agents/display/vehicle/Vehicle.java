@@ -32,16 +32,12 @@ public abstract class Vehicle extends DisplayableAgent {
 
 	private final String ID;
 	private Point2D _currLocation; // How close to next intersection
-	private Line2D _curLine;
+	private Line2D _currRoadLine;
 	private Distance _currSpeed;
 	private long _time;
 	private LinkedList<Road> _trayectory;
 	private boolean _isAlive;
-	private int _lineIdx = 0;
-
-	public int getLineIdx() {
-		return _lineIdx;
-	}
+	private int _roadLineIdx = 0;
 
 	/**
 	 * Given in K. Assumed to be K/s
@@ -53,6 +49,10 @@ public abstract class Vehicle extends DisplayableAgent {
 	 */
 	public abstract Distance getAcceleration();
 
+	public int getRoadLineIdx() {
+		return _roadLineIdx;
+	}
+
 	/**
 	 * Given in m.
 	 */
@@ -62,8 +62,8 @@ public abstract class Vehicle extends DisplayableAgent {
 		return _currLocation;
 	}
 
-	public Line2D getLine() {
-		return _curLine;
+	public Line2D getRoadLine() {
+		return _currRoadLine;
 	}
 
 	/**
@@ -90,25 +90,15 @@ public abstract class Vehicle extends DisplayableAgent {
 	}
 
 	/**
-	 * Resets locations variables when a new road is reached.
-	 */
-	private void updateRoad() {
-		_currLocation = currentRoad().startLoc();
-		_lineIdx = 0;		
-		_curLine = currentRoad().getLineList().get(_lineIdx);
-	};
-
-	/**
      * Displays the vehicle according to its location
      * variables.
      * Gets called once per frame
      */
 	public void display() {
-//		parent.stroke(255);
-//		parent.strokeWeight(3);
-//		parent
-//				.point((float) _currLocation.getX(), (float) _currLocation
-//						.getY());
+		super.applet.stroke(0,0,255);
+		super.applet.strokeWeight(3);
+		super.applet.point((float) _currLocation.getX(), (float) _currLocation
+						.getY());
 	}
 	
 	/**
@@ -177,6 +167,52 @@ public abstract class Vehicle extends DisplayableAgent {
 	}
 
 	/**
+	 * Delete the car from schedule loop.
+	 * 
+	 * @param state
+	 */
+	// public void die ( final SimState state )
+	// {
+	// _log.log( Level.INFO, this + "Dying..." );
+	// _carCount--;
+	//        
+	// if ( toDiePointer != null )
+	// toDiePointer.stop();
+	// }
+	
+	/**
+	 * Returns true if car in front is not too close.
+	 */
+	protected boolean canMove() {
+		boolean canMove = false;
+	
+		if (!atEndOfRoad()) {
+			boolean isSaturated = false;
+			
+			int nextSegIdx = currentRoad().getSegIdx(_currRoadLine, _currLocation)+1;
+			if(nextSegIdx < currentRoad().getSegmentList().get(_roadLineIdx).size()  )
+			{
+				Line2D nextSeg = currentRoad().getSegmentList().get(_roadLineIdx).get(nextSegIdx);
+				isSaturated = currentRoad().isSegSaturated(nextSeg);
+			}	
+			
+			canMove = !isSaturated;
+		} else {
+			//TODO look at traffic light
+		}
+		return canMove;
+	}
+
+	/**
+	 * Resets locations variables when a new road is reached.
+	 */
+	private void updateRoad() {
+		_currLocation = currentRoad().startLoc();
+		_roadLineIdx = 0;		
+		_currRoadLine = currentRoad().getLineList().get(_roadLineIdx);
+	}
+
+	/**
 	 * Add this car to the current street it's cruising
 	 * 
 	 * @param car
@@ -230,36 +266,6 @@ public abstract class Vehicle extends DisplayableAgent {
 	// if ( toDiePointer != null )
 	// toDiePointer.stop();
 	// }
-
-	/**
-	 * Returns true if car in front is not too close.
-	 */
-	protected boolean canMove() {
-		boolean canMove = false;
-
-		// Orientation or = currentStreet().getOrientation();
-
-		Vehicle prevCar = getPrevCar();
-
-		if (!atEndOfRoad()) {
-			// If this is not the first car.
-			// if (null != prevCar) {
-			// if (this._currLocation < prevCar._currLocation) {
-			// canMove = true;
-			// }
-			//
-			// } else {
-			// TODO true for now.. must look at later. When must a car stop?
-			canMove = true;
-			// }
-		} else {
-			// canMove = TrafficLightState.RED != currentXing( state_
-			// ).getTrafficLight().getState( or );
-			// TODO bug here.. rethink this logic!
-			canMove = true;
-		}
-		return canMove;
-	}
 
 	/**
 	 * Get the next car in line
@@ -316,8 +322,8 @@ public abstract class Vehicle extends DisplayableAgent {
 			Point2D newLoc = currentRoad().getNewLocation(_currLocation, 1);
 			if (_currLocation != newLoc) {
 				_currLocation = newLoc;
-				if (_curLine.ptLineDist(_currLocation) > Road.DISTANCE_THRESHOLD) {
-					updateLine();
+				if (_currRoadLine.ptLineDist(_currLocation) > Road.DISTANCE_THRESHOLD) {
+					updateRoadSeg();
 				}
 				currentRoad().updateVehicle(this);
 
@@ -327,10 +333,10 @@ public abstract class Vehicle extends DisplayableAgent {
 		}
 	}
 
-	private void updateLine()
+	private void updateRoadSeg()
 	{
-		_lineIdx ++;
-		_curLine = currentRoad().getLineList().get(_lineIdx);
+		_roadLineIdx ++;
+		_currRoadLine = currentRoad().getLineList().get(_roadLineIdx);
 	}
 	private void die(){
 		currentRoad().removeVFromRoad(this);

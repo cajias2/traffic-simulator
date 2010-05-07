@@ -28,6 +28,7 @@ import edu.uci.ics.jung.graph.util.Pair;
  * 
  */
 public class Sim1 extends TrafficSim {
+	public static final double NEW_VHCL_RATIO = .10;
 	private final int WIDTH = 800;
 	private final int HEIGHT = 600;
 	private final int FRAME_RATE = 30;
@@ -203,8 +204,8 @@ public class Sim1 extends TrafficSim {
 		PApplet ap = getApplet();
 		// Seg 1
 		points.add(new Point2D.Float(20, ap.random(getHeight() - 20)));
-		points.add(new Point2D.Float(getWidth() - 20, ap.random(20,
-				getHeight() - 20)));
+		points.add(new Point2D.Float(getWidth() - 600, ap.random(20,
+				getHeight() - 600)));
 		points.add(new Point2D.Float(20, ap.random(getHeight() - 20)));
 		return points;
 	}
