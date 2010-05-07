@@ -97,7 +97,14 @@ public class TrafficLightAgent extends DisplayableAgent {
 	public TrafficLightState getState(Orientation or_) {
 		return _stateMap.get(or_).getState();
 	}
-
+	/**
+	 * Returns the the traffic light object
+	 * 
+	 * @return
+	 */
+	public TrafficLight getTf(Orientation or_) {
+		return _stateMap.get(or_);
+	}
 	/**
      * 
      */

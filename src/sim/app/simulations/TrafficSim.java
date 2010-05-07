@@ -48,7 +48,7 @@ public abstract class TrafficSim {
 		for (Road rd : getRoads()) {
 			rd.display();
 		}
-		
+
 		Iterator<Agent> iter = getAgents().iterator();
 		while (iter.hasNext()) {
 			Agent agent = iter.next();
@@ -58,7 +58,7 @@ public abstract class TrafficSim {
 			} else {
 				agent.move();
 				if (agent instanceof DisplayableAgent) {
-					((DisplayableAgent)agent).display();
+					((DisplayableAgent) agent).display();
 				}
 			}
 		}
@@ -81,7 +81,7 @@ public abstract class TrafficSim {
 		Random rand = new Random(System.currentTimeMillis());
 		int targetIndex = rand.nextInt(100);
 		int currentIndex = 0;
-	
+
 		for (StreetXing xing : _sourceXings) {
 			currentIndex += xing.getStartOdds();
 			if (currentIndex >= targetIndex) {
@@ -105,7 +105,7 @@ public abstract class TrafficSim {
 		Random rand = new Random(System.currentTimeMillis());
 		int targetIndex = rand.nextInt(100);
 		int currentIndex = 0;
-	
+
 		for (StreetXing xing : _destXings) {
 			currentIndex += xing.getEndOdds();
 			if (currentIndex >= targetIndex) {
@@ -113,7 +113,7 @@ public abstract class TrafficSim {
 				break;
 			}
 		}
-	
+
 		return pickedXing;
 	}
 
@@ -121,8 +121,15 @@ public abstract class TrafficSim {
 
 	protected abstract PApplet getApplet();
 
+	/**
+	 * Implement a time series to determine wether to create add a new vehicle
+	 * in time T
+	 */
 	protected abstract boolean addVhclP();
 
+	/**
+	 * Create all the geo objs needed to describe the city
+	 */
 	protected abstract void generateCity();
 
 	protected abstract List<Agent> getAgents();
