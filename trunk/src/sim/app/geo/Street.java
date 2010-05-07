@@ -14,7 +14,7 @@ public class Street extends Road {
     private static int _streetCount = 0;
     private static final int TYPE = 1;
     private static final Distance MAX_VELOCITY = new Kilometers(45.0);
-    private static final int MAX_VHCL_PER_SEG = 1;
+    private static final int MAX_VHCL_PER_SEG = 2;
 
 
     /**

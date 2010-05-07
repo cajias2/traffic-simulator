@@ -11,18 +11,20 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import processing.core.PApplet;
+import sim.app.agents.display.lights.TrafficLight;
 import sim.app.agents.display.vehicle.Vehicle;
 import sim.app.geo.distance.Distance;
 import sim.app.geo.distance.Kilometers;
 import sim.app.geo.distance.Meters;
 import sim.app.processing.Displayable;
+import sim.app.utils.TrafficLightState;
 
 /**
  * @author biggie
  * 
  */
 public abstract class Road implements Displayable {
-	private static final Distance LAYER_SEG = new Meters(10);
+	public static final Distance LAYER_SEG = new Meters(10);
 
 	private static PApplet _parent;
 
@@ -37,6 +39,8 @@ public abstract class Road implements Displayable {
 	private List<Vehicle> _vehiclesOnRoad;
 
 	private Distance _geoLength;
+	
+	private TrafficLight _tf;
 
 	/*
 	 * If something is this far way from something else, they are considered to
@@ -143,6 +147,20 @@ public abstract class Road implements Displayable {
 		if (newLoc_ == null)
 			throw new RuntimeException("Intersection should not be null");
 		return newLoc_;
+	}
+
+	/**
+	 * @return the _tf
+	 */
+	public TrafficLightState getTf() {
+		return _tf.getState();
+	}
+
+	/**
+	 * @param tf the _tf to set
+	 */
+	public void setTf(TrafficLight tf) {
+		_tf = tf;
 	}
 
 	/**
@@ -427,6 +445,12 @@ public abstract class Road implements Displayable {
 		return p;
 	}
 
+	/**
+	 * 
+	 * @param l_
+	 * @param pt_
+	 * @return
+	 */
 	public int getSegIdx(Line2D l_, Point2D pt_) {
 		int seg;
 

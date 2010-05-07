@@ -17,6 +17,8 @@ import sim.app.geo.Street;
 import sim.app.geo.StreetXing;
 import sim.app.geo.distance.Distance;
 import sim.app.geo.distance.Kilometers;
+import sim.app.geo.distance.Meters;
+import sim.app.utils.TrafficLightState;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -186,7 +188,7 @@ public abstract class Vehicle extends DisplayableAgent {
 	protected boolean canMove() {
 		boolean canMove = false;
 	
-		if (!atEndOfRoad()) {
+		if (!atLastSeg()) {
 			boolean isSaturated = false;
 			
 			int nextSegIdx = currentRoad().getSegIdx(_currRoadLine, _currLocation)+1;
@@ -194,11 +196,25 @@ public abstract class Vehicle extends DisplayableAgent {
 			{
 				Line2D nextSeg = currentRoad().getSegmentList().get(_roadLineIdx).get(nextSegIdx);
 				isSaturated = currentRoad().isSegSaturated(nextSeg);
-			}	
+			}else if(( _roadLineIdx +1) < currentRoad().getSegmentList().size())
+			{
+				Line2D nextSeg = currentRoad().getSegmentList().get(_roadLineIdx + 1).get(0);
+				isSaturated = currentRoad().isSegSaturated(nextSeg);
+			}
 			
 			canMove = !isSaturated;
 		} else {
-			//TODO look at traffic light
+			if( currentXing().hasTrafficLight())
+			{
+				Point2D tfLoc = currentXing().getLocation();
+				Meters distance = new Meters(getLocation().distance(tfLoc));
+				if(distance.toMeters() <= Road.LAYER_SEG.toMeters());
+				{
+					TrafficLightState tfState = currentRoad().getTf();
+					canMove = TrafficLightState.RED != tfState;
+				}				
+				
+			}
 		}
 		return canMove;
 	}
@@ -309,7 +325,15 @@ public abstract class Vehicle extends DisplayableAgent {
 		Point2D dest = _city.getDest(currentRoad()).getLocation();
 		return (_currLocation.distance(dest) <= Road.DISTANCE_THRESHOLD);
 	}
-
+	/**
+	 * 
+	 * @return true if closer to the destination than the Distance threshold
+	 */
+	private boolean atLastSeg() {
+		Point2D dest = _city.getDest(currentRoad()).getLocation();
+		
+		return (_currLocation.distance(dest) <= Road.LAYER_SEG.toMeters());
+	}
 	/**
 	 * @throws Exception 
 	 * 
