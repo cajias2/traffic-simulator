@@ -5,24 +5,27 @@ package sim.app.geo.distance;
 
 /**
  * @author biggie
- *
+ * 
  */
 public class Kilometers extends Distance {
 
-    public Kilometers(Double x_)
-    {
+    public Kilometers(Double x_) {
 	_lenght = x_;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see sim.app.geo.distance.Distance#toMeters()
      */
     @Override
     public double toMeters() {
-	return _lenght*KILO_M;
+	return _lenght * KILO_M;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see sim.app.geo.distance.Distance#val()
      */
     @Override
