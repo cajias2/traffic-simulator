@@ -23,8 +23,7 @@ public class Car extends Vehicle {
     private final Distance MAX_VELOCITY = new Kilometers(100.0);
     private final Distance SIZE = new Meters(4.0);
 
-    public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_,
-	    Logger log_, PApplet parent_) {
+    public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_, PApplet parent_) {
 	super(trayectory_, city_, log_, parent_);
     }
 
@@ -54,7 +53,7 @@ public class Car extends Vehicle {
 
     @Override
     public void display() {
-	super.display();	
+	super.display();
     }
 
 }

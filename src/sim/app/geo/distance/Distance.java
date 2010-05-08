@@ -27,8 +27,11 @@ public abstract class Distance {
     }
 
     public abstract double getVal();
+
     public abstract void setVal(double x_);
+
     public abstract double toMeters();
+
     public abstract String toString();
 
 }

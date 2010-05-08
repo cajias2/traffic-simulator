@@ -8,13 +8,16 @@ import sim.app.agents.Agent;
 
 /**
  * @author biggie
- *
+ * 
  */
 public abstract class DisplayableAgent extends Agent {
 
-	protected PApplet applet;	
-	/* (non-Javadoc)
-	 * @see sim.app.agents.Agent#display()
-	 */
-	abstract public void display();
+    protected PApplet applet;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sim.app.agents.Agent#display()
+     */
+    abstract public void display();
 }
