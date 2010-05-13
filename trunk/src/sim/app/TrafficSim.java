@@ -20,7 +20,7 @@ import edu.uci.ics.jung.graph.Graph;
 
 public abstract class TrafficSim {
 
-    public static int MAX_CAR_COUNT = 3;
+    public static int MAX_CAR_COUNT = 100;
     protected Graph<StreetXing, Road> _city = new DirectedSparseGraph<StreetXing, Road>();
     protected List<StreetXing> _sourceXings = new LinkedList<StreetXing>();
     protected List<StreetXing> _destXings = new LinkedList<StreetXing>();

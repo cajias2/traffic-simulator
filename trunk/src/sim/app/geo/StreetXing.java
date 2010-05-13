@@ -19,8 +19,8 @@ public class StreetXing {
     private static Logger _log;
     private TrafficLightAgent _trafficLight;
     private static int _xingCount = 0;
-    private static double _startOdds = 0;
-    private static double _endOdds = 0;
+    private double _startOdds = 0;
+    private double _endOdds = 0;
     private Point2D _location;
     private final List<Road> _roads;
 
@@ -112,7 +112,7 @@ public class StreetXing {
      *            the _startOdds to set
      */
     public void setStartOdds(double startOdds_) {
-	StreetXing._startOdds = startOdds_;
+	_startOdds = startOdds_;
     }
 
     /**
@@ -120,7 +120,7 @@ public class StreetXing {
      *            the _endOdds to set
      */
     public void setEndOdds(double endOdds_) {
-	StreetXing._endOdds = endOdds_;
+	_endOdds = endOdds_;
     }
 
     /**
