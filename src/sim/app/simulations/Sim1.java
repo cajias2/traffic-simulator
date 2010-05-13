@@ -6,7 +6,6 @@ package sim.app.simulations;
 import static java.lang.Math.floor;
 import static java.lang.Math.sin;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +30,7 @@ import edu.uci.ics.jung.graph.util.Pair;
  * 
  */
 public class Sim1 extends TrafficSim {
-    public static final double NEW_VHCL_RATIO = .4;
+    public static final double NEW_VHCL_RATIO = .008;
     private final int WIDTH = 800;
     private final int HEIGHT = 600;
     private final int FRAME_RATE = 30;
@@ -66,8 +65,11 @@ public class Sim1 extends TrafficSim {
 	super.update();
 
 	if (addVhclP()) {
-	    Agent agent = generateVehicle();
-	    getAgents().add(agent);
+	    int carsPerStep = carFlow();
+	    for (int i = 0; i < carsPerStep; i++) {
+		Agent agent = generateVehicle();
+		getAgents().add(agent);
+	    }
 	}
     }
 
@@ -96,8 +98,8 @@ public class Sim1 extends TrafficSim {
      * @return
      */
     protected int carFlow() {
-	int carPerStep = (int) (floor(sin(getApplet().frameCount)) * (MAX_CAR_COUNT / 2 + MAX_CAR_COUNT / 2));
-	_log.log(Level.FINE, "Will try to create: " + carPerStep + "cars");
+	int carPerStep = (int) (floor(Math.abs(sin(getApplet().frameCount) * (MAX_CAR_COUNT / 2 ))));
+	_log.log(Level.INFO, "Will try to create: " + carPerStep + "cars");
 	return carPerStep;
 
     }
@@ -132,7 +134,6 @@ public class Sim1 extends TrafficSim {
 	_agentsList.add(light2);
 	endXingEW.setTrafficLight(light2);
 
-	
 	// Create trafic light for intersection
 	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), _log);
 	streetNS.getSubRoad(0).setTf(xingLight.getTf(Orientation.NORTH_SOUTH));
@@ -141,24 +142,24 @@ public class Sim1 extends TrafficSim {
 	intersect.setTrafficLight(xingLight);
 
 	// Set start/end odds for each Xing
-	setSrcXingOdds(startXingNS, 50);
-	setSrcXingOdds(startXingEW, 50);
-	
-//	setDestXingOdds(endXingNS, 50);	
-	setDestXingOdds(endXingEW, 100);
+	setSrcXingOdds(startXingNS, 60);
+	setSrcXingOdds(startXingEW, 40);
+
+	setDestXingOdds(endXingNS, 25);
+	setDestXingOdds(endXingEW, 75);
 
 	// Finally, add the edge
-	 _city.addEdge(streetNS.getSubRoad(0), new Pair<StreetXing>(startXingNS,
-	 intersect));
+	_city.addEdge(streetNS.getSubRoad(0), new Pair<StreetXing>(startXingNS, intersect));
 	_city.addEdge(streetNS.getSubRoad(1), new Pair<StreetXing>(intersect, endXingNS));
-	
+
 	_city.addEdge(streetEW.getSubRoad(0), new Pair<StreetXing>(startXingEW, intersect));
 	_city.addEdge(streetEW.getSubRoad(1), new Pair<StreetXing>(intersect, endXingEW));
 
     }
 
     /**
-     * @param xing_
+     * @param xi
+     *            ng_
      */
     private void setDestXingOdds(StreetXing xing_, int odds_) {
 	_destXings.add(xing_);
@@ -171,9 +172,9 @@ public class Sim1 extends TrafficSim {
     }
 
     private void processRoad(Road rd_, StreetXing intersect) {
-	Road rd1 = new Street(rd_.ID+intersect.getId(), rd_.getSubPointList(rd_.getP1(), intersect.getLocation()),
+	Road rd1 = new Street(rd_.ID + intersect.getId(), rd_.getSubPointList(rd_.getP1(), intersect.getLocation()),
 		_applet, _log);
-	Road rd2 = new Street(intersect.getId()+rd_.ID, rd_.getSubPointList(intersect.getLocation(), rd_.getP2()),
+	Road rd2 = new Street(intersect.getId() + rd_.ID, rd_.getSubPointList(intersect.getLocation(), rd_.getP2()),
 		_applet, _log);
 	List<Road> rdList = new LinkedList<Road>();
 	rdList.add(rd1);
