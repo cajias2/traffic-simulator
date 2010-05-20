@@ -10,8 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import edu.uci.ics.jung.graph.util.Pair;
-
 import processing.core.PApplet;
 import sim.app.agents.display.lights.TrafficLight;
 import sim.app.agents.display.vehicle.Vehicle;
@@ -458,7 +456,7 @@ public abstract class Road implements Displayable {
 	double xD1, yD1, xD2, yD2, xD3, yD3;
 	double dot, deg, len1, len2;
 	double segmentLen1, segmentLen2;
-	double ua, ub, div;
+	double ua, div;
 
 	// calculate differences
 	xD1 = p2.getX() - p1.getX();
@@ -485,7 +483,6 @@ public abstract class Road implements Displayable {
 	Point2D pt = new Point2D.Double();
 	div = yD2 * xD1 - xD2 * yD1;
 	ua = (xD2 * yD3 - yD2 * xD3) / div;
-	ub = (xD1 * yD3 - yD1 * xD3) / div;
 	pt.setLocation(p1.getX() + ua * xD1, p1.getY() + ua * yD1);
 
 	// calculate the combined length of the two segments

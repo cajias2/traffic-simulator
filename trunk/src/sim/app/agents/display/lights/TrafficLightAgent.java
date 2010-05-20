@@ -10,10 +10,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-
-import sim.app.agents.Agent;
 import sim.app.agents.display.DisplayableAgent;
-import sim.app.processing.Displayable;
 import sim.app.utils.Orientation;
 import sim.app.utils.TrafficLightState;
 

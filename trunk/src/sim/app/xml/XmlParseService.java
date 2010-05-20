@@ -3,10 +3,8 @@
  */
 package sim.app.xml;
 
-import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,16 +18,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import processing.core.PApplet;
-
-import sim.app.agents.display.lights.TrafficLightAgent;
 import sim.app.geo.Road;
-import sim.app.geo.Street;
 import sim.app.geo.StreetXing;
 import sim.app.utils.Orientation;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.util.Pair;
 
 /**
  * @author biggie
