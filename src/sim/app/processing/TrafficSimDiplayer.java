@@ -21,7 +21,7 @@ public abstract class TrafficSimDiplayer extends PApplet {
     }
 
     /**
-     * 
+     * Called by PApplet. Draws the simulation.
      */
     public void draw() {
 	background(100);

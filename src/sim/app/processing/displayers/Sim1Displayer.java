@@ -30,7 +30,6 @@ public class Sim1Displayer extends TrafficSimDiplayer {
      */
     @Override
     protected TrafficSim getNewSimulation(final PApplet applet, final Logger log) {
-	// TODO Auto-generated method stub
 	return new Sim1(applet, log);
     }
 

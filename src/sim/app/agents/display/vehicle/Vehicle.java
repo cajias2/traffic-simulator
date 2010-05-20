@@ -7,10 +7,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.sun.tools.javac.resources.compiler;
 
 import processing.core.PApplet;
 import sim.app.agents.display.DisplayableAgent;
@@ -161,19 +158,6 @@ public abstract class Vehicle extends DisplayableAgent {
 	return ID;
     }
 
-    /**
-     * Delete the car from schedule loop.
-     * 
-     * @param state
-     */
-    // public void die ( final SimState state )
-    // {
-    // _log.log( Level.INFO, this + "Dying..." );
-    // _carCount--;
-    //        
-    // if ( toDiePointer != null )
-    // toDiePointer.stop();
-    // }
 
     /**
      * Returns true if car in front is not too close.
@@ -269,20 +253,6 @@ public abstract class Vehicle extends DisplayableAgent {
     }
 
     /**
-     * Delete the car from schedule loop.
-     * 
-     * @param state
-     */
-    // public void die ( final SimState state )
-    // {
-    // _log.log( Level.INFO, this + "Dying..." );
-    // _carCount--;
-    //        
-    // if ( toDiePointer != null )
-    // toDiePointer.stop();
-    // }
-
-    /**
      * @param state_
      * @return
      */
@@ -298,14 +268,6 @@ public abstract class Vehicle extends DisplayableAgent {
 	return _trayectory.getFirst();
     }
 
-    /**
-     * 
-     * @return true if closer to the destination than the Distance threshold
-     */
-    private boolean atEndOfRoad() {
-	Point2D dest = _city.getDest(currentRoad()).getLocation();
-	return (_currLocation.distance(dest) <= Road.DISTANCE_THRESHOLD);
-    }
 
     /**
      * 
@@ -322,7 +284,6 @@ public abstract class Vehicle extends DisplayableAgent {
      * 
      */
     private void moveVehicle() {
-//	if (!atEndOfRoad()) {
 	    Point2D newLoc = currentRoad().getNewLocation(_currLocation, 1);
 	    if (_currLocation != newLoc) {
 		_currLocation = newLoc;
@@ -333,24 +294,12 @@ public abstract class Vehicle extends DisplayableAgent {
 		    if (compA >= compB) {
 			updateRoadSeg();
 		    }
-		}//else if(currentRoad().getSubRoadList().size() > _subRoadIdx)
-//		{
-//		    updateSubRoad();
-//		}
+		}
 		currentRoad().updateVehicle(this);
 
 	    } else if(currentRoad().getLineList().size() > _subRoadIdx){
 		goToNextRoad();
 	    }
-//	} else {
-//	    goToNextRoad();
-//	}
-    }
-
-    private void updateSubRoad() {
-	_subRoadIdx++;
-	_roadLineIdx = 0;
-	_currRoadLine = currentRoad().getSubRoad(_subRoadIdx).getLine(0);
     }
 
     /**
@@ -362,7 +311,6 @@ public abstract class Vehicle extends DisplayableAgent {
     }
 
     private void die() {
-//	currentRoad().removeVFromRoad(this);
 	_isAlive = false;
     }
 }

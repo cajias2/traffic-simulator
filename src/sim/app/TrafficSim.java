@@ -14,7 +14,6 @@ import sim.app.geo.Road;
 import sim.app.geo.StreetXing;
 import sim.app.processing.Displayable;
 import sim.app.xml.XmlParseService;
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 
