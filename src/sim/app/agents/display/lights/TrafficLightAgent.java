@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import apple.laf.CoreUIConstants.State;
+
 import processing.core.PApplet;
 import sim.app.agents.display.DisplayableAgent;
 import sim.app.utils.Orientation;
@@ -22,30 +24,40 @@ public class TrafficLightAgent extends DisplayableAgent {
     private static final long serialVersionUID = 1829654668132095868L;
     private static Logger _log;
     private static int _lightCount = 0;
-    private int _duration;
+    private int[] _durationArr;
     private int _timeLeft;
+    private int _stateIdx;
     private Map<Orientation, TrafficLight> _stateMap;
     private Point2D _location;
 
-    private final String ID;
+    private final int ID;
 
     /**
      * 
+     * @param duration_
+     *            total time
+     * @param split_
+     *            number ranging from 0 - 1
      * @param log_
      */
-    public TrafficLightAgent(PApplet applet, Logger log_) {
+    public TrafficLightAgent(PApplet applet, int duration_, double split_, Logger log_) {
 	super.applet = applet;
+	assert split_ <= 1 && split_ >= 0;
+
 	_log = log_;
-	ID = "Light_" + _lightCount;
+	ID = _lightCount;
 	_lightCount++;
-	_duration = 100;
+	_durationArr = new int[2];
+	_durationArr[0] = (int) (duration_ * split_);
+	_durationArr[1] = (int) (duration_*(1 - split_));
 
 	// Initialize state map
 	_stateMap = new HashMap<Orientation, TrafficLight>(2);
 	_stateMap.put(Orientation.EAST_WEST, new TrafficLight(TrafficLightState.GREEN));
 	_stateMap.put(Orientation.NORTH_SOUTH, new TrafficLight(TrafficLightState.RED));
 
-	this.resetTimer();
+	_stateIdx = 0;
+	this.resetTimer(_stateIdx);
 
     }
 
@@ -58,7 +70,10 @@ public class TrafficLightAgent extends DisplayableAgent {
 	_timeLeft--;
 	if (0 > _timeLeft) {
 	    updateLights();
-	    this.resetTimer();
+	    _stateIdx++;
+	    if (_stateIdx >= _durationArr.length )
+		_stateIdx = 0;
+	    this.resetTimer(_stateIdx);
 	}
 
     }
@@ -103,7 +118,7 @@ public class TrafficLightAgent extends DisplayableAgent {
      * 
      */
     public String toString() {
-	return ID;
+	return "light_" + ID;
     }
 
     public void setLocation(Point2D _location) {
@@ -117,8 +132,8 @@ public class TrafficLightAgent extends DisplayableAgent {
     /**
      * Reset the traffic light timer
      */
-    private void resetTimer() {
-	_timeLeft = _duration;
+    private void resetTimer(int state_) {
+	_timeLeft = _durationArr[state_];
     }
 
     /**

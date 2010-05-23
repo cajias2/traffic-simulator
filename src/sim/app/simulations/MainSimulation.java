@@ -29,12 +29,15 @@ import edu.uci.ics.jung.graph.util.Pair;
  * @author biggie
  * 
  */
-public class Sim1 extends TrafficSim {
+public class MainSimulation extends TrafficSim {
     public static final double NEW_VHCL_RATIO = 1;
     private final int WIDTH = 800;
     private final int HEIGHT = 600;
     private final int FRAME_RATE = 30;
-    private final int SIM_DURATION = 1800;
+    private final int SIM_DURATION;
+    private final Double[] TF_DLAY;
+    private final int TF_DUR;
+    private final String OUT_FOLDER;
     private static String _cityDir = "/../src/xml/OneStreet.xml";
 
     private final PApplet _applet;
@@ -46,8 +49,12 @@ public class Sim1 extends TrafficSim {
 	return _applet;
     }
 
-    public Sim1(PApplet applet_, Logger log_) {
+    public MainSimulation(PApplet applet_,int simDur_,Double[] tfDlay_, int tfDur_, String outFolder_, Logger log_) {
 	_applet = applet_;
+	SIM_DURATION = simDur_;
+	TF_DLAY = tfDlay_;
+	TF_DUR = tfDur_;
+	OUT_FOLDER = outFolder_;
 	_log = log_;
 	_agentsList = new LinkedList<Agent>();
 	generateCity();
@@ -130,18 +137,18 @@ public class Sim1 extends TrafficSim {
 	/*
 	 * Create traffic light and add it to Xing
 	 */
-	TrafficLightAgent light = new TrafficLightAgent(getApplet(), 100, 0.7, _log);
+	TrafficLightAgent light = new TrafficLightAgent(getApplet(), TF_DUR, TF_DLAY[0], _log);
 	streetNS.getSubRoad(1).setTf(light.getTf(Orientation.NORTH_SOUTH));
 	_agentsList.add(light);
 	endXingNS.setTrafficLight(light);
 
-	TrafficLightAgent light2 = new TrafficLightAgent(getApplet(), 100, 0.5, _log);
+	TrafficLightAgent light2 = new TrafficLightAgent(getApplet(), TF_DUR, TF_DLAY[1], _log);
 	streetEW.getSubRoad(1).setTf(light2.getTf(Orientation.NORTH_SOUTH));
 	_agentsList.add(light2);
 	endXingEW.setTrafficLight(light2);
 
 	// Create trafic light for intersection
-	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), 100, 0.5, _log);
+	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), TF_DUR, TF_DLAY[2], _log);
 	streetNS.getSubRoad(0).setTf(xingLight.getTf(Orientation.NORTH_SOUTH));
 	streetEW.getSubRoad(0).setTf(xingLight.getTf(Orientation.EAST_WEST));
 	_agentsList.add(xingLight);
@@ -259,6 +266,6 @@ public class Sim1 extends TrafficSim {
     @Override
     protected String getOutputFolderName() {
 	// TODO Auto-generated method stub
-	return null;
+	return OUT_FOLDER;
     }
 }
