@@ -35,6 +35,7 @@ public class Sim2 extends TrafficSim {
     private final int WIDTH = 800;
     private final int HEIGHT = 600;
     private final int FRAME_RATE = 30;
+    private final int SIM_DURATION = 1800;
     private static String _cityDir = "/../src/xml/OneStreet.xml";
 
     private final PApplet _applet;
@@ -122,19 +123,19 @@ public class Sim2 extends TrafficSim {
 	/*
 	 * Create traffic light and add it to Xing
 	 */
-	TrafficLightAgent light = new TrafficLightAgent(getApplet(), _log);
-	streetNS.getSubRoad(1).setTf(light.getTf(Orientation.NORTH_SOUTH));
-	_agentsList.add(light);
-	endXingNS.setTrafficLight(light);
-
-	TrafficLightAgent light2 = new TrafficLightAgent(getApplet(), _log);
-	streetEW.getSubRoad(1).setTf(light2.getTf(Orientation.NORTH_SOUTH));
-	_agentsList.add(light2);
-	endXingEW.setTrafficLight(light2);
+//	TrafficLightAgent light = new TrafficLightAgent(getApplet(), 100, 0.5, _log);
+//	streetNS.getSubRoad(1).setTf(light.getTf(Orientation.NORTH_SOUTH));
+//	_agentsList.add(light);
+//	endXingNS.setTrafficLight(light);
+//
+//	TrafficLightAgent light2 = new TrafficLightAgent(getApplet(), 100, 0.5, _log);
+//	streetEW.getSubRoad(1).setTf(light2.getTf(Orientation.NORTH_SOUTH));
+//	_agentsList.add(light2);
+//	endXingEW.setTrafficLight(light2);
 
 	
 	// Create trafic light for intersection
-	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), _log);
+	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), 100, 0.5, _log);
 	streetNS.getSubRoad(0).setTf(xingLight.getTf(Orientation.NORTH_SOUTH));
 	streetEW.getSubRoad(0).setTf(xingLight.getTf(Orientation.EAST_WEST));
 	_agentsList.add(xingLight);
@@ -144,8 +145,8 @@ public class Sim2 extends TrafficSim {
 	setSrcXingOdds(startXingNS, 50);
 	setSrcXingOdds(startXingEW, 50);
 	
-//	setDestXingOdds(endXingNS, 50);	
-	setDestXingOdds(endXingEW, 100);
+	setDestXingOdds(endXingNS, 50);	
+	setDestXingOdds(endXingEW, 50);
 
 	// Finally, add the edge
 	 _city.addEdge(streetNS.getSubRoad(0), new Pair<StreetXing>(startXingNS,
@@ -247,5 +248,16 @@ public class Sim2 extends TrafficSim {
 	    points.add(new Point2D.Float(ap.getHeight() - 20, 500));
 	}
 	return points;
+    }
+
+    @Override
+    public int getSimDuration() {
+	return SIM_DURATION;
+    }
+
+    @Override
+    protected String getOutputFolderName() {
+	// TODO Auto-generated method stub
+	return null;
     }
 }
