@@ -95,6 +95,87 @@ public class Car implements Steppable
     }
     
     /**
+     * Delete the car from schedule loop.
+     * 
+     * @param state
+     */
+    public void die ( final SimState state )
+    {
+        _log.log( Level.INFO, this + "Dying..." );
+        _carCount--;
+        
+        if ( toDiePointer != null )
+            toDiePointer.stop();
+    }
+
+    /**
+     * Returns number of cars currently in play
+     * @return
+     */
+    public static int getNumberOfCars ()
+    {
+        return _carCount;
+    }
+
+    /**
+     * Overrite toString to print car id: car_[number in simulation]_[number in
+     * city < MAX_CAR ]
+     */
+    public String toString ()
+    {
+        return ID;
+    }
+
+    /**
+     * Move the car. If at the end of the street, move to the next street in
+     * trayectory. Car start at location 0
+     */
+    protected void move ()
+    {
+        
+        if ( atEndOfStreet() && !_trayectory.isEmpty() )
+        {
+            
+            goToNextStreet();
+        } else
+        {
+            _currLocation++;
+        }
+    }
+
+    /**
+     * Returns true if car in front is not too close.
+     */
+    protected boolean canMove ( CitySimState state_ )
+    {
+        boolean canMove = false;
+        
+        Orientation or = currentStreet().getOrientation();
+        
+        Car prevCar = getPrevCar();
+        
+        if ( !atEndOfStreet() )
+        {
+            // If this is not the first car.
+            if ( null != prevCar )
+            {
+                if ( this._currLocation + 1 < prevCar._currLocation )
+                {
+                    canMove = true;
+                }
+                
+            } else
+            {
+                canMove = true;
+            }
+        } else
+        {
+            canMove = TrafficLightState.RED != currentXing( state_ ).getTrafficLight().getState( or );
+        }
+        return canMove;
+    }
+
+    /**
      * Add this car to the current street it's cruising
      * 
      * @param car
@@ -112,23 +193,6 @@ public class Car implements Steppable
     {
         
         _trayectory.getFirst().carsOnStreet.remove( this );
-    }
-    
-    /**
-     * Move the car. If at the end of the street, move to the next street in
-     * trayectory. Car start at location 0
-     */
-    protected void move ()
-    {
-        
-        if ( atEndOfStreet() && !_trayectory.isEmpty() )
-        {
-            
-            goToNextStreet();
-        } else
-        {
-            _currLocation++;
-        }
     }
     
     /**
@@ -161,61 +225,6 @@ public class Car implements Steppable
 
     
     /**
-     * Delete the car from schedule loop.
-     * 
-     * @param state
-     */
-    public void die ( final SimState state )
-    {
-        _log.log( Level.INFO, this + "Dying..." );
-        _carCount--;
-        
-        if ( toDiePointer != null )
-            toDiePointer.stop();
-    }
-    
-    /**
-     * Returns number of cars currently in play
-     * @return
-     */
-    public static int getNumberOfCars ()
-    {
-        return _carCount;
-    }
-    
-    /**
-     * Returns true if car in front is not too close.
-     */
-    protected boolean canMove ( CitySimState state_ )
-    {
-        boolean canMove = false;
-        
-        Orientation or = currentStreet().getOrientation();
-        
-        Car prevCar = getPrevCar();
-        
-        if ( !atEndOfStreet() )
-        {
-            // If this is not the first car.
-            if ( null != prevCar )
-            {
-                if ( this._currLocation + 1 < prevCar._currLocation )
-                {
-                    canMove = true;
-                }
-                
-            } else
-            {
-                canMove = true;
-            }
-        } else
-        {
-            canMove = TrafficLightState.RED != currentXing( state_ ).getTrafficLight().getState( or );
-        }
-        return canMove;
-    }
-    
-    /**
      * Get the next car in line
      * 
      * @return null if this is the first car
@@ -234,15 +243,6 @@ public class Car implements Steppable
             // ignore
         }
         return nextCar;
-    }
-    
-    /**
-     * Overrite toString to print car id: car_[number in simulation]_[number in
-     * city < MAX_CAR ]
-     */
-    public String toString ()
-    {
-        return ID;
     }
     
     /**
