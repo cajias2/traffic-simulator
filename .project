@@ -3,6 +3,7 @@
 	<name>Traffic</name>
 	<comment></comment>
 	<projects>
+		<project>Mason</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
