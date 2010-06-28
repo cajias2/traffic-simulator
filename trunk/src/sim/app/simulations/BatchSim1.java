@@ -1,9 +1,6 @@
 package sim.app.simulations;
 
-import java.io.File;
-
-import sim.app.TrafficSim;
-import sim.app.processing.displayers.TrafficSimDisplayStarter;
+import sim.app.processing.simulations.displayers.TrafficSimDisplayStarter;
 
 public class BatchSim1 {
 

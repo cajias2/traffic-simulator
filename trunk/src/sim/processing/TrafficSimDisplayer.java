@@ -1,4 +1,4 @@
-package sim.app.processing;
+package sim.processing;
 
 import java.util.logging.Logger;
 
@@ -6,16 +6,19 @@ import processing.core.PApplet;
 import sim.app.TrafficSim;
 
 @SuppressWarnings("serial")
-public abstract class TrafficSimDiplayer extends PApplet {
+public abstract class TrafficSimDisplayer extends PApplet
+{
 
     private static TrafficSim _sim;
-    private Logger _log;
-    private long _duration;
+    private Logger            _log;
+    private long              _duration;
 
     /**
      * Gets called first by PApplet. Creates a new simulation.
      */
-    public void setup() {
+    @Override
+    public void setup()
+    {
 	_duration = System.currentTimeMillis();
 	_log = Logger.getLogger(sketchPath);
 	_log.info("Simulation staterd\n");
@@ -27,18 +30,21 @@ public abstract class TrafficSimDiplayer extends PApplet {
     /**
      * Called by PApplet. Draws the simulation.
      */
-    public void draw() {
+    @Override
+    public void draw()
+    {
 	background(100);
-	if (_sim.getSimDuration() >= this.frameCount) {
+	if (_sim.getSimDuration() >= frameCount)
+	{
 	    _sim.display();
 	    _sim.update();
-	} else {
+	} else
+	{
 	    _sim.end();
 	    _log.info("Simulation ended. Took: " + (System.currentTimeMillis() - _duration) / 1000 + "sec");
-	    this.exit();
+	    exit();
 	}
     }
-    
 
     protected abstract TrafficSim getNewSimulation(PApplet applet_, Logger log);
 }

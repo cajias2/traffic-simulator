@@ -9,25 +9,26 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import apple.laf.CoreUIConstants.State;
-
 import processing.core.PApplet;
+import sim.app.agents.data.TrafficLight;
 import sim.app.agents.display.DisplayableAgent;
 import sim.app.utils.Orientation;
 import sim.app.utils.TrafficLightState;
+import sim.engine.SimState;
+import sim.engine.Steppable;
 
 /**
  * @author biggie
  */
-public class TrafficLightAgent extends DisplayableAgent {
+public class TrafficLightAgent extends DisplayableAgent implements Steppable {
 
     private static final long serialVersionUID = 1829654668132095868L;
     private static Logger _log;
     private static int _lightCount = 0;
-    private int[] _durationArr;
+    private final int[] _durationArr;
     private int _timeLeft;
     private int _stateIdx;
-    private Map<Orientation, TrafficLight> _stateMap;
+    private final Map<Orientation, TrafficLight> _stateMap;
     private Point2D _location;
 
     private final int ID;
@@ -57,7 +58,7 @@ public class TrafficLightAgent extends DisplayableAgent {
 	_stateMap.put(Orientation.NORTH_SOUTH, new TrafficLight(TrafficLightState.RED));
 
 	_stateIdx = 0;
-	this.resetTimer(_stateIdx);
+	resetTimer(_stateIdx);
 
     }
 
@@ -65,6 +66,7 @@ public class TrafficLightAgent extends DisplayableAgent {
      * Count down on the time this light remains on the current state. If the
      * time runs out, the state changes and the timer is resetted
      */
+    @Override
     public void move() {
 	// Reduce time left at each stage
 	_timeLeft--;
@@ -73,7 +75,7 @@ public class TrafficLightAgent extends DisplayableAgent {
 	    _stateIdx++;
 	    if (_stateIdx >= _durationArr.length )
 		_stateIdx = 0;
-	    this.resetTimer(_stateIdx);
+	    resetTimer(_stateIdx);
 	}
 
     }
@@ -117,6 +119,7 @@ public class TrafficLightAgent extends DisplayableAgent {
     /**
      * 
      */
+    @Override
     public String toString() {
 	return "light_" + ID;
     }
@@ -149,5 +152,15 @@ public class TrafficLightAgent extends DisplayableAgent {
 		entry.getValue().setState(TrafficLightState.GREEN);
 	    }
 	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sim.engine.Steppable#step(sim.engine.SimState)
+     */
+    public void step(SimState state_) {
+	move();
+
     }
 }

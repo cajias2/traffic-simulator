@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.geo;
+package sim.app.road;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import processing.core.PApplet;
-import sim.app.agents.display.lights.TrafficLight;
+import sim.app.agents.data.TrafficLight;
 import sim.app.agents.display.vehicle.Vehicle;
-import sim.app.geo.distance.Distance;
-import sim.app.geo.distance.Kilometers;
-import sim.app.geo.distance.Meters;
-import sim.app.processing.Displayable;
+import sim.app.road.distance.Distance;
+import sim.app.road.distance.Kilometers;
+import sim.app.road.distance.Meters;
 import sim.app.utils.TrafficLightState;
+import sim.processing.Displayable;
 
 /**
  * @author biggie
@@ -38,7 +38,7 @@ public abstract class Road implements Displayable {
     
     private List<Road> _subRoads;
 
-    private List<Vehicle> _vehiclesOnRoad;
+    private final List<Vehicle> _vehiclesOnRoad;
 
     private Distance _geoLength;
 
@@ -285,6 +285,7 @@ public abstract class Road implements Displayable {
     /**
      * Class toString
      */
+    @Override
     public String toString() {
 	return ID + "__" + _vehiclesOnRoad.size();
     }
@@ -318,7 +319,7 @@ public abstract class Road implements Displayable {
 	Point2D intersectPoint = null;
 	for (Line2D bLine : b_.getLineList()) {
 	    
-	    for (Line2D thisLine : this.getLineList()) {
+	    for (Line2D thisLine : getLineList()) {
 		if (thisLine.intersectsLine(bLine)) {
 		    intersectPoint = findIntersection(thisLine.getP1(), thisLine.getP2(), bLine.getP1(), bLine.getP2());
 		}

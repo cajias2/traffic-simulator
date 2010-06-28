@@ -1,6 +1,5 @@
-package sim.app.processing.displayers;
+package sim.app.processing.simulations.displayers;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
@@ -33,6 +32,7 @@ public class TrafficSimDisplayStarter extends PApplet {
     /**
      * Gets called first by PApplet. Creates a new simulation.
      */
+    @Override
     public void setup() {
 	_totalTime = System.currentTimeMillis();
 	_log = Logger.getLogger(sketchPath);
@@ -45,15 +45,16 @@ public class TrafficSimDisplayStarter extends PApplet {
     /**
      * Called by PApplet. Draws the simulation.
      */
+    @Override
     public void draw() {
 	background(100);
-	if (_sim.getSimDuration() >= this.frameCount) {
+	if (_sim.getSimDuration() >= frameCount) {
 	    _sim.display();
 	    _sim.update();
 	} else {
 	    _sim.end();
 	    _log.info("Simulation ended. Took: " + (System.currentTimeMillis() - _totalTime) / 1000 + "sec");
-	    this.exit();
+	    exit();
 	}
     }
 

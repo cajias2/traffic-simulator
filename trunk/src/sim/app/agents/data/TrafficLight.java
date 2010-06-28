@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.agents.display.lights;
+package sim.app.agents.data;
 
 import sim.app.utils.TrafficLightState;
 

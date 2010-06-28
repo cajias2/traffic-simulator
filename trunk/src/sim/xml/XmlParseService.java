@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.xml;
+package sim.xml;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,8 +18,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import sim.app.geo.Road;
-import sim.app.geo.StreetXing;
+import sim.app.road.Road;
+import sim.app.road.StreetXing;
 import sim.app.utils.Orientation;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -50,10 +50,10 @@ public class XmlParseService {
     final static String TWO_WAY = "2way";
 
     private static Logger _logger;
-    private String _fileName;
-    private Graph<StreetXing, Road> _g = new DirectedSparseGraph<StreetXing, Road>();
-    private List<StreetXing> _sourceXings = new LinkedList<StreetXing>();
-    private List<StreetXing> _destXings = new LinkedList<StreetXing>();
+    private final String _fileName;
+    private final Graph<StreetXing, Road> _g = new DirectedSparseGraph<StreetXing, Road>();
+    private final List<StreetXing> _sourceXings = new LinkedList<StreetXing>();
+    private final List<StreetXing> _destXings = new LinkedList<StreetXing>();
     private int _maxCarsInSim;
 
     /**

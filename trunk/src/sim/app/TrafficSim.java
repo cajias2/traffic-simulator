@@ -16,10 +16,10 @@ import processing.core.PApplet;
 import sim.app.agents.Agent;
 import sim.app.agents.display.DisplayableAgent;
 import sim.app.agents.display.vehicle.Vehicle;
-import sim.app.geo.Road;
-import sim.app.geo.StreetXing;
-import sim.app.processing.Displayable;
-import sim.app.xml.XmlParseService;
+import sim.app.road.Road;
+import sim.app.road.StreetXing;
+import sim.processing.Displayable;
+import sim.xml.XmlParseService;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -97,7 +97,6 @@ public abstract class TrafficSim {
     }
     /**
      * @param v
-     * @param trayectory
      */
     private void logAgentTime(Vehicle v) {
 	    File folder = new File(getOutputFolderName());
