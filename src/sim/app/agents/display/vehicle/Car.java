@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.app.geo.Road;
-import sim.app.geo.StreetXing;
-import sim.app.geo.distance.Distance;
-import sim.app.geo.distance.Kilometers;
-import sim.app.geo.distance.Meters;
+import sim.app.road.Road;
+import sim.app.road.StreetXing;
+import sim.app.road.distance.Distance;
+import sim.app.road.distance.Kilometers;
+import sim.app.road.distance.Meters;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -27,8 +27,12 @@ public class Car extends Vehicle {
 	super(trayectory_, city_, log_, parent_);
     }
 
+    public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_) {
+	super(trayectory_, city_, log_);
+    }
+
     /**
-     * Given in K. Assumed to be K/s
+     * Given in K. Assumed to be K/h
      */
     @Override
     public Distance getMaxVelocity() {

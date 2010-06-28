@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.geo.distance;
+package sim.app.road.distance;
 
 /**
  * @author biggie

@@ -1,20 +1,14 @@
-/**
- * 
- */
-package sim.app.processing.displayers;
+package sim.app.processing.simulations.displayers;
 
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
 import sim.app.TrafficSim;
-import sim.app.processing.TrafficSimDiplayer;
-import sim.app.simulations.Sim1;
+import sim.app.simulations.Sim2;
+import sim.processing.TrafficSimDisplayer;
 
-/**
- * @author biggie
- * 
- */
-public class Sim1Displayer extends TrafficSimDiplayer {
+public class Sim2Displayer extends TrafficSimDisplayer
+{
 
     /**
      * 
@@ -29,8 +23,9 @@ public class Sim1Displayer extends TrafficSimDiplayer {
      * .PApplet, java.util.logging.Logger)
      */
     @Override
-    protected TrafficSim getNewSimulation(final PApplet applet, final Logger log) {
-	return new Sim1(applet, log);
+    protected TrafficSim getNewSimulation(final PApplet applet, final Logger log)
+    {
+	return new Sim2(applet, log);
     }
 
 }
