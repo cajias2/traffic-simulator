@@ -58,7 +58,7 @@ public abstract class Road implements Displayable {
     abstract protected int getMaxVhclSeg();
 
     /**
-     * Constructor
+     * Constructor, Processing
      */
     public Road(String id_, List<Point2D> pointList_, PApplet parent_) {
 	if (_parent == null) {
@@ -70,6 +70,15 @@ public abstract class Road implements Displayable {
 	createRoad(pointList_);
 //	processRoadSegments();
     }
+
+    /**
+     * Constructor, Mason
+     */
+    public Road(String id_, List<Point2D> pointList_)
+    {
+	this(id_, pointList_, null);
+    }
+
     /**
      * 
      * @param intersecList_
