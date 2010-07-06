@@ -34,6 +34,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
     private final int ID;
 
     /**
+     * Constructor, Processing
      * 
      * @param duration_
      *            total time
@@ -63,11 +64,27 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
     }
 
     /**
+     * Constructor, Mason
+     * 
+     * @param duration_
+     *            total time
+     * @param split_
+     *            number ranging from 0 - 1
+     * @param log_
+     */
+    public TrafficLightAgent(int duration_, double split_,
+	    Logger log_)
+    {
+	this(null, duration_, split_, log_);
+    }
+
+    /**
      * Count down on the time this light remains on the current state. If the
      * time runs out, the state changes and the timer is resetted
      */
     @Override
-    public void move() {
+    public void move(SimState state_)
+    {
 	// Reduce time left at each stage
 	_timeLeft--;
 	if (0 > _timeLeft) {
@@ -160,7 +177,9 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
      * @see sim.engine.Steppable#step(sim.engine.SimState)
      */
     public void step(SimState state_) {
-	move();
+	move(state_);
 
     }
+
+
 }

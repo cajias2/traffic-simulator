@@ -79,7 +79,7 @@ public abstract class TrafficSim {
 		logAgentTime(v);
 		iter.remove();
 	    } else {
-		agent.move();
+		agent.move(null);
 	    }
 	}
     }

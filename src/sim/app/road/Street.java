@@ -18,7 +18,7 @@ public class Street extends Road {
     private static final int MAX_VHCL_PER_SEG = 5;
 
     /**
-     * Class constructor
+     * Class constructor, Processing.
      * 
      * @author biggie
      */
@@ -28,6 +28,17 @@ public class Street extends Road {
 	_streetCount++;
     }
 
+    /**
+     * Class constructor, Mason
+     * 
+     * @author biggie
+     */
+    public Street(String id_, List<Point2D> pointList_, Logger log_)
+    {
+	this(id_, pointList_, null, log_);
+    }
+
+    @Override
     public Distance getMaxVelocity() {
 	return MAX_VELOCITY;
     }

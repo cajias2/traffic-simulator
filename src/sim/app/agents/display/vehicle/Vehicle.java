@@ -141,7 +141,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
      * @throws Exception
      */
     @Override
-    public void move()
+    public void move(SimState state_)
     {
 
 	if (!_trayectoryList.isEmpty())
@@ -159,7 +159,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
 	    _time++;
 	} else
 	{
-	    die();
+	    die(state_);
 	}
     }
 
@@ -169,8 +169,13 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
      * @see sim.engine.Steppable#step(sim.engine.SimState)
      */
     public void step(SimState state_) {
-	move();
+	move(state_);
     }
+
+    /**
+     * 
+     * @author biggie
+     */
     public boolean isAlive()
     {
 	return _isAlive;
@@ -209,19 +214,6 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
 	return ID;
     }
 
-    /**
-     * Delete the car from schedule loop.
-     * 
-     * @param state
-     */
-    // public void die ( final SimState state )
-    // {
-    // _log.log( Level.INFO, this + "Dying..." );
-    // _carCount--;
-    //
-    // if ( toDiePointer != null )
-    // toDiePointer.stop();
-    // }
 
     /**
      * Returns true if car in front is not too close.
@@ -307,6 +299,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
     {
 	long currentTime = System.currentTimeMillis();
 	_travelTime = currentTime - _initialTime;
+	System.out.println(this + " Finished at: " + _travelTime / 1000);
     }
 
     /**
@@ -355,19 +348,6 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
      * }
      */
 
-    /**
-     * Delete the car from schedule loop.
-     * 
-     * @param state
-     */
-    // public void die ( final SimState state )
-    // {
-    // _log.log( Level.INFO, this + "Dying..." );
-    // _carCount--;
-    //
-    // if ( toDiePointer != null )
-    // toDiePointer.stop();
-    // }
 
     /**
      * @param state_
