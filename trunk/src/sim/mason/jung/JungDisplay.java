@@ -62,30 +62,30 @@ import edu.uci.ics.jung.visualization.renderers.Renderer;
 
 public class JungDisplay extends JComponent implements Steppable {
 
-    public static final ImageIcon CAMERA_ICON      = iconFor("Camera.png");
-    public static final ImageIcon CAMERA_ICON_P    = iconFor("CameraPressed.png");
+    public static final ImageIcon CAMERA_ICON = iconFor("Camera.png");
+    public static final ImageIcon CAMERA_ICON_P = iconFor("CameraPressed.png");
     /* Set to true if we're running on a Mac */
-    public static final boolean   isMacOSX	 = isMacOSX();
+    public static final boolean isMacOSX = isMacOSX();
     /* Set to true if we're running on Windows */
-    public static final boolean   isWindows	= isWindows();
+    public static final boolean isWindows = isWindows();
 
-    private static final long     serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-    private final Box	     header;
-    private final GUIState	simulation;
-    private final JDialog	 dialog;
+    private final Box header;
+    private final GUIState simulation;
+    private final JDialog dialog;
 
-    public AbstractLayout	 layout;
-    public VisualizationViewer    viewer;
-    public JFrame		 frame;
+    public AbstractLayout layout;
+    public VisualizationViewer viewer;
+    public JFrame frame;
     /* Variable which will keep track of time of next update */
-    public double		 nextUpdate       = 0;
-    public double		 updateInterval   = 2;
+    public double nextUpdate = 0;
+    public double updateInterval = 2;
 
-    private Stoppable	     stopper;
+    private Stoppable stopper;
 
     /* The button which snaps a screenshot */
-    private final JButton	 snapshotButton;
+    private final JButton snapshotButton;
 
     /**
      * 
@@ -102,20 +102,16 @@ public class JungDisplay extends JComponent implements Steppable {
 	if ((currentTime > nextUpdate)) {
 
 	    if (frame.isShowing()) {
-
 		layout.reset();
-
 		viewer.repaint();
 	    }
 
 	    // Compute nextUpdate time.
-
 	    nextUpdate = currentTime + updateInterval;
 	}
     }
 
     /**
-     * 
      * @author biggie
      */
     public void takeSnapshot() {
@@ -157,7 +153,6 @@ public class JungDisplay extends JComponent implements Steppable {
     }
 
     /**
-     * 
      * @author biggie JungDisplay
      */
     public JungDisplay(GUIState simulation) {
@@ -180,7 +175,7 @@ public class JungDisplay extends JComponent implements Steppable {
 	viewer = new VisualizationViewer(layout, new Dimension(600, 600));
 	viewer.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>());
 	viewer.getRenderContext().setVertexFillPaintTransformer(
-		new PickableVertexPaintTransformer<String>(viewer.getPickedVertexState(), Color.red, Color.red));
+		new PickableVertexPaintTransformer<String>(viewer.getPickedVertexState(), Color.red, Color.green));
 
 	viewer.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>());
 	viewer.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.AUTO);

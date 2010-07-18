@@ -41,10 +41,11 @@ public class MainSimulation extends TrafficSim {
     private static String _cityDir = "/../src/xml/OneStreet.xml";
 
     private final PApplet _applet;
-    private LinkedList<Road> _roads;
+    private final LinkedList<Road> _roads;
     private final Logger _log;
-    private List<Agent> _agentsList;
+    private final List<Agent> _agentsList;
 
+    @Override
     public PApplet getApplet() {
 	return _applet;
     }
@@ -138,21 +139,21 @@ public class MainSimulation extends TrafficSim {
 	 * Create traffic light and add it to Xing
 	 */
 	TrafficLightAgent light = new TrafficLightAgent(getApplet(), TF_DUR, TF_DLAY[0], _log);
-	streetNS.getSubRoad(1).setTf(light.getTf(Orientation.NORTH_SOUTH));
+	streetNS.getSubRoad(1).setTL(light.getTf(Orientation.NS));
 	_agentsList.add(light);
-	endXingNS.setTrafficLight(light);
+	// endXingNS.setTrafficLight(light);
 
 	TrafficLightAgent light2 = new TrafficLightAgent(getApplet(), TF_DUR, TF_DLAY[1], _log);
-	streetEW.getSubRoad(1).setTf(light2.getTf(Orientation.NORTH_SOUTH));
+	streetEW.getSubRoad(1).setTL(light2.getTf(Orientation.NS));
 	_agentsList.add(light2);
-	endXingEW.setTrafficLight(light2);
+	// endXingEW.setTrafficLight(light2);
 
 	// Create trafic light for intersection
 	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), TF_DUR, TF_DLAY[2], _log);
-	streetNS.getSubRoad(0).setTf(xingLight.getTf(Orientation.NORTH_SOUTH));
-	streetEW.getSubRoad(0).setTf(xingLight.getTf(Orientation.EAST_WEST));
+	streetNS.getSubRoad(0).setTL(xingLight.getTf(Orientation.NS));
+	streetEW.getSubRoad(0).setTL(xingLight.getTf(Orientation.EW));
 	_agentsList.add(xingLight);
-	intersect.setTrafficLight(xingLight);
+	// intersect.setTrafficLight(xingLight);
 
 	// Set start/end odds for each Xing
 	setSrcXingOdds(startXingNS, 60);

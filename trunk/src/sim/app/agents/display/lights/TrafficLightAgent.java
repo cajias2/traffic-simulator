@@ -55,8 +55,8 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
 
 	// Initialize state map
 	_stateMap = new HashMap<Orientation, TrafficLight>(2);
-	_stateMap.put(Orientation.EAST_WEST, new TrafficLight(TrafficLightState.GREEN));
-	_stateMap.put(Orientation.NORTH_SOUTH, new TrafficLight(TrafficLightState.RED));
+	_stateMap.put(Orientation.EW, new TrafficLight(TrafficLightState.GREEN));
+	_stateMap.put(Orientation.NS, new TrafficLight(TrafficLightState.RED));
 
 	_stateIdx = 0;
 	resetTimer(_stateIdx);
@@ -104,7 +104,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
     public void display() {
 	if (null != _location) {
 	    applet.smooth();
-	    if (TrafficLightState.RED == _stateMap.get(Orientation.NORTH_SOUTH).getState()) {
+	    if (TrafficLightState.RED == _stateMap.get(Orientation.NS).getState()) {
 		applet.fill(255, 0, 0);
 	    } else {
 		applet.fill(0, 255, 0);
@@ -161,6 +161,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
      * list Also resets the time left time, by copying over the duration value.
      */
     private void updateLights() {
+	System.out.println(this + "Updating");
 	// Cicle through the state list
 	for (Entry<Orientation, TrafficLight> entry : _stateMap.entrySet()) {
 	    if (TrafficLightState.GREEN == entry.getValue().getState()) {
