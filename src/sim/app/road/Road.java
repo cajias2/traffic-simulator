@@ -16,33 +16,26 @@ import sim.app.agents.display.vehicle.Vehicle;
 import sim.app.road.distance.Distance;
 import sim.app.road.distance.Kilometers;
 import sim.app.road.distance.Meters;
+import sim.app.utils.Orientation;
 import sim.app.utils.TrafficLightState;
 import sim.processing.Displayable;
 
 /**
  * @author biggie
- * 
  */
 public abstract class Road implements Displayable {
     public static final Distance LAYER_SEG = new Meters(10);
 
     private static PApplet _parent;
-
     private List<Line2D> _lineList;
-
     private double _realLength = 0;
-
     private LinkedList<List<Line2D>> _segmentList;
-
     private HashMap<Line2D, List<Vehicle>> _vehicleOnSeg;
-    
     private List<Road> _subRoads;
-
     private final List<Vehicle> _vehiclesOnRoad;
-
     private Distance _geoLength;
-
     private TrafficLight _tf;
+    private Orientation _or;
 
     /*
      * If something is this far way from something else, they are considered to
@@ -51,7 +44,7 @@ public abstract class Road implements Displayable {
     public static final double DISTANCE_THRESHOLD = 0.001;
 
     public final String ID;
-    private int _roadCount = 0;
+    private static int _roadCount = 0;
 
     protected abstract int getStrokeWeight();
 
@@ -64,39 +57,37 @@ public abstract class Road implements Displayable {
 	if (_parent == null) {
 	    _parent = parent_;
 	}
-	ID = id_+"+"+_roadCount;
+	ID = id_;
 	_roadCount++;
 	_vehiclesOnRoad = new LinkedList<Vehicle>();
 	createRoad(pointList_);
-//	processRoadSegments();
     }
 
     /**
      * Constructor, Mason
      */
-    public Road(String id_, List<Point2D> pointList_)
-    {
+    public Road(String id_, List<Point2D> pointList_) {
 	this(id_, pointList_, null);
     }
 
     /**
-     * 
      * @param intersecList_
      */
-    public void setSubRoad(List<Road> rdList_)
-    {
+    public void setSubRoad(List<Road> rdList_) {
 	_subRoads = rdList_;
     }
-    
-    public Road getSubRoad(int idx_)
-    {
+
+    public Road getSubRoad(int idx_) {
 	return _subRoads.get(idx_);
     }
-    public List<Road> getSubRoadList(){
+
+    public List<Road> getSubRoadList() {
 	return _subRoads;
     }
+
     /**
      * Get a list of the lines that make up this road
+     * 
      * @return
      */
     public List<Line2D> getLineList() {
@@ -108,6 +99,14 @@ public abstract class Road implements Displayable {
      */
     public LinkedList<List<Line2D>> getSegmentList() {
 	return _segmentList;
+    }
+
+    public Orientation getOr() {
+	return _or;
+    }
+
+    public void setOr(Orientation or_) {
+	_or = or_;
     }
 
     public abstract Distance getMaxVelocity();
@@ -157,7 +156,7 @@ public abstract class Road implements Displayable {
 	double runLen = Math.abs(Math.cos(slopeDeg) * len_);
 
 	Point2D secP1 = new Point2D.Double(curLoc_.getX() + dir[0] * runLen, curLoc_.getY());
-	Point2D secP2 = new Point2D.Double(secP1.getX(), secP1.getY() + 10*dir[1]);
+	Point2D secP2 = new Point2D.Double(secP1.getX(), secP1.getY() + 10 * dir[1]);
 	Line2D secant = new Line2D.Double(secP1, secP2);
 	newLoc_ = findIntersection(l_.getP1(), l_.getP2(), secant.getP1(), secant.getP2());
 
@@ -181,14 +180,20 @@ public abstract class Road implements Displayable {
      * @return the _tf
      */
     public TrafficLightState getTf() {
-	return _tf.getState();
+	if(_tf != null)
+	{
+	    return _tf.getState(); 
+	}
+	return null;
+	
+	
     }
 
     /**
      * @param tf
      *            the _tf to set
      */
-    public void setTf(TrafficLight tf) {
+    public void setTL(TrafficLight tf) {
 	_tf = tf;
     }
 
@@ -203,18 +208,17 @@ public abstract class Road implements Displayable {
 	 * Display the road by going though each line in the list that comprises
 	 * it and displaying it individually.
 	 */
-	if(null == _subRoads || _subRoads.isEmpty()){
-	for (Line2D currSeg : _lineList) {
-	    _parent.stroke(0);
-	    _parent.strokeWeight(getStrokeWeight());
-	    _parent.line((float) currSeg.getP1().getX(), (float) currSeg.getP1().getY(),
-		    (float) currSeg.getP2().getX(), (float) currSeg.getP2().getY());
-	}
-	}else{
-	   for(Road subR: _subRoads)
-	   {
-	       subR.display();
-	   }
+	if (null == _subRoads || _subRoads.isEmpty()) {
+	    for (Line2D currSeg : _lineList) {
+		_parent.stroke(0);
+		_parent.strokeWeight(getStrokeWeight());
+		_parent.line((float) currSeg.getP1().getX(), (float) currSeg.getP1().getY(), (float) currSeg.getP2()
+			.getX(), (float) currSeg.getP2().getY());
+	    }
+	} else {
+	    for (Road subR : _subRoads) {
+		subR.display();
+	    }
 	}
 	for (Entry<Line2D, List<Vehicle>> e : _vehicleOnSeg.entrySet()) {
 
@@ -239,7 +243,6 @@ public abstract class Road implements Displayable {
     }
 
     /**
-     * 
      * @param v_
      * @throws Exception
      */
@@ -296,7 +299,7 @@ public abstract class Road implements Displayable {
      */
     @Override
     public String toString() {
-	return ID + "__" + _vehiclesOnRoad.size();
+	return ID + "_v" + _vehiclesOnRoad.size();
     }
 
     /**
@@ -327,7 +330,7 @@ public abstract class Road implements Displayable {
     public Point2D findIntersection(Road b_) {
 	Point2D intersectPoint = null;
 	for (Line2D bLine : b_.getLineList()) {
-	    
+
 	    for (Line2D thisLine : getLineList()) {
 		if (thisLine.intersectsLine(bLine)) {
 		    intersectPoint = findIntersection(thisLine.getP1(), thisLine.getP2(), bLine.getP1(), bLine.getP2());
@@ -352,20 +355,18 @@ public abstract class Road implements Displayable {
      * Create a a list of line segments for disaq1play
      */
     public void processRoadSegments() {
-	if(null != _subRoads && !_subRoads.isEmpty())
-	{
-	    for(Road subR : _subRoads)
-	    {
+	if (null != _subRoads && !_subRoads.isEmpty()) {
+	    for (Road subR : _subRoads) {
 		subR.processRoadSegments();
 	    }
-	}else{
-	_segmentList = new LinkedList<List<Line2D>>();
-	_vehicleOnSeg = new HashMap<Line2D, List<Vehicle>>();
-	for (Line2D currLine : _lineList) {
-	    // Divide the line into segments and store them in a map
-	    _segmentList.add(new LinkedList<Line2D>());
-	    findRoadSegment(currLine);
-	}
+	} else {
+	    _segmentList = new LinkedList<List<Line2D>>();
+	    _vehicleOnSeg = new HashMap<Line2D, List<Vehicle>>();
+	    for (Line2D currLine : _lineList) {
+		// Divide the line into segments and store them in a map
+		_segmentList.add(new LinkedList<Line2D>());
+		findRoadSegment(currLine);
+	    }
 	}
     }
 
@@ -400,6 +401,12 @@ public abstract class Road implements Displayable {
 	}
     }
 
+    /**
+     * Return the line segment to which this point belongs to.
+     * 
+     * @param curLoc
+     * @return
+     */
     private Line2D getLine(Point2D curLoc) {
 	Line2D currLine = null;
 
@@ -436,7 +443,6 @@ public abstract class Road implements Displayable {
     }
 
     /**
-     * 
      * @param l_
      * @param pt_
      * @return
@@ -446,6 +452,10 @@ public abstract class Road implements Displayable {
 
 	if (l_.ptLineDist(pt_) <= DISTANCE_THRESHOLD) {
 	    seg = (int) (l_.getP1().distance(pt_) / LAYER_SEG.getVal());
+	    // Hack in cases that the point is right on the border
+	    if (pt_.getX() == l_.getX2() && pt_.getY() == l_.getY2()) {
+		seg--;
+	    }
 	} else
 	    throw new RuntimeException("Point not in line");
 
@@ -518,50 +528,67 @@ public abstract class Road implements Displayable {
 	// if the point isn't on the line, return null
 	int compare1 = Double.compare(Math.abs(len1 - segmentLen1), DISTANCE_THRESHOLD);
 	int compare2 = Double.compare(Math.abs(len2 - segmentLen2), DISTANCE_THRESHOLD);
-	if (compare1 > 0 ||compare2 > 0)
+	if (compare1 > 0 || compare2 > 0)
 	    return null;
 
 	// return the valid intersection
 	return pt;
     }
-    
-    public List<Point2D> getSubPointList(Point2D p1_, Point2D p2_)
-    {
+
+    /**
+     * Return the list of points that make up a Road, from {@code p1_} to
+     * {@code p2_} This can be used to draw a subsection of a road accurately.
+     * 
+     * @param p1_
+     *            Begining of section
+     * @param p2_
+     *            End of section
+     * @return Point list.
+     */
+    public List<Point2D> getSubPointList(Point2D p1_, Point2D p2_) {
 	Line2D l1 = getLine(p1_);
 	Line2D l2 = getLine(p2_);
-	
+
 	List<Point2D> subList = new LinkedList<Point2D>();
 	int dist1 = Double.compare(DISTANCE_THRESHOLD, l1.getP1().distance(l2.getP1()));
-	int dist2 = Double.compare(DISTANCE_THRESHOLD, l1.getP2().distance(l2.getP2()));	
-	if(1==dist1 && 1 == dist2)
-	{
+	int dist2 = Double.compare(DISTANCE_THRESHOLD, l1.getP2().distance(l2.getP2()));
+	if (1 == dist1 && 1 == dist2) {
 	    subList.add(p1_);
 	    subList.add(p2_);
-	}else{
+	} else {
 	    subList.add(p1_);
-	    for(Line2D cl: getLineList())
-	    {
-		if(cl.equals(l2))
-		{
-//		    Line2D lastLine = new Line2D.Double(cl.getP1(), p2_);
+	    for (Line2D cl : getLineList()) {
+		if (cl.equals(l2)) {
+		    // Line2D lastLine = new Line2D.Double(cl.getP1(), p2_);
 		    subList.add(p2_);
 		    break;
 		}
 		subList.add(cl.getP2());
-	    }	    
+	    }
 	}
-	return subList;	
-    }
-    
-    public Point2D getP1()
-    {
-	return _lineList.get(0).getP1();
-    }
-    public Point2D getP2()
-    {
-	return _lineList.get(_lineList.size()-1).getP2();
+	return subList;
     }
 
+    /**
+     * @return The coordinates of the road origin.
+     */
+    public Point2D getP1() {
+	return _lineList.get(0).getP1();
+    }
+
+    /**
+     * @return The coordibates of the road end.
+     */
+    public Point2D getP2() {
+	return _lineList.get(_lineList.size() - 1).getP2();
+    }
+
+    /**
+     * Get the ith line segment of the Road.
+     * 
+     * @param i
+     * @return Line segment.
+     */
     public Line2D getLine(int i) {
 	// TODO Auto-generated method stub
 	return _lineList.get(i);

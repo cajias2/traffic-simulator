@@ -6,7 +6,6 @@ package sim.app.simulations;
 import static java.lang.Math.floor;
 import static java.lang.Math.sin;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,10 +38,11 @@ public class Sim2 extends TrafficSim {
     private static String _cityDir = "/../src/xml/OneStreet.xml";
 
     private final PApplet _applet;
-    private LinkedList<Road> _roads;
+    private final LinkedList<Road> _roads;
     private final Logger _log;
-    private List<Agent> _agentsList;
+    private final List<Agent> _agentsList;
 
+    @Override
     public PApplet getApplet() {
 	return _applet;
     }
@@ -136,10 +136,10 @@ public class Sim2 extends TrafficSim {
 	
 	// Create trafic light for intersection
 	TrafficLightAgent xingLight = new TrafficLightAgent(getApplet(), 100, 0.5, _log);
-	streetNS.getSubRoad(0).setTf(xingLight.getTf(Orientation.NORTH_SOUTH));
-	streetEW.getSubRoad(0).setTf(xingLight.getTf(Orientation.EAST_WEST));
+	streetNS.getSubRoad(0).setTL(xingLight.getTf(Orientation.NS));
+	streetEW.getSubRoad(0).setTL(xingLight.getTf(Orientation.EW));
 	_agentsList.add(xingLight);
-	intersect.setTrafficLight(xingLight);
+	// intersect.setTrafficLight(xingLight);
 
 	// Set start/end odds for each Xing
 	setSrcXingOdds(startXingNS, 50);

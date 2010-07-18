@@ -8,6 +8,5 @@ package sim.app.utils;
  * 
  */
 public enum Orientation {
-    NORTH_SOUTH, EAST_WEST;
-
+    NS, EW;
 }

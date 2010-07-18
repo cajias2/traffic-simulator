@@ -31,17 +31,12 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
 
     public Stoppable		       toDiePointer  = null;
     private static int                     _vhclCount    = 0;
-    private static int                     _idToken      = 0; // ID token
-	                                                       // always grows==
-	                                                       // ensure id
-    // uniqueness.
+    private static int _idToken = 0; // always grows to ensure id uniqueness.
     private static Logger                  _log;
     private static Graph<StreetXing, Road> _city;
 
     private final String                   ID;
-    private Point2D                        _currLocation;     // How close to
-	                                                       // next
-	                                                       // intersection
+    private Point2D _currLocation; // How close to next intersection
     private Line2D                         _currRoadLine;
     private final Distance                 _currSpeed;
     private long                           _time;
@@ -52,8 +47,121 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
 
     // ANTONIO
     private String                         _trayectoryID = "";
-    private final long                     _initialTime;
-    private long                           _travelTime   = 0;
+    private final long _initialTime;
+    private long _travelTime = 0;
+    private long _masonSteps = 0;
+
+    /**
+     * Class constructor.
+     * 
+     * @param trayectory_
+     */
+    public Vehicle(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_, PApplet parent_)
+    {
+        super.applet = parent_;
+        _isAlive = true;
+        ID = "Car_" + _idToken + "_" + _vhclCount;
+        _city = city_;
+        _vhclCount++;
+        _idToken++;
+        _trayectoryList = new LinkedList<Road>(trayectory_);
+        updateRoad();
+        _currSpeed = new Kilometers(0.0);
+        _time = System.currentTimeMillis();
+        _log = log_;
+        // Add car to the streetQue
+        currentRoad().getVehiclesOnRoad().add(this);
+        _log.log(Level.INFO, "Created: " + this);
+    
+        // ANTONIO
+        _initialTime = System.currentTimeMillis();
+        // for(Road r : trayectory_){
+        // _trayectoryID += r.ID + "_";
+        // }
+    }
+
+    /**
+     * Class constructor.
+     * 
+     * @param trayectory_
+     */
+    public Vehicle(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_) {
+        this(trayectory_, city_, log_, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sim.engine.Steppable#step(sim.engine.SimState)
+     */
+    public void step(SimState state_) {
+        if(_masonSteps == 0)
+        {
+            _masonSteps = state_.schedule.getSteps();
+        }
+        move(state_);
+    }
+
+    /**
+     * Updates the location variables of this vehicle. Gets called once per
+     * frame.
+     * 
+     * @throws Exception
+     */
+    @Override
+    public void move(SimState state_)
+    {
+    
+        if (!_trayectoryList.isEmpty())
+        {
+            // does next xing have a tf?
+            if (canMove())
+            {
+        	moveVehicle();
+            } else
+            {
+        	// Car stops. Reset time and speed.
+        	_time = System.currentTimeMillis();
+        	_currSpeed.setVal(0.0);
+            }
+            _time++;
+        } else
+        {
+            die(state_);
+        }
+    }
+
+    /**
+     * Displays the vehicle according to its location variables. Gets called
+     * once per frame
+     */
+    @Override
+    public void display()
+    {
+        super.applet.stroke(0, 0, 255);
+        super.applet.strokeWeight(3);
+        super.applet.point((float) _currLocation.getX(), (float) _currLocation.getY());
+    }
+
+    /**
+     * Delete the car from schedule loop.
+     * 
+     * @param state
+     */
+    public void die(final SimState state) {
+        _log.log(Level.INFO, this + "Dying...");
+        _masonSteps = state.schedule.getSteps() - _masonSteps;
+        System.out.println(this + "finished after " + _masonSteps + "steps");
+        die();
+        _vhclCount--;
+        if (toDiePointer != null)
+            toDiePointer.stop();
+    }
+
+    public long getMasonSteps()
+    {
+	return _masonSteps;
+    }
 
     /**
      * Given in K. Assumed to be K/s
@@ -85,91 +193,14 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
 	return _currRoadLine;
     }
 
-    /**
-     * Class constructor.
-     * 
-     * @param trayectory_
-     */
-    public Vehicle(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_, PApplet parent_)
+    public String getTrayectoryID()
     {
-	super.applet = parent_;
-	_isAlive = true;
-	ID = "Car_" + _idToken + "_" + _vhclCount;
-	_city = city_;
-	_vhclCount++;
-	_idToken++;
-	_trayectoryList = new LinkedList<Road>(trayectory_);
-	updateRoad();
-	_currSpeed = new Kilometers(0.0);
-	_time = System.currentTimeMillis();
-	_log = log_;
-	// Add car to the streetQue
-	currentRoad().getVehiclesOnRoad().add(this);
-	// _log.log( Level., "Created: " + this );
-
-	// ANTONIO
-	_initialTime = System.currentTimeMillis();
-	// for(Road r : trayectory_){
-	// _trayectoryID += r.ID + "_";
-	// }
+        return _trayectoryID;
     }
 
-    /**
-     * Class constructor.
-     * 
-     * @param trayectory_
-     */
-    public Vehicle(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_) {
-	this(trayectory_, city_, log_, null);
-    }
-    /**
-     * Displays the vehicle according to its location variables. Gets called
-     * once per frame
-     */
-    @Override
-    public void display()
+    public long getTravelDuration()
     {
-	super.applet.stroke(0, 0, 255);
-	super.applet.strokeWeight(3);
-	super.applet.point((float) _currLocation.getX(), (float) _currLocation.getY());
-    }
-
-    /**
-     * Updates the location variables of this vehicle. Gets called once per
-     * frame.
-     * 
-     * @throws Exception
-     */
-    @Override
-    public void move(SimState state_)
-    {
-
-	if (!_trayectoryList.isEmpty())
-	{
-	    // does next xing have a tf?
-	    if (canMove())
-	    {
-		moveVehicle();
-	    } else
-	    {
-		// Car stops. Reset time and speed.
-		_time = System.currentTimeMillis();
-		_currSpeed.setVal(0.0);
-	    }
-	    _time++;
-	} else
-	{
-	    die(state_);
-	}
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sim.engine.Steppable#step(sim.engine.SimState)
-     */
-    public void step(SimState state_) {
-	move(state_);
+        return _travelTime;
     }
 
     /**
@@ -179,19 +210,6 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
     public boolean isAlive()
     {
 	return _isAlive;
-    }
-
-    /**
-     * Delete the car from schedule loop.
-     * 
-     * @param state
-     */
-    public void die(final SimState state) {
-	_log.log(Level.INFO, this + "Dying...");
-	die();
-	_vhclCount--;
-	if (toDiePointer != null)
-	    toDiePointer.stop();
     }
 
     /**
@@ -246,7 +264,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
 		Line2D nextSeg = _trayectoryList.get(1).getSegmentList().get(0).get(0);
 		isSaturated = _trayectoryList.get(1).isSegSaturated(nextSeg);
 	    }
-	    if (currentXing().hasTrafficLight())
+	    if (currentRoad().getTf() != null)// hasTrafficLight())
 	    {
 		Point2D tfLoc = currentXing().getLocation();
 		Meters distance = new Meters(getLocation().distance(tfLoc));
@@ -278,28 +296,11 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
     // ANTONIO
     private void updateRouteHistory()
     {
-	String roadID = String.valueOf(currentRoad().ID);
+	String roadID = currentRoad().ID;
 	if (!_trayectoryID.endsWith(roadID))
 	{
 	    _trayectoryID += "_" + roadID;
 	}
-    }
-
-    public String getTrayectoryID()
-    {
-	return _trayectoryID;
-    }
-
-    public long getTravelDuration()
-    {
-	return _travelTime;
-    }
-
-    private void updateTrarvelTime()
-    {
-	long currentTime = System.currentTimeMillis();
-	_travelTime = currentTime - _initialTime;
-	System.out.println(this + " Finished at: " + _travelTime / 1000);
     }
 
     /**
@@ -444,7 +445,8 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable
     {
 	// currentRoad().removeVFromRoad(this);
 	_isAlive = false;
-	updateTrarvelTime();
+	long currentTime = System.currentTimeMillis();
+	_travelTime = currentTime - _initialTime;
     }
 
 }

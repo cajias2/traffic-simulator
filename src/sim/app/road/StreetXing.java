@@ -6,12 +6,12 @@ package sim.app.road;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 import sim.app.agents.display.lights.TrafficLightAgent;
 import sim.app.utils.Orientation;
-import sim.app.utils.TrafficLightState;
 
 public class StreetXing {
 
@@ -23,6 +23,7 @@ public class StreetXing {
     private double _endOdds = 0;
     private Point2D _location;
     private final List<Road> _roads;
+    private Collection<Road> _subRoads = new ArrayList<Road>();
 
     public Font nodeFont = new Font("SansSerif", Font.PLAIN, 12);
 
@@ -37,11 +38,11 @@ public class StreetXing {
 	_roads = new ArrayList<Road>();
 	_roads.add(a_);
 	if (null != b_) {
-	    ID = a_.ID + "_X_" + b_.ID + "_" + _xingCount;
+	    ID = a_.ID + "X" + b_.ID;
 	    _roads.add(b_);
 	    _location = a_.findIntersection(b_);
 	} else {
-	    ID = a_.ID + "_" + _xingCount;
+	    ID = a_.ID;
 	}
 	_xingCount++;
     }
@@ -64,22 +65,14 @@ public class StreetXing {
      * @return boolean
      */
     public boolean hasTrafficLight() {
-	return _trafficLight != null;
-    }
-
-    public void setTrafficLight(TrafficLightAgent tf_) {
-	_trafficLight = tf_;
-	_trafficLight.setLocation(_location);
-    }
-
-    /**
-     * Returns traffic Light instance. Null if it's not set. Call {@code
-     * hasTrafficLight()} before to prevent {@code NullPointerException}s
-     * 
-     * @return trafficLight instance
-     */
-    public TrafficLightAgent getTrafficLight() {
-	return _trafficLight;
+	for (Road rd : _subRoads)
+	{
+	    if (rd.getTf() != null)
+	    {
+		return true;
+	    }
+	}
+	return false;
     }
 
     public String getId() {
@@ -107,6 +100,18 @@ public class StreetXing {
 	return _location;
     }
 
+    public List<Road> getRoads()
+    {
+        return _roads;
+    }
+
+    /**
+     * @param _subRoad_
+     */
+    public void setSubRoads(Collection<Road> subRoads_) {
+	_subRoads = subRoads_;
+    }
+
     /**
      * @param startOdds_
      *            the _startOdds to set
@@ -126,16 +131,16 @@ public class StreetXing {
     /**
      * @author biggie
      */
+    @Override
     public String toString() {
 
-	StringBuffer echo = new StringBuffer(ID + "\n");
+	StringBuffer echo = new StringBuffer(ID);
 	if (hasTrafficLight()) {
-	    for (Orientation or : Orientation.values()) {
-		TrafficLightState state = _trafficLight.getState(or);
-		if (state != null) {
-		    echo.append(or + ": " + state);
+	    for (Road rd : _subRoads) {
+		if (rd.getTf() != null && rd.getOr() == Orientation.NS) {
+		    echo.append("(" + rd.getOr() + ":" + rd.getTf() + ")");
+		    break;
 		}
-		echo.append("__");
 	    }
 	}
 	return echo.toString();
