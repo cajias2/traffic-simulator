@@ -2,6 +2,7 @@ package sim.app;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,8 @@ import sim.geo.RoadWeightTransformer;
 import sim.geo.StreetXing;
 import sim.utils.xml.XmlInputParseService;
 import sim.utils.xml.XmlOutputParseService;
+import sim.utils.xml.data.OutputSection;
+import sim.utils.xml.data.SectionStartComparator;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 
 @SuppressWarnings("serial")
@@ -46,14 +49,8 @@ public class TrafficSim extends CitySimState {
     private final List<StreetXing> _sourceXings;
     private final List<StreetXing> _destXings;
     private final List<TrafficLightAgent> _tlAgents;
-    private final Map<String, BufferedWriter> _fileWriterMap = new HashMap<String, BufferedWriter>();
-    private final String OUT_FOLDER;
 
     private final Map<String, Document> _outputDocMap;
-    public static final double XMIN = 0;
-    public static final double XMAX = 800;
-    public static final double YMIN = 0;
-    public static final double YMAX = 600;
     public static int MAX_CAR_COUNT;
     public static int SIM_TIME;
 
@@ -70,7 +67,6 @@ public class TrafficSim extends CitySimState {
 	_destXings = parsedGraph.getDestXings();
 	_tlAgents = parsedGraph.getTlAgents();
 	SIM_TIME = parsedGraph.getSimDuration();
-	OUT_FOLDER = "output";
 	_outputDocMap = new HashMap<String, Document>();
 	_log = log_;
     }
@@ -89,7 +85,6 @@ public class TrafficSim extends CitySimState {
 	_destXings = parsedGraph.getDestXings();
 	_tlAgents = parsedGraph.getTlAgents();
 	_outputDocMap = new HashMap<String, Document>();
-	OUT_FOLDER = "output";
 
     }
 
@@ -229,14 +224,37 @@ public class TrafficSim extends CitySimState {
      * TODO
      */
     private void printOutput() {
-
-
+	Map<String, List<OutputSection>> tsMap = new HashMap<String, List<OutputSection>>();
 	for (Entry<String, Document> entrySet : _outputDocMap.entrySet()) {
 	    String docName = entrySet.getKey();
 	    Document document = entrySet.getValue();
+	    getCity().getEdges();
 	    XmlOutputParseService outParser = new XmlOutputParseService(document, getCity());
-	    outParser.getSectionStartSeries("1(aX1_TO_1)");
-	    printXml(docName, document);
+	    Map<String, List<OutputSection>> docMap = outParser.getSectionStartSeries();
+	    // Copy the sections of each out to the map
+	    for (Entry<String, List<OutputSection>> ts : docMap.entrySet()) {
+		if (tsMap.containsKey(ts.getKey())) {
+		    tsMap.get(ts.getKey()).addAll(ts.getValue());
+		} else {
+		    tsMap.put(ts.getKey(), ts.getValue());
+		}
+	    }
+	    printXml(docName+"_out", document);
+	}
+
+	for (Entry<String, List<OutputSection>> ts : tsMap.entrySet()) {
+	    Collections.sort(ts.getValue(), new SectionStartComparator());
+	    try {
+		// Create file
+		FileWriter fstream = new FileWriter(ts.getKey() + ".txt");
+		BufferedWriter out = new BufferedWriter(fstream);
+		for (OutputSection os : ts.getValue()) {
+		    out.write(os.getStart() + "\t" + os.getSpeed() + "\n");
+		}
+		out.close();
+	    } catch (Exception e) {// Catch exception if any
+		System.err.println("Error: " + e.getMessage());
+	    }
 	}
     }
 
@@ -280,7 +298,7 @@ public class TrafficSim extends CitySimState {
      * @return cars to generate per step
      */
     protected int carFlow() {
-	int carPerStep = 1;
+	int carPerStep = 10;
 	// int carPerStep = (int) (floor(sin(schedule.getTime() / 1000.0)
 	// * MAX_CAR_COUNT));
 	// _log.log(Level.FINER, "Creating: " + carPerStep + " cars");
