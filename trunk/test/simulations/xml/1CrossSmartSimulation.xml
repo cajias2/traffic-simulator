@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simulation maxCars="1" simDuration="5000" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TrafficSimultion.xsd">
+
+    <streets>
+        <street name="a" orientation="EW" dir="2way">
+        	<point x="10" y="500"/>
+        	<point x="990" y="500"/>
+        </street>
+
+        <street name="1" orientation="NS" dir="2way">
+        	<point x="500" y="10"/>
+        	<point x="500" y="990"/>
+        </street>
+                                          
+                 
+    </streets>
+
+	<trayectory>
+		<origin>
+			<streetNode name="a" percent="100" />
+
+		</origin>
+		<destination>
+			<streetNode name="1" percent="100" />
+
+		</destination>
+	</trayectory>
+	
+    <trafficLights>       
+        <tl from="a" to="1" duration="5" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>                        
+    </trafficLights>
+</simulation>

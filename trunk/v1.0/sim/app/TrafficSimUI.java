@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import sim.app.utils.JungDisplay;
+import sim.utils.JungDisplay;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.GUIState;

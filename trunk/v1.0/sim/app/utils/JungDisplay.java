@@ -1,4 +1,4 @@
-package sim.app.utils;
+package sim.utils;
 
 /*
  * This is a simple display capable of working with MASON and displaying JUNG

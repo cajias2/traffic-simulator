@@ -7,9 +7,9 @@ import java.awt.Font;
 import java.util.Queue;
 import java.util.logging.Logger;
 
-import sim.app.agents.TrafficLight;
-import sim.app.utils.Orientation;
-import sim.app.utils.TrafficLightState;
+import sim.agents.TrafficLight;
+import sim.utils.Orientation;
+import sim.utils.TrafficLightState;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Double2D;

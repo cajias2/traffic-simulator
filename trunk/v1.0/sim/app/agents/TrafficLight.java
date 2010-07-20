@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.agents;
+package sim.agents;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,8 +11,8 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import sim.app.utils.Orientation;
-import sim.app.utils.TrafficLightState;
+import sim.utils.Orientation;
+import sim.utils.TrafficLightState;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 

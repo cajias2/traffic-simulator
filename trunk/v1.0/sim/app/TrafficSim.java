@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import sim.app.agents.Car;
+import sim.agents.Car;
 import sim.app.graph.CitySimState;
 import sim.app.graph.Street;
 import sim.app.graph.StreetXing;
