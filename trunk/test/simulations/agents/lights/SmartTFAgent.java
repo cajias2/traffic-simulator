@@ -44,7 +44,7 @@ public class SmartTFAgent extends TrafficLightAgent {
 	    else if (flowNS == 0)
 		newSplit = 100;
 	    else {
-		newSplit = (int) (((flowNS * 100.0) / (flowNS + flowEW)) * 100.0);
+		newSplit = (int) (((flowNS * 100.0) / (flowNS + flowEW)));
 	    }
 	}
 	setSplit(newSplit);

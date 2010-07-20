@@ -214,7 +214,6 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 	_outDoc.getChildNodes().item(0).appendChild(_outputElement);
     }
 
-
     /**
      * Given in K. Assumed to be K/s
      */
@@ -347,7 +346,6 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 	_currRoadLine = currentRoad().getLineList().get(_roadLineIdx);
     }
 
-
     /**
      * Add this car to the current street it's cruising
      * 
@@ -464,6 +462,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 	    }
 	} else {
 	    goToNextRoad();
+	    _rdStart = 0;
 	}
     }
 

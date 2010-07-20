@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<output route="">
-<vhcl start="1" end="2">
-	<section name="a(a->aX1)" start="33" end="33" speed=""/>
-	<section name="a(a->aX1)" start="33" end="33" speed="1.4"/>
-</vhcl>
-</output>

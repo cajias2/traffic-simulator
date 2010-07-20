@@ -1,10 +1,11 @@
 package sim.app;
 
 import java.io.BufferedWriter;
-import java.io.StringWriter;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +34,7 @@ import sim.geo.Road;
 import sim.geo.RoadWeightTransformer;
 import sim.geo.StreetXing;
 import sim.utils.xml.XmlInputParseService;
+import sim.utils.xml.XmlOutputParseService;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 
 @SuppressWarnings("serial")
@@ -54,7 +56,6 @@ public class TrafficSim extends CitySimState {
     public static final double YMAX = 600;
     public static int MAX_CAR_COUNT;
     public static int SIM_TIME;
-
 
     /**
      * Creates a TrafficSim simulation with the given random number seed.
@@ -100,7 +101,6 @@ public class TrafficSim extends CitySimState {
 	super.start();
 	schedule.reset(); // clear out the schedule
 
-
 	scheduleTrafficLights();
 
 	Steppable carGenerator = new Steppable() {
@@ -108,11 +108,13 @@ public class TrafficSim extends CitySimState {
 	    DijkstraShortestPath<StreetXing, Road> routeMap = new DijkstraShortestPath<StreetXing, Road>(getCity(),
 		    rdTrans, false);
 	    int carOrder = 0;
+
 	    public void step(SimState state) {
 		if (SIM_TIME <= schedule.getSteps()) {
 		    for (Vehicle v : Vehicle.getActiveVhcl()) {
 			v.finalizeLog(schedule.getSteps());
 		    }
+
 		    printOutput();
 		    state.finish();
 		    System.exit(0);
@@ -227,6 +229,26 @@ public class TrafficSim extends CitySimState {
      * TODO
      */
     private void printOutput() {
+
+
+	for (Entry<String, Document> entrySet : _outputDocMap.entrySet()) {
+	    String docName = entrySet.getKey();
+	    Document document = entrySet.getValue();
+	    XmlOutputParseService outParser = new XmlOutputParseService(document, getCity());
+	    outParser.getSectionStartSeries("1(aX1_TO_1)");
+	    printXml(docName, document);
+	}
+    }
+
+    /**
+     * @author biggie
+     * @name   printXml
+     * Purpose TODO
+     * 
+     * @param 
+     * @return void
+     */
+    private void printXml(String docName, Document document) {
 	TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	Transformer transformer = null;
 	try {
@@ -235,22 +257,19 @@ public class TrafficSim extends CitySimState {
 	} catch (TransformerConfigurationException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
-	}
-
-	for (Document document : _outputDocMap.values()) {
-
-	    DOMSource source = new DOMSource(document);
-	    StreamResult result = new StreamResult(new StringWriter());
-
-	    try {
-		transformer.transform(source, result);
-		String xmlString = result.getWriter().toString();
-		System.out.println(xmlString);
-		System.out.println("++++++++++");
-	    } catch (TransformerException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
+	}	
+	DOMSource source = new DOMSource(document);
+	try {
+	// Create file
+	FileWriter fstream = new FileWriter(docName + ".xml");
+	BufferedWriter out = new BufferedWriter(fstream);
+	StreamResult result = new StreamResult(out);
+	transformer.transform(source, result);
+	out.close();
+	} catch (TransformerException e) {
+	e.printStackTrace();
+	} catch (Exception e) {// Catch exception if any
+	System.err.println("Error: " + e.getMessage());
 	}
     }
 
