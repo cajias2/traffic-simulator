@@ -161,7 +161,6 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
      * list Also resets the time left time, by copying over the duration value.
      */
     private void updateLights() {
-	System.out.println(this + "Updating");
 	// Cicle through the state list
 	for (Entry<Orientation, TrafficLight> entry : _stateMap.entrySet()) {
 	    if (TrafficLightState.GREEN == entry.getValue().getState()) {

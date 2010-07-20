@@ -33,12 +33,14 @@ import edu.uci.ics.jung.graph.util.Pair;
 /**
  * @author biggie
  */
-public class XmlParseService {
+public class XmlInputParseService {
     /*
      * Begin constant declaration. These constants should match refs in
      * TrafficSimulation.xsd
      */
     final static String NODE_SIM = "simulation";
+    final static String ATTR_SIM_DURATION = "simDuration";
+
     final static String NODE_TRAFFICLIGHT = "trafficLights";
     final static String NODE_TL = "tl";
     final static String NODE_TRAYECTORY = "trayectory";
@@ -71,13 +73,14 @@ public class XmlParseService {
     private final List<StreetXing> _destXings = new LinkedList<StreetXing>();
     private final List<TrafficLightAgent> _tlAgents = new LinkedList<TrafficLightAgent>();
     private int _maxCarsInSim;
+    private int _simDuration;
 
     /**
      * Class Constructor
      * 
      * @param fileName_
      */
-    public XmlParseService(String fileName_, Logger logger_) {
+    public XmlInputParseService(String fileName_, Logger logger_) {
 	_fileName = fileName_;
 	_logger = logger_;
 	// use a unique display
@@ -100,6 +103,10 @@ public class XmlParseService {
      */
     public int getMaxCars() {
 	return _maxCarsInSim;
+    }
+
+    public int getSimDuration() {
+	return _simDuration;
     }
 
     public List<TrafficLightAgent> getTlAgents() {
@@ -157,6 +164,8 @@ public class XmlParseService {
 	    // String simName =
 	    // simNode.getAttributes().getNamedItem(ATTR_NAME).getNodeValue();
 	    _maxCarsInSim = Integer.parseInt(simNode.getAttributes().getNamedItem(ATTR_SIM_MAXCARS).getNodeValue());
+	    _simDuration = Integer.parseInt(simNode.getAttributes().getNamedItem(ATTR_SIM_DURATION).getNodeValue());
+
 	}
     }
 
@@ -211,7 +220,7 @@ public class XmlParseService {
 	    if (currXing.getLocation() != nextXing.getLocation()) {
 
 		Pair<StreetXing> xingPair = new Pair<StreetXing>(currXing, nextXing);
-		String thereId = rd_.ID + "(" + currXing.getId() + "->" + nextXing.getId() + ")";
+		String thereId = rd_.ID + "(" + currXing.getId() + "_TO_" + nextXing.getId() + ")";
 		List<Point2D> subList = rd_.getSubPointList(currXing.getLocation(), nextXing.getLocation());
 		Road there = new Street(thereId, subList, _logger);
 		there.processRoadSegments();
@@ -403,8 +412,13 @@ public class XmlParseService {
 	for (int i = 0; i < tfNodeList.getLength(); i++) {
 
 	    if (NODE_TL.equals(tfNodeList.item(i).getNodeName())) {
-		createTl(tfNodeList.item(i));
-
+		Node tlNode = tfNodeList.item(i);
+		String from = tlNode.getAttributes().getNamedItem(ATTR_TL_FROM).getNodeValue();
+		String to = tlNode.getAttributes().getNamedItem(ATTR_TL_TO).getNodeValue();
+		int duration = Integer.parseInt(tlNode.getAttributes().getNamedItem(ATT_TL_DUR).getNodeValue());
+		double split = Double.parseDouble(tlNode.getAttributes().getNamedItem(ATT_TL_SPLIT).getNodeValue());
+		Class clazz = TrafficLightAgent.class;
+		createTl(from, to, duration, split, clazz);
 	    }
 	}
     }
@@ -412,18 +426,15 @@ public class XmlParseService {
     /**
      * Finds the intersections specified in the node, and creates a traffic
      * light
+     * TODO load any tf class by reflection
      * 
      * @param childNodes_
      */
-    private void createTl(Node tlNode_) {
-	String from = tlNode_.getAttributes().getNamedItem(ATTR_TL_FROM).getNodeValue();
-	String to = tlNode_.getAttributes().getNamedItem(ATTR_TL_TO).getNodeValue();
-	int duration = Integer.parseInt(tlNode_.getAttributes().getNamedItem(ATT_TL_DUR).getNodeValue());
-	double split = Double.parseDouble(tlNode_.getAttributes().getNamedItem(ATT_TL_SPLIT).getNodeValue());
-	TrafficLightAgent tl = new TrafficLightAgent(duration, split, _logger);
+    private void createTl(String from_, String to_, int duration_, double split_, Class tfClazz_) {
+	TrafficLightAgent tl = new TrafficLightAgent(duration_, split_, _logger);
 	_tlAgents.add(tl);
-	Road rdA = _roadMap.get(from);
-	Road rdB = _roadMap.get(to);
+	Road rdA = _roadMap.get(from_);
+	Road rdB = _roadMap.get(to_);
 
 	for (Road subRd : rdA.getSubRoadList()) {
 	    Pair<StreetXing> pair = getGraph().getEndpoints(subRd);

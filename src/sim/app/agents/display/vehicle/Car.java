@@ -6,6 +6,8 @@ package sim.app.agents.display.vehicle;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.w3c.dom.Document;
+
 import processing.core.PApplet;
 import sim.app.road.Road;
 import sim.app.road.StreetXing;
@@ -27,8 +29,8 @@ public class Car extends Vehicle {
 	super(trayectory_, city_, log_, parent_);
     }
 
-    public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_) {
-	super(trayectory_, city_, log_);
+    public Car(List<Road> route_, Graph<StreetXing, Road> city_, Document doc_, Logger log_) {
+	super(route_, city_, doc_, log_);
     }
 
     /**

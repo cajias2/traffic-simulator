@@ -11,7 +11,7 @@
 			<xs:attribute name="name" type="xs:string" use="optional"
 				default="Simulation" />			
 			<xs:attribute name="maxCars" type="xs:decimal" use="required" />
-			<xs:attribute name="simTime" type="xs:decimal" use="required" />
+			<xs:attribute name="simDuration" type="xs:decimal" use="required" />
 		</xs:complexType>
 	</xs:element>
 
@@ -61,8 +61,9 @@
 		<xs:complexType>	
 			<xs:attribute name="from" type="xs:string" use="required" />
 			<xs:attribute name="to" type="xs:string" use="required" />		
-			<xs:attribute name="duration" type="xs:integer"" use="required" />
-			<xs:attribute name="split" type="xs:integer" use="required" />		
+			<xs:attribute name="duration" type="xs:integer"" use="required" default="0"/>
+			<xs:attribute name="split" type="xs:integer" use="required" default="0"/>
+			<xs:attribute name="class" type="xs:string" use="optional"/>		
 		</xs:complexType>
 	</xs:element>	
 
