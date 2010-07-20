@@ -19,7 +19,7 @@ import sim.app.agents.display.vehicle.Vehicle;
 import sim.app.road.Road;
 import sim.app.road.StreetXing;
 import sim.processing.Displayable;
-import sim.xml.XmlParseService;
+import sim.xml.XmlInputParseService;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -39,7 +39,7 @@ public abstract class TrafficSim
     @Deprecated
     protected void parseGraph(String cityDir)
     {
-	XmlParseService parsedGraph = new XmlParseService(System.getProperty("user.dir") + cityDir, getLogger());
+	XmlInputParseService parsedGraph = new XmlInputParseService(System.getProperty("user.dir") + cityDir, getLogger());
 	_city = parsedGraph.getGraph();
 	MAX_CAR_COUNT = parsedGraph.getMaxCars();
 	_sourceXings = parsedGraph.getSourceXings();
@@ -119,18 +119,18 @@ public abstract class TrafficSim
 	    folder.mkdir();
 	}
 
-	if (!_fileWriterMap.containsKey(v.getTrayectoryID()))
+	if (!_fileWriterMap.containsKey(v.getRouteID()))
 	{
 	    try
 	    {
-		File outF = new File(folder.getAbsolutePath() + File.separator + v.getTrayectoryID() + ".txt");
+		File outF = new File(folder.getAbsolutePath() + File.separator + v.getRouteID() + ".txt");
 		if (outF.exists())
 		    outF.delete();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outF.getAbsoluteFile(), true));
-		_fileWriterMap.put(v.getTrayectoryID(), bw);
+		_fileWriterMap.put(v.getRouteID(), bw);
 	    } catch (Exception ex)
 	    {
-		System.err.println("Error creating file: Results//" + v.getTrayectoryID() + ".txt");
+		System.err.println("Error creating file: Results//" + v.getRouteID() + ".txt");
 		ex.printStackTrace();
 	    }
 	}
@@ -138,10 +138,10 @@ public abstract class TrafficSim
 	try
 	{
 	    String formatOut = String.format("%d\t%d\n", getApplet().frameCount, v.getTravelDuration());
-	    _fileWriterMap.get(v.getTrayectoryID()).write(formatOut);
+	    _fileWriterMap.get(v.getRouteID()).write(formatOut);
 	} catch (Exception ex)
 	{
-	    System.err.println("Error writting file Results//" + v.getTrayectoryID() + ".txt");
+	    System.err.println("Error writting file Results//" + v.getRouteID() + ".txt");
 	    ex.printStackTrace();
 	}
     }

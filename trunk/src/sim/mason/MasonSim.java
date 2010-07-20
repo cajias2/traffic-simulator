@@ -1,15 +1,27 @@
 package sim.mason;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import sim.app.agents.display.lights.TrafficLightAgent;
 import sim.app.agents.display.vehicle.Car;
@@ -19,7 +31,7 @@ import sim.app.road.StreetXing;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.xml.XmlParseService;
+import sim.xml.XmlInputParseService;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 
 @SuppressWarnings("serial")
@@ -34,6 +46,7 @@ public class MasonSim extends CitySimState {
     private final Map<String, BufferedWriter> _fileWriterMap = new HashMap<String, BufferedWriter>();
     private final String OUT_FOLDER;
 
+    private final Map<String, Document> _outputDocMap;
     public static final double XMIN = 0;
     public static final double XMAX = 800;
     public static final double YMIN = 0;
@@ -41,20 +54,22 @@ public class MasonSim extends CitySimState {
     public static int MAX_CAR_COUNT;
     public static int SIM_TIME;
 
+
     /**
      * Creates a MasonSim simulation with the given random number seed.
      */
     public MasonSim(long seed, String cityXmlFileName_, Logger log_) {
 	super(seed);
 	cityXmlFileName_ = System.getProperty("user.dir") + cityXmlFileName_;
-	XmlParseService parsedGraph = new XmlParseService(cityXmlFileName_, log_);
+	XmlInputParseService parsedGraph = new XmlInputParseService(cityXmlFileName_, log_);
 	setCity(parsedGraph.getGraph());
 	MAX_CAR_COUNT = parsedGraph.getMaxCars();
 	_sourceXings = parsedGraph.getSourceXings();
 	_destXings = parsedGraph.getDestXings();
 	_tlAgents = parsedGraph.getTlAgents();
-	SIM_TIME = 10000;
+	SIM_TIME = parsedGraph.getSimDuration();
 	OUT_FOLDER = "output";
+	_outputDocMap = new HashMap<String, Document>();
 	_log = log_;
     }
 
@@ -64,13 +79,14 @@ public class MasonSim extends CitySimState {
      */
     public MasonSim(long seed) {
 	super(seed);
-	XmlParseService parsedGraph = new XmlParseService(_cityXml, _log);
+	XmlInputParseService parsedGraph = new XmlInputParseService(_cityXml, _log);
 	setCity(parsedGraph.getGraph());
 	MAX_CAR_COUNT = parsedGraph.getMaxCars();
-	SIM_TIME = 10000;
+	SIM_TIME = parsedGraph.getSimDuration();
 	_sourceXings = parsedGraph.getSourceXings();
 	_destXings = parsedGraph.getDestXings();
 	_tlAgents = parsedGraph.getTlAgents();
+	_outputDocMap = new HashMap<String, Document>();
 	OUT_FOLDER = "output";
 
     }
@@ -91,7 +107,7 @@ public class MasonSim extends CitySimState {
 	    int carOrder = 0;
 	    public void step(SimState state) {
 		if (SIM_TIME <= schedule.getSteps()) {
-		    end();
+		    printOutput();
 		    state.finish();
 
 		}
@@ -101,24 +117,46 @@ public class MasonSim extends CitySimState {
 		    StreetXing target = getDest();
 		    // Make sure start and end are different and that there is a
 		    // path
-		    List<Road> trayectory = null;
-		    while ((source.getId().equals(target.getId()) && trayectory == null)
-			    || !source.getId().equals(target.getId()) && trayectory == null) {
+		    List<Road> route = null;
+		    while ((source.getId().equals(target.getId()) && route == null)
+			    || !source.getId().equals(target.getId()) && route == null) {
 			target = getDest();
-			trayectory = routeMap.getPath(source, target);
-			if (null == trayectory || trayectory.isEmpty()) {
-			    trayectory = null;
+			route = routeMap.getPath(source, target);
+			if (null == route || route.isEmpty()) {
+			    route = null;
 			}
 		    }
-		    Vehicle vhcl = new Car(trayectory, getCity(), _log);
+		    String routeName = route.get(0).ID + "_" + route.get(route.size() - 1).ID;
+		    if (!_outputDocMap.containsKey(routeName)) {
+			_outputDocMap.put(routeName, createDom(routeName));
+		    }
+		    Vehicle vhcl = new Car(route, getCity(), _outputDocMap.get(routeName), _log);
 		    vhcl.toDiePointer = schedule.scheduleRepeating(schedule.getTime(), carOrder++, vhcl);
 		}
 	    }
-
 	};
 	// Schedule the car Generator
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, carGenerator, 1);
 
+    }
+
+    /**
+     * @param _route
+     * @return
+     */
+    private Document createDom(String _route) {
+	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder documentBuilder = null;
+	try {
+	    documentBuilder = documentBuilderFactory.newDocumentBuilder();
+	} catch (ParserConfigurationException e) {
+	    e.printStackTrace();
+	}
+	Document document = documentBuilder.newDocument();
+	Element rootElement = document.createElement("output");
+	rootElement.setAttribute("route", _route);
+	document.appendChild(rootElement);
+	return document;
     }
 
     /**
@@ -179,45 +217,34 @@ public class MasonSim extends CitySimState {
 	return pickedXing;
     }
 
-    // TODO refactor
-    public void end() {
-	for (BufferedWriter w : _fileWriterMap.values()) {
+    /**
+     * TODO
+     */
+    private void printOutput() {
+	TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	Transformer transformer = null;
+	try {
+	    transformer = transformerFactory.newTransformer();
+	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	} catch (TransformerConfigurationException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
+	for (Document document : _outputDocMap.values()) {
+
+	    DOMSource source = new DOMSource(document);
+	    StreamResult result = new StreamResult(new StringWriter());
+
 	    try {
-		w.close();
-	    } catch (IOException e) {
+		transformer.transform(source, result);
+		String xmlString = result.getWriter().toString();
+		System.out.println(xmlString);
+		System.out.println("++++++++++");
+	    } catch (TransformerException e) {
+		// TODO Auto-generated catch block
 		e.printStackTrace();
 	    }
-	}
-    }
-
-    /**
-     * @param v
-     */
-    private void logAgentTime(Vehicle v) {
-	File folder = new File(OUT_FOLDER);
-	if (!folder.exists()) {
-	    folder.mkdir();
-	}
-
-	if (!_fileWriterMap.containsKey(v.getTrayectoryID())) {
-	    try {
-		File outF = new File(folder.getAbsolutePath() + File.separator + v.getTrayectoryID() + ".txt");
-		if (outF.exists())
-		    outF.delete();
-		BufferedWriter bw = new BufferedWriter(new FileWriter(outF.getAbsoluteFile(), true));
-		_fileWriterMap.put(v.getTrayectoryID(), bw);
-	    } catch (Exception ex) {
-		System.err.println("Error creating file: Results//" + v.getTrayectoryID() + ".txt");
-		ex.printStackTrace();
-	    }
-	}
-
-	try {
-	    String formatOut = String.format("%d\t%d\n", v.getMasonSteps(), v.getTravelDuration());
-	    _fileWriterMap.get(v.getTrayectoryID()).write(formatOut);
-	} catch (Exception ex) {
-	    System.err.println("Error writting file Results//" + v.getTrayectoryID() + ".txt");
-	    ex.printStackTrace();
 	}
     }
 
