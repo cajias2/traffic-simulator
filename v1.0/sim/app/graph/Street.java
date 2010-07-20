@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import sim.app.agents.Car;
-import sim.app.utils.Orientation;
+import sim.agents.Car;
+import sim.utils.Orientation;
 
 public class Street {
 	private final String ID;

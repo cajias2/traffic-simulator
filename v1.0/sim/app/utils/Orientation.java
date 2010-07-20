@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.app.utils;
+package sim.utils;
 
 /**
  * @author biggie

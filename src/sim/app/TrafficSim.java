@@ -1,179 +1,202 @@
 package sim.app;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import processing.core.PApplet;
-import sim.app.agents.Agent;
-import sim.app.agents.display.DisplayableAgent;
-import sim.app.agents.display.vehicle.Vehicle;
-import sim.app.road.Road;
-import sim.app.road.StreetXing;
-import sim.processing.Displayable;
-import sim.xml.XmlInputParseService;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.Graph;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-public abstract class TrafficSim
-{
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-    public static int MAX_CAR_COUNT = 3;
-    protected Graph<StreetXing, Road> _city = new DirectedSparseGraph<StreetXing, Road>();
-    protected List<StreetXing> _sourceXings = new LinkedList<StreetXing>();
-    protected List<StreetXing> _destXings = new LinkedList<StreetXing>();
-    protected Map<String, BufferedWriter> _fileWriterMap = new HashMap<String, BufferedWriter>();
+import sim.agents.lights.TrafficLightAgent;
+import sim.agents.vehicle.Car;
+import sim.agents.vehicle.Vehicle;
+import sim.engine.Schedule;
+import sim.engine.SimState;
+import sim.engine.Steppable;
+import sim.geo.Road;
+import sim.geo.RoadWeightTransformer;
+import sim.geo.StreetXing;
+import sim.utils.xml.XmlInputParseService;
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
+
+@SuppressWarnings("serial")
+public class TrafficSim extends CitySimState {
+    private static Logger _log;
+    private static String clazz = TrafficSim.class.getSimpleName();
+    private static String _cityXml;
+    private static Random _rand = new Random(System.currentTimeMillis());
+    private final List<StreetXing> _sourceXings;
+    private final List<StreetXing> _destXings;
+    private final List<TrafficLightAgent> _tlAgents;
+    private final Map<String, BufferedWriter> _fileWriterMap = new HashMap<String, BufferedWriter>();
+    private final String OUT_FOLDER;
+
+    private final Map<String, Document> _outputDocMap;
+    public static final double XMIN = 0;
+    public static final double XMAX = 800;
+    public static final double YMIN = 0;
+    public static final double YMAX = 600;
+    public static int MAX_CAR_COUNT;
+    public static int SIM_TIME;
+
 
     /**
-     * 
-     * @param cityDir
+     * Creates a TrafficSim simulation with the given random number seed.
      */
-    @Deprecated
-    protected void parseGraph(String cityDir)
-    {
-	XmlInputParseService parsedGraph = new XmlInputParseService(System.getProperty("user.dir") + cityDir, getLogger());
-	_city = parsedGraph.getGraph();
+    public TrafficSim(long seed, String cityXmlFileName_, Logger log_) {
+	super(seed);
+	cityXmlFileName_ = System.getProperty("user.dir") + cityXmlFileName_;
+	XmlInputParseService parsedGraph = new XmlInputParseService(cityXmlFileName_, log_);
+	setCity(parsedGraph.getGraph());
 	MAX_CAR_COUNT = parsedGraph.getMaxCars();
 	_sourceXings = parsedGraph.getSourceXings();
 	_destXings = parsedGraph.getDestXings();
-
+	_tlAgents = parsedGraph.getTlAgents();
+	SIM_TIME = parsedGraph.getSimDuration();
+	OUT_FOLDER = "output";
+	_outputDocMap = new HashMap<String, Document>();
+	_log = log_;
     }
 
     /**
-     * Display all displayable elements
-     * 
-     * @throws Exception
-     * 
+     * Creates a NetworkTest simulation with the given random number seed.
+     * _cityXml must be set first!
      */
-    public void display()
-    {
+    public TrafficSim(long seed) {
+	super(seed);
+	XmlInputParseService parsedGraph = new XmlInputParseService(_cityXml, _log);
+	setCity(parsedGraph.getGraph());
+	MAX_CAR_COUNT = parsedGraph.getMaxCars();
+	SIM_TIME = parsedGraph.getSimDuration();
+	_sourceXings = parsedGraph.getSourceXings();
+	_destXings = parsedGraph.getDestXings();
+	_tlAgents = parsedGraph.getTlAgents();
+	_outputDocMap = new HashMap<String, Document>();
+	OUT_FOLDER = "output";
 
-	for (Displayable disp : getRoads())
-	{
-	    disp.display();
-	}
-	// Display Agents
-	Iterator<Agent> iter = getAgents().iterator();
-	while (iter.hasNext())
-	{
-	    Agent agent = iter.next();
-	    if (agent instanceof DisplayableAgent)
-	    {
-		((DisplayableAgent) agent).display();
-	    }
-	}
     }
 
     /**
-     * Update Agents
+     * Start the Simulation.
      */
-    public void update()
-    {
-	Iterator<Agent> iter = getAgents().iterator();
-	while (iter.hasNext())
-	{
-	    Agent agent = iter.next();
-	    // If we're dealing with a car, remove it if it's dead.
-	    if (agent instanceof Vehicle && !((Vehicle) agent).isAlive())
-	    {
-		Vehicle v = (Vehicle) agent;
-		logAgentTime(v);
-		iter.remove();
-	    } else
-	    {
-		agent.move(null);
-	    }
-	}
-    }
+    @Override
+    public void start() {
+	super.start();
+	schedule.reset(); // clear out the schedule
 
-    public void end()
-    {
-	for (BufferedWriter w : _fileWriterMap.values())
-	{
-	    try
-	    {
-		w.close();
-	    } catch (IOException e)
-	    {
-		e.printStackTrace();
+
+	scheduleTrafficLights();
+
+	Steppable carGenerator = new Steppable() {
+	    org.apache.commons.collections15.Transformer<Road, Number> rdTrans = new RoadWeightTransformer();
+	    DijkstraShortestPath<StreetXing, Road> routeMap = new DijkstraShortestPath<StreetXing, Road>(getCity(),
+		    rdTrans, false);
+	    int carOrder = 0;
+	    public void step(SimState state) {
+		if (SIM_TIME <= schedule.getSteps()) {
+		    for (Vehicle v : Vehicle.getActiveVhcl()) {
+			v.finalizeLog(schedule.getSteps());
+		    }
+		    printOutput();
+		    state.finish();
+		    System.exit(0);
+		}
+		double vhclThisStep = carFlow();
+		for (int i = 0; Vehicle.count() < MAX_CAR_COUNT && i < vhclThisStep; i++) {
+		    StreetXing source = getSource();
+		    StreetXing target = getDest();
+		    // Make sure start and end are different and that there is a
+		    // path
+		    List<Road> route = null;
+		    while ((source.getId().equals(target.getId()) && route == null)
+			    || !source.getId().equals(target.getId()) && route == null) {
+			target = getDest();
+			route = routeMap.getPath(source, target);
+			if (null == route || route.isEmpty()) {
+			    route = null;
+			}
+		    }
+		    String routeName = route.get(0).ID + "_" + route.get(route.size() - 1).ID;
+		    if (!_outputDocMap.containsKey(routeName)) {
+			_outputDocMap.put(routeName, createDom(routeName));
+		    }
+		    Vehicle vhcl = new Car(route, getCity(), _outputDocMap.get(routeName), _log);
+		    vhcl.toDiePointer = schedule.scheduleRepeating(schedule.getTime(), carOrder++, vhcl);
+		}
 	    }
-	}
+	};
+	// Schedule the car Generator
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, carGenerator, 1);
+
     }
 
     /**
-     * @param v
+     * @param _route
+     * @return
      */
-    private void logAgentTime(Vehicle v)
-    {
-	File folder = new File(getOutputFolderName());
-	if (!folder.exists())
-	{
-	    folder.mkdir();
+    private Document createDom(String _route) {
+	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder documentBuilder = null;
+	try {
+	    documentBuilder = documentBuilderFactory.newDocumentBuilder();
+	} catch (ParserConfigurationException e) {
+	    e.printStackTrace();
 	}
-
-	if (!_fileWriterMap.containsKey(v.getRouteID()))
-	{
-	    try
-	    {
-		File outF = new File(folder.getAbsolutePath() + File.separator + v.getRouteID() + ".txt");
-		if (outF.exists())
-		    outF.delete();
-		BufferedWriter bw = new BufferedWriter(new FileWriter(outF.getAbsoluteFile(), true));
-		_fileWriterMap.put(v.getRouteID(), bw);
-	    } catch (Exception ex)
-	    {
-		System.err.println("Error creating file: Results//" + v.getRouteID() + ".txt");
-		ex.printStackTrace();
-	    }
-	}
-
-	try
-	{
-	    String formatOut = String.format("%d\t%d\n", getApplet().frameCount, v.getTravelDuration());
-	    _fileWriterMap.get(v.getRouteID()).write(formatOut);
-	} catch (Exception ex)
-	{
-	    System.err.println("Error writting file Results//" + v.getRouteID() + ".txt");
-	    ex.printStackTrace();
-	}
+	Document document = documentBuilder.newDocument();
+	Element rootElement = document.createElement("output");
+	rootElement.setAttribute("route", _route);
+	document.appendChild(rootElement);
+	return document;
     }
 
-    public abstract int getWidth();
+    /**
+     * Cicle through each street crossing and schedule traffic lights if found
+     * O(# of street xings)
+     */
+    private void scheduleTrafficLights() {
+	for (TrafficLightAgent tl : _tlAgents) {
+	    schedule.scheduleRepeating(tl);
+	}
 
-    public abstract int getHeight();
-
-    public abstract int getFrameRate();
-
-    public abstract int getSimDuration();
+    }
 
     /**
+     * Return a random car begining based on the {@code startingOdds} attribute
+     * in the city xml.
+     * <p/>
+     * See {@link TraffiSimulation.xsd} for more info
      * 
      * @return
      */
-    protected StreetXing getSource()
-    {
+    protected StreetXing getDest() {
 	StreetXing pickedXing = null;
-	Random rand = new Random(System.currentTimeMillis());
-	int targetIndex = rand.nextInt(100);
+	int targetIndex = _rand.nextInt(100);
 	int currentIndex = 0;
 
-	for (StreetXing xing : _sourceXings)
-	{
-	    currentIndex += xing.getStartOdds();
-	    if (currentIndex >= targetIndex)
-	    {
+	for (StreetXing xing : _destXings) {
+	    currentIndex += xing.getEndOdds();
+	    if (currentIndex >= targetIndex) {
 		pickedXing = xing;
 		break;
 	    }
 	}
+
 	return pickedXing;
     }
 
@@ -185,44 +208,97 @@ public abstract class TrafficSim
      * 
      * @return
      */
-    protected StreetXing getDest()
-    {
+    private StreetXing getSource() {
 	StreetXing pickedXing = null;
-	Random rand = new Random(System.currentTimeMillis());
-	int targetIndex = rand.nextInt(100);
+	int targetIndex = _rand.nextInt(100);
 	int currentIndex = 0;
 
-	for (StreetXing xing : _destXings)
-	{
-	    currentIndex += xing.getEndOdds();
-	    if (currentIndex >= targetIndex)
-	    {
+	for (StreetXing xing : _sourceXings) {
+	    currentIndex += xing.getStartOdds();
+	    if (currentIndex >= targetIndex) {
 		pickedXing = xing;
 		break;
 	    }
 	}
-
 	return pickedXing;
     }
 
-    protected abstract Logger getLogger();
+    /**
+     * TODO
+     */
+    private void printOutput() {
+	TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	Transformer transformer = null;
+	try {
+	    transformer = transformerFactory.newTransformer();
+	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	} catch (TransformerConfigurationException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
 
-    protected abstract PApplet getApplet();
+	for (Document document : _outputDocMap.values()) {
+
+	    DOMSource source = new DOMSource(document);
+	    StreamResult result = new StreamResult(new StringWriter());
+
+	    try {
+		transformer.transform(source, result);
+		String xmlString = result.getWriter().toString();
+		System.out.println(xmlString);
+		System.out.println("++++++++++");
+	    } catch (TransformerException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	}
+    }
 
     /**
-     * Implement a time series to determine wether to create add a new vehicle
-     * in time T
+     * Return number of cars to generate per step... Should follow a sinoidal
+     * function to mimic traffic waves.
+     * 
+     * @return cars to generate per step
      */
-    protected abstract boolean addVhclP();
+    protected int carFlow() {
+	int carPerStep = 1;
+	// int carPerStep = (int) (floor(sin(schedule.getTime() / 1000.0)
+	// * MAX_CAR_COUNT));
+	// _log.log(Level.FINER, "Creating: " + carPerStep + " cars");
+	return carPerStep;
+
+    }
 
     /**
-     * Create all the geo objs needed to describe the city
+     * Main
+     * 
+     * @param args
      */
-    protected abstract void generateCity();
+    public static void main(String[] args) {
+	_log = Logger.getLogger("SimLogger");
+	_log.setLevel(Level.SEVERE);
 
-    protected abstract List<Agent> getAgents();
+	if (args.length < 2 || "city".equals(args[0])) {
+	    System.err.println("Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+		    + "See TrafficSimulation.xsd for details");
+	    System.exit(1);
 
-    protected abstract List<Road> getRoads();
-
-    protected abstract String getOutputFolderName();
+	}
+	for (int i = 0; i < args.length; i++) {
+	    if ("-city".equals(args[i])) {
+		_cityXml = args[++i];
+	    } else if ("-verbose".equals(args[i]) || "-v".equals(args[i])) {
+		_log.setLevel(Level.INFO);
+	    } else if ("-debug".equals(args[i])) {
+		_log.setLevel(Level.FINE);
+	    }
+	}
+	if (null == _cityXml || "".equals(_cityXml)) {
+	    System.err.println("Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+		    + "See TrafficSimulation.xsd for details");
+	    System.exit(1);
+	}
+	_cityXml = System.getProperty("user.dir") + _cityXml;
+	doLoop(TrafficSim.class, args);
+    }
 }
