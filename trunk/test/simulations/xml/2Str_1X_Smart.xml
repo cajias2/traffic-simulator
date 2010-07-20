@@ -17,8 +17,8 @@
 
 	<trayectory>
 		<origin>
-			<streetNode name="a" percent="99" />
-			<streetNode name="1" percent="1" />
+			<streetNode name="a" percent="70" />
+			<streetNode name="1" percent="30" />
 
 		</origin>
 		<destination>

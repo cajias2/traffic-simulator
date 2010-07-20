@@ -36,18 +36,20 @@ public class SmartTFAgent extends TrafficLightAgent {
     public void step(SimState state_) {
 	double flowNS = _flowMap.get(Orientation.NS);
 	double flowEW = _flowMap.get(Orientation.EW);
-	int newSplit = 0;
+
 	if (!(flowEW == 0 && flowNS == 0)) {
+	    int newSplit = 0;
 
 	    if (flowEW == 0)
 		newSplit = 0;
 	    else if (flowNS == 0)
 		newSplit = 100;
 	    else {
-		newSplit = (int) (((flowNS * 100.0) / (flowNS + flowEW)));
+		newSplit = (int) (((flowEW * 100.0) / (flowNS + flowEW)));
+		System.out.println(newSplit);
 	    }
+	    setSplit(newSplit);
 	}
-	setSplit(newSplit);
 
 	super.step(state_);
 	for (Road rd : getRoads()) {
