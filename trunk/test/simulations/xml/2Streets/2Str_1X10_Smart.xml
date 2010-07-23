@@ -17,8 +17,8 @@
 
 	<trayectory>
 		<origin>
-			<streetNode name="a" percent="90" />
-			<streetNode name="1" percent="10" />
+			<streetNode name="a" percent="10" />
+			<streetNode name="1" percent="90" />
 
 		</origin>
 		<destination>
@@ -27,7 +27,6 @@
 	</trayectory>
 	
     <trafficLights>       
-        <tl from="a" to="1" duration="100" split="0.5"/>  
-                      
+        <tl from="a" to="1" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>                        
     </trafficLights>
 </simulation>

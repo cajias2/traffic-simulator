@@ -1,6 +1,7 @@
 package sim.app;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,9 +101,13 @@ public class TrafficSim extends CitySimState {
 
 	Steppable carGenerator = new Steppable() {
 	    org.apache.commons.collections15.Transformer<Road, Number> rdTrans = new RoadWeightTransformer();
-	    DijkstraShortestPath<StreetXing, Road> routeMap = new DijkstraShortestPath<StreetXing, Road>(getCity(),
-		    rdTrans, false);
+	    // DijkstraShortestPath<StreetXing, Road> routeMap = new
+	    // DijkstraShortestPath<StreetXing, Road>(getCity(),
+	    // rdTrans, false);
+	    DijkstraShortestPath<StreetXing, Road> routeMap = new DijkstraShortestPath<StreetXing, Road>(getCity());
+
 	    int carOrder = 0;
+
 
 	    public void step(SimState state) {
 		if (SIM_TIME <= schedule.getSteps()) {
@@ -224,6 +229,16 @@ public class TrafficSim extends CitySimState {
      * TODO
      */
     private void printOutput() {
+	File outDir = new File(System.getProperty("user.dir") + "/output");
+	if (!outDir.exists())
+	    outDir.mkdir();
+	File outXmlDir = new File(outDir.getAbsoluteFile() + "/" + "xml");
+	if (!outXmlDir.exists())
+	    outXmlDir.mkdir();
+	File outTxtDir = new File(outDir.getAbsoluteFile() + "/" + "txt");
+	if (!outTxtDir.exists())
+	    outTxtDir.mkdir();
+
 	Map<String, List<OutputSection>> tsMap = new HashMap<String, List<OutputSection>>();
 	for (Entry<String, Document> entrySet : _outputDocMap.entrySet()) {
 	    String docName = entrySet.getKey();
@@ -239,14 +254,24 @@ public class TrafficSim extends CitySimState {
 		    tsMap.put(ts.getKey(), ts.getValue());
 		}
 	    }
-	    printXml(docName+"_out", document);
+	    printXml(docName + "_out", document, outXmlDir.getAbsolutePath());
 	}
+	printTxt(tsMap, outTxtDir.getAbsolutePath());
+    }
+
+    /**
+     * @param tsMap
+     */
+    private void printTxt(Map<String, List<OutputSection>> tsMap, String path_) {
 
 	for (Entry<String, List<OutputSection>> ts : tsMap.entrySet()) {
 	    Collections.sort(ts.getValue(), new SectionStartComparator());
+	    double lastStart = -1;
+
+	    // Remove duplicates
 	    try {
 		// Create file
-		FileWriter fstream = new FileWriter(ts.getKey() + ".txt");
+		FileWriter fstream = new FileWriter(path_ + "/" + ts.getKey() + ".txt");
 		BufferedWriter out = new BufferedWriter(fstream);
 		for (OutputSection os : ts.getValue()) {
 		    out.write(os.getStart() + "\t" + os.getSpeed() + "\n");
@@ -266,7 +291,7 @@ public class TrafficSim extends CitySimState {
      * @param 
      * @return void
      */
-    private void printXml(String docName, Document document) {
+    private void printXml(String docName, Document document, String path_) {
 	TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	Transformer transformer = null;
 	try {
@@ -279,7 +304,7 @@ public class TrafficSim extends CitySimState {
 	DOMSource source = new DOMSource(document);
 	try {
 	// Create file
-	FileWriter fstream = new FileWriter(docName + ".xml");
+	    FileWriter fstream = new FileWriter(path_ + "/" + docName + ".xml");
 	BufferedWriter out = new BufferedWriter(fstream);
 	StreamResult result = new StreamResult(out);
 	transformer.transform(source, result);
