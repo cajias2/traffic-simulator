@@ -45,13 +45,16 @@ public class XmlOutputParseService {
 	    Node nd = nl.item(i);
 	    String name = nd.getAttributes().getNamedItem("name").getNodeValue();
 	    if (!sectionMap.containsKey(name))
+ {
 		sectionMap.put(name, new ArrayList<OutputSection>());
+	    }
 	    double start = Double.parseDouble(nd.getAttributes().getNamedItem("start").getNodeValue());
 	    double end = Double.parseDouble(nd.getAttributes().getNamedItem("end").getNodeValue());
 	    double speed = Double.parseDouble(nd.getAttributes().getNamedItem("speed").getNodeValue());
 	    OutputSection os = new OutputSection(name, start, end, speed);
 	    sectionMap.get(name).add(os);
 	}
+
 	return sectionMap;
     }
 }
