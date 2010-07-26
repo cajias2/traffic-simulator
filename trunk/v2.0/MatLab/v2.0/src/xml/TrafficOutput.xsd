@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" >
+
+<xs:element name="output">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="vhcl" minOccurs='0' maxOccurs='unbounded' />
+			</xs:sequence>
+			<xs:attribute name="route" type="string"" use="required"/>			
+		</xs:complexType>
+	</xs:element>
+
+
+	<!-- 
+		Vehicle
+	 -->
+	<xs:element name="vhcl">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="section" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+			<xs:attribute name="start" type="integer" use="required"/>			
+			<xs:attribute name="end" type="integer" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- 
+		Section
+	 -->
+	<xs:element name="section">
+		<xs:complexType>
+			<xs:attribute name="name" type="string" use="required"/>			
+			<xs:attribute name="start" type="integer" use="required"/>			
+			<xs:attribute name="end" type="integer" use="required"/>
+			<xs:attribute name="speed" type="float"" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+</schema>
