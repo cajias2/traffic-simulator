@@ -1,0 +1,6 @@
+
++ Crear calles paralelas (2way streets)
+	Encontrar la relacion entre los puntos (x, y) & (x1, y1)... (Xdelta, Ydelta)
+	Para el proximo punto, movemos (x, y) a una distancia perpendicular a la primera recta, y traamos una nueva recta
+	 manteniendo las relaciones entre los puntos.
+	 	- La distacia == al grosor de la primera linea, para que quede al lado.
