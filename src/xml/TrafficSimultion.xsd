@@ -68,7 +68,7 @@
 	</xs:element>	
 
 	<!--
-		Trayectory 
+		Trajectory 
 	 -->
 	 	<xs:element name="trayectory">
 		<xs:complexType>

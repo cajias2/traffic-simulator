@@ -46,7 +46,7 @@ public class SmartTFAgent extends TrafficLightAgent {
 		newSplit = 100;
 	    else {
 		newSplit = (int) (((flowEW * 100.0) / (flowNS + flowEW)));
-		System.out.println(newSplit);
+		// System.out.println(newSplit);
 	    }
 	    setSplit(newSplit);
 	}

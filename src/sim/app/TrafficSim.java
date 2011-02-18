@@ -168,7 +168,7 @@ public class TrafficSim extends CitySimState {
     }
 
     /**
-     * Cicle through each street crossing and schedule traffic lights if found
+     * Cycle through each street crossing and schedule traffic lights if found
      * O(# of street xings)
      */
     private void scheduleTrafficLights() {
@@ -271,12 +271,17 @@ public class TrafficSim extends CitySimState {
 	    // Remove duplicates
 	    try {
 		// Create file
-		FileWriter fstream = new FileWriter(path_ + "/" + ts.getKey() + ".txt");
-		BufferedWriter out = new BufferedWriter(fstream);
+		FileWriter speedWrt = new FileWriter(path_ + "/speed_" + ts.getKey() + ".txt");
+		FileWriter timeWrt = new FileWriter(path_ + "/time_" + ts.getKey() + ".txt");
+
+		BufferedWriter speedOut = new BufferedWriter(speedWrt);
+		BufferedWriter timeOut = new BufferedWriter(timeWrt);
 		for (OutputSection os : ts.getValue()) {
-		    out.write(os.getStart() + "\t" + os.getSpeed() + "\n");
+		    speedOut.write(os.getStart() + "\t" + os.getSpeed() + "\n");
+		    timeOut.write(os.getStart() + "\t" + os.getEnd() + "\t" + (os.getEnd() - os.getStart()) + "\n");
 		}
-		out.close();
+		speedOut.close();
+		timeOut.close();
 	    } catch (Exception e) {// Catch exception if any
 		System.err.println("Error: " + e.getMessage());
 	    }
