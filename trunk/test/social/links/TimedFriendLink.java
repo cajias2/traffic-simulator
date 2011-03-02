@@ -1,7 +1,7 @@
 /**
  * 
  */
-package graph.edge.social;
+package social.links;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;

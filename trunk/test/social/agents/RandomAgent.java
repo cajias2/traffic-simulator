@@ -1,7 +1,7 @@
 /**
  * 
  */
-package graph.vertex.social;
+package social.agents;
 
 import sim.agents.Agent;
 import sim.engine.SimState;
