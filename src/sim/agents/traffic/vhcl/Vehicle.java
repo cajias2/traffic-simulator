@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.agents.vehicle;
+package sim.agents.traffic.vhcl;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -15,14 +15,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import processing.core.PApplet;
-import sim.agents.display.DisplayableAgent;
+import sim.agents.DisplayableAgent;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
-import sim.geo.Road;
-import sim.geo.StreetXing;
 import sim.geo.distance.Distance;
 import sim.geo.distance.Meters;
+import sim.graph.traffic.Road;
+import sim.graph.traffic.StreetXing;
 import sim.utils.TrafficLightState;
 import edu.uci.ics.jung.graph.Graph;
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.agents.data;
+package sim.agents.traffic;
 
 import sim.utils.TrafficLightState;
 
@@ -9,7 +9,7 @@ import sim.utils.TrafficLightState;
  * @author biggie
  * 
  */
-public class TrafficLight {
+public class TLState {
     private TrafficLightState _state;
 
     /**
@@ -17,7 +17,7 @@ public class TrafficLight {
      * 
      * @param state_
      */
-    public TrafficLight(TrafficLightState state_) {
+    public TLState(TrafficLightState state_) {
 	_state = state_;
     }
 
