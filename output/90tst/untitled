@@ -1,0 +1,27 @@
+
+ts10 = load('time_10.txt');
+ts50 = load('time_50.txt');
+ts90 = load('time_90.txt');
+
+tsSM10 = load('time_Smart10.txt');
+tsSM50 = load('time_Smart50.txt');
+tsSM90 = load('time_Smart90.txt');
+
+
+hold on
+plot (ts10(:,2) - , 'b')%, ts90(:,2))
+plot (tsSM10(:,2), 'r')%, ts90(:,2))
+hold off
+
+
+hold on
+plot (ts50(:,2), 'b')%, ts90(:,2))
+plot (tsSM50(:,2), 'r' )%, ts90(:,2))
+hold off
+
+
+hold on
+plot (ts90(:,2), 'b')%, ts90(:,2))
+plot (tsSM90(:,2), 'r')%, ts90(:,2))
+hold off
+
