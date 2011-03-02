@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.utils.xml;
+package sim.utils.xml.traffic;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
@@ -23,10 +23,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import sim.agents.lights.TrafficLightAgent;
-import sim.geo.Road;
-import sim.geo.Street;
-import sim.geo.StreetXing;
+import sim.agents.traffic.TLAgent;
+import sim.graph.traffic.Road;
+import sim.graph.traffic.Street;
+import sim.graph.traffic.StreetXing;
 import sim.utils.Orientation;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -35,7 +35,7 @@ import edu.uci.ics.jung.graph.util.Pair;
 /**
  * @author biggie
  */
-public class XmlInputParseService {
+public class XmlInputTrafficParseService {
     /**
      * 
      */
@@ -77,7 +77,7 @@ public class XmlInputParseService {
     private final Graph<StreetXing, Road> _g = new DirectedSparseGraph<StreetXing, Road>();
     private final List<StreetXing> _sourceXings = new LinkedList<StreetXing>();
     private final List<StreetXing> _destXings = new LinkedList<StreetXing>();
-    private final List<TrafficLightAgent> _tlAgents = new LinkedList<TrafficLightAgent>();
+    private final List<TLAgent> _tlAgents = new LinkedList<TLAgent>();
     private int _maxCarsInSim;
     private int _simDuration;
 
@@ -86,7 +86,7 @@ public class XmlInputParseService {
      * 
      * @param fileName_
      */
-    public XmlInputParseService(String fileName_, Logger logger_) {
+    public XmlInputTrafficParseService(String fileName_, Logger logger_) {
 	_fileName = fileName_;
 	_logger = logger_;
 	// use a unique display
@@ -115,7 +115,7 @@ public class XmlInputParseService {
 	return _simDuration;
     }
 
-    public List<TrafficLightAgent> getTlAgents() {
+    public List<TLAgent> getTlAgents() {
 	return _tlAgents;
     }
 
@@ -428,7 +428,7 @@ public class XmlInputParseService {
 		{
 		    className = tlNode.getAttributes().getNamedItem(ATTR_TF_CLASS).getNodeValue();
 		}else{
-		    className = TrafficLightAgent.class.getCanonicalName();
+		    className = TLAgent.class.getCanonicalName();
 		}
 		createTl(from, to, duration, split, className);
 	    }
@@ -445,7 +445,7 @@ public class XmlInputParseService {
     private void createTl(String from_, String to_, int duration_, double split_, String className_) {
 	Object[] tfArgs = new Object[] { duration_, split_, _logger };
 	Class[] tfArgsClass = new Class[] { int.class, double.class, Logger.class };
-	TrafficLightAgent tl = null;
+	TLAgent tl = null;
 	try {
 	    tl = instantiateTfObj(className_, tfArgs, tfArgsClass);
 	} catch (Exception e) {
@@ -495,15 +495,15 @@ public class XmlInputParseService {
      * @throws InstantiationException
      * @throws IllegalArgumentException
      */
-    private TrafficLightAgent instantiateTfObj(String className_, Object[] tfArgs_, Class[] tfArgsClass_)
+    private TLAgent instantiateTfObj(String className_, Object[] tfArgs_, Class[] tfArgsClass_)
 	    throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
 	    InstantiationException, IllegalAccessException, InvocationTargetException {
 	 Class tfClazz = Class.forName(className_);
 	 Constructor cons = tfClazz.getConstructor(tfArgsClass_);
 
 	Object obj = cons.newInstance(tfArgs_);
-	assert obj instanceof TrafficLightAgent;
-	return (TrafficLightAgent) obj;
+	assert obj instanceof TLAgent;
+	return (TLAgent) obj;
     }
 
     /**

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.utils.xml;
+package sim.utils.xml.traffic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +12,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import sim.geo.Road;
-import sim.geo.StreetXing;
+import sim.graph.traffic.Road;
+import sim.graph.traffic.StreetXing;
 import sim.utils.xml.data.OutputSection;
 import edu.uci.ics.jung.graph.Graph;
 

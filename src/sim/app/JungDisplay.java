@@ -1,4 +1,4 @@
-package sim.app.jung;
+package sim.app;
 
 /*
  * This is a simple display capable of working with MASON and displaying JUNG
@@ -33,15 +33,14 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import sim.app.CitySimState;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.display.SimApplet;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
-import sim.geo.Road;
-import sim.geo.StreetXing;
+import sim.graph.traffic.Road;
+import sim.graph.traffic.StreetXing;
 import sim.util.Utilities;
 import sim.util.media.PngEncoder;
 import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
@@ -164,7 +163,7 @@ public class JungDisplay extends JComponent implements Steppable {
 	 * Layout is the JUNG's procedure which plans how the graph will be
 	 * drawn. Check out other layouts, by default we will use Kamada-Kawai.
 	 */
-	Graph<StreetXing, Road> city = ((CitySimState) simulation.state).getCity();
+	Graph<StreetXing, Road> city = ((NetworkSimState) simulation.state).getNwrk();
 	DijkstraDistance<StreetXing, Road> distance = new DijkstraDistance<StreetXing, Road>(city);
 	layout = new KKLayout<StreetXing, Road>(city, distance);
 
