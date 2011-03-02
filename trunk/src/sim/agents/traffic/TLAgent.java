@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.agents.lights;
+package sim.agents.traffic;
 
 import java.awt.geom.Point2D;
 import java.util.HashMap;
@@ -11,18 +11,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import sim.agents.data.TrafficLight;
-import sim.agents.display.DisplayableAgent;
+import sim.agents.DisplayableAgent;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.geo.Road;
+import sim.graph.traffic.Road;
 import sim.utils.Orientation;
 import sim.utils.TrafficLightState;
 
 /**
  * @author biggie
  */
-public class TrafficLightAgent extends DisplayableAgent implements Steppable {
+public class TLAgent extends DisplayableAgent implements Steppable {
 
     private static final long serialVersionUID = 1829654668132095868L;
     private static Logger _log;
@@ -32,7 +31,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
     private final List<Road> _roadList = new LinkedList<Road>();
     private int _timeLeft;
     private int _stateIdx;
-    private final Map<Orientation, TrafficLight> _stateMap;
+    private final Map<Orientation, TLState> _stateMap;
     private Point2D _location;
 
     private final int ID;
@@ -47,7 +46,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
      *            number ranging from 0 - 1
      * @param log_
      */
-    public TrafficLightAgent(int duration_, double split_,
+    public TLAgent(int duration_, double split_,
 	    Logger log_)
     {
         assert split_ <= 1 && split_ >= 0;
@@ -60,9 +59,9 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
         resetDurationArr();
     
         // Initialize state map
-        _stateMap = new HashMap<Orientation, TrafficLight>(2);
-        _stateMap.put(Orientation.EW, new TrafficLight(TrafficLightState.GREEN));
-        _stateMap.put(Orientation.NS, new TrafficLight(TrafficLightState.RED));
+        _stateMap = new HashMap<Orientation, TLState>(2);
+        _stateMap.put(Orientation.EW, new TLState(TrafficLightState.GREEN));
+        _stateMap.put(Orientation.NS, new TLState(TrafficLightState.RED));
     
         _stateIdx = 0;
         resetTimer(_stateIdx);
@@ -135,7 +134,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
      * 
      * @return
      */
-    public TrafficLight getTf(Orientation or_) {
+    public TLState getTf(Orientation or_) {
 	return _stateMap.get(or_);
     }
 
@@ -183,7 +182,7 @@ public class TrafficLightAgent extends DisplayableAgent implements Steppable {
      */
     private void updateLights() {
 	// Cicle through the state list
-	for (Entry<Orientation, TrafficLight> entry : _stateMap.entrySet()) {
+	for (Entry<Orientation, TLState> entry : _stateMap.entrySet()) {
 	    if (TrafficLightState.GREEN == entry.getValue().getState()) {
 		entry.getValue().setState(TrafficLightState.RED);
 	    } else {

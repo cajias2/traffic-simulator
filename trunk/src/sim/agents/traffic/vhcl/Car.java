@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.agents.vehicle;
+package sim.agents.traffic.vhcl;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -9,11 +9,11 @@ import java.util.logging.Logger;
 import org.w3c.dom.Document;
 
 import processing.core.PApplet;
-import sim.geo.Road;
-import sim.geo.StreetXing;
 import sim.geo.distance.Distance;
 import sim.geo.distance.Kilometers;
 import sim.geo.distance.Meters;
+import sim.graph.traffic.Road;
+import sim.graph.traffic.StreetXing;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
