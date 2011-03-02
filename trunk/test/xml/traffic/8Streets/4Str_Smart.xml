@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simulation maxCars="100" simDuration="1000" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TrafficSimultion.xsd">
+
+    <streets>
+        <street name="a" orientation="EW" dir="2way">
+        	<point x="10" y="10"/>
+        	<point x="600" y="10"/>
+        </street>
+        <street name="b" orientation="EW" dir="2way">
+        	<point x="10" y="20"/>
+        	<point x="600" y="20"/>
+        </street>
+        <street name="c" orientation="EW" dir="2way">
+        	<point x="10" y="30"/>
+        	<point x="600" y="30"/>
+        </street>
+        <street name="d" orientation="EW" dir="2way">
+        	<point x="10" y="40"/>
+        	<point x="600" y="40"/>
+        </street>        
+
+
+        <street name="1" orientation="NS" dir="2way">
+        	<point x="15" y="5"/>
+        	<point x="10" y="600"/>
+        </street>
+        <street name="2" orientation="NS" dir="2way">
+        	<point x="20" y="5"/>
+        	<point x="20" y="600"/>
+        </street>
+        <street name="3" orientation="NS" dir="2way">
+        	<point x="30" y="5"/>
+        	<point x="30" y="600"/>
+        </street>
+        <street name="4" orientation="NS" dir="2way">
+        	<point x="40" y="5"/>
+        	<point x="40" y="600"/>
+        </street>                                          
+                 
+    </streets>
+
+	<trayectory>
+		<origin>
+			<streetNode name="a" percent="20" />
+			<streetNode name="b" percent="20" />
+			<streetNode name="c" percent="20" />
+			<streetNode name="d" percent="40" />
+		</origin>
+		<destination>
+			<streetNode name="1" percent="25" />
+			<streetNode name="2" percent="25" />
+			<streetNode name="3" percent="25" />
+			<streetNode name="4" percent="25" />
+		</destination>
+	</trayectory>
+	
+    <trafficLights>       
+        <tl from="a" to="1" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="a" to="2" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="a" to="3" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="a" to="4" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+
+        
+        <tl from="b" to="1" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="b" to="2" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="b" to="3" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="b" to="4" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+
+
+        <tl from="c" to="1" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="c" to="2" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="c" to="3" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="c" to="4" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+ 
+        
+        <tl from="d" to="1" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="d" to="2" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="d" to="3" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+        <tl from="d" to="4" duration="100" split="0.5" class="simulations.agents.lights.SmartTFAgent"/>  
+
+                      
+    </trafficLights>
+</simulation>
