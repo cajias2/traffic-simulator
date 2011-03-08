@@ -4,9 +4,7 @@
 package sim.app;
 
 import sim.engine.SimState;
-import sim.graph.traffic.Road;
-import sim.graph.traffic.StreetXing;
-import edu.uci.ics.jung.graph.Graph;
+import sim.mason.AgentNetwork;
 
 /**
  * @author biggie
@@ -15,7 +13,7 @@ import edu.uci.ics.jung.graph.Graph;
 @SuppressWarnings("serial")
 public class NetworkSimState extends SimState {
 
-    private Graph<StreetXing, Road> _ntwrk;
+    private AgentNetwork _ntwrk;
 
     /**
      * 
@@ -29,7 +27,7 @@ public class NetworkSimState extends SimState {
      * 
      * @param ntwrk_
      */
-    public void setNetwork(Graph<StreetXing, Road> ntwrk_) {
+    public void setNetwork(AgentNetwork ntwrk_) {
 	_ntwrk = ntwrk_;
     }
 
@@ -37,7 +35,7 @@ public class NetworkSimState extends SimState {
      * 
      * @return
      */
-    public Graph<StreetXing, Road> getNwrk() {
+    public AgentNetwork getNwrk() {
 	return _ntwrk;
     }
 }

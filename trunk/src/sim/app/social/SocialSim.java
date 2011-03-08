@@ -1,15 +1,21 @@
 package sim.app.social;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import sim.agents.traffic.vhcl.Vehicle;
+import sim.agents.Agent;
 import sim.app.NetworkSimState;
 import sim.engine.Schedule;
-import sim.engine.SimState;
-import sim.engine.Steppable;
-import sim.utils.xml.traffic.XmlInputTrafficParseService;
+import sim.field.continuous.Continuous2D;
+import sim.mason.AgentNetwork;
+import sim.util.Double2D;
+import sim.utils.xml.social.SocialInputParseService;
 
 @SuppressWarnings("serial")
 public class SocialSim extends NetworkSimState {
@@ -19,19 +25,21 @@ public class SocialSim extends NetworkSimState {
     private static String _simXml;
     private static Random _rand = new Random(System.currentTimeMillis());
 
-    public static int AGENT_COUNT;
-    public static int SIM_TIME;
-
+    private final int AGENT_COUNT;
+    private final int SIM_TIME;
+    private Map _agentMap;
+    public Continuous2D environment = null;
+    public AgentNetwork network = null;
     /**
      * Creates a TrafficSim simulation with the given random number seed.
      */
     public SocialSim(long seed, String simXml_, Logger log_) {
 	super(seed);
 	simXml_ = System.getProperty("user.dir") + simXml_;
-	XmlInputTrafficParseService parsedGraph = new XmlInputTrafficParseService(simXml_, log_);
-	setNetwork(parsedGraph.getGraph());
-	AGENT_COUNT = parsedGraph.getMaxCars();
-	SIM_TIME = parsedGraph.getSimDuration();
+	SocialInputParseService parsedIn = new SocialInputParseService(simXml_, log_);
+
+	AGENT_COUNT = parsedIn.getAgentNum();
+	SIM_TIME = parsedIn.getSimDuration();
 	_log = log_;
     }
 
@@ -41,10 +49,18 @@ public class SocialSim extends NetworkSimState {
      */
     public SocialSim(long seed) {
 	super(seed);
-	XmlInputTrafficParseService parsedGraph = new XmlInputTrafficParseService(_simXml, _log);
-	setNetwork(parsedGraph.getGraph());
-	AGENT_COUNT = parsedGraph.getMaxCars();
-	SIM_TIME = parsedGraph.getSimDuration();
+	SocialInputParseService parseSrv = new SocialInputParseService(_simXml, _log);
+	parseSrv.parseSim();
+	_agentMap = parseSrv.parseAgents();
+	AGENT_COUNT = parseSrv.getAgentNum();
+	SIM_TIME = parseSrv.getSimDuration();
+    }
+
+    boolean acceptablePosition(final Agent node, final Double2D location) {
+	if (location.x < DIAMETER / 2 || location.x > (XMAX - XMIN) - DIAMETER / 2 || location.y < DIAMETER / 2
+		|| location.y > (YMAX - YMIN) - DIAMETER / 2)
+	    return false;
+	return true;
     }
 
     /**
@@ -54,21 +70,45 @@ public class SocialSim extends NetworkSimState {
     public void start() {
 	super.start();
 	schedule.reset(); // clear out the schedule
-
-	Steppable carGenerator = new Steppable() {
-
-	    public void step(SimState state) {
-		if (SIM_TIME <= schedule.getSteps()) {
-		    for (Vehicle v : Vehicle.getActiveVhcl()) {
-			v.finalizeLog(schedule.getSteps());
+	
+	for (int i = 0; i < AGENT_COUNT; i++) {
+	    double ticket = _rand.nextDouble() * 100;
+	    double winner = 0.0;
+	    Iterator<Entry<Class<Agent>, Double>> it = _agentMap.entrySet().iterator();
+	    while (it.hasNext()) {
+		Entry<Class<Agent>, Double> entry = it.next();
+		winner += entry.getValue();
+		if (winner >= ticket) {
+		    try {
+			schedule.scheduleRepeating(Schedule.EPOCH, 1, instantiateAgentObj(entry.getKey()), 1);
+		    } catch (Exception e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
 		    }
-		    state.finish();
-		    System.exit(0);
 		}
 	    }
-	};
-	// Schedule the car Generator
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, carGenerator, 1);
+	}
+    }
+
+    /**
+     * @param className_
+     * @param agentArgs_
+     * @param agentArgsClass_
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws IllegalArgumentException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private Agent instantiateAgentObj(Class<Agent> clazz_)
+	    throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
+	    InstantiationException, IllegalAccessException, InvocationTargetException {
+	Constructor<Agent> cons = clazz_.getConstructor();
+	Object obj = cons.newInstance();
+	return (Agent) obj;
     }
 
     /**
