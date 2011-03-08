@@ -5,7 +5,7 @@ package social.links;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.graph.social.edge.FriendLink;
+import sim.graph.social.link.FriendLink;
 
 /**
  * @author biggie

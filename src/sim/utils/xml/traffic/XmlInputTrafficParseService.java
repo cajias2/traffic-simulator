@@ -367,9 +367,7 @@ public class XmlInputTrafficParseService {
 
 	    } else if (NODE_TRAY_DEST.equals(trayNodes.item(i).getNodeName())) {
 		parseTrayNode(trayNodes.item(i).getChildNodes(), false);
-
 	    }
-
 	}
     }
 
