@@ -3,7 +3,7 @@
  */
 package social.links;
 
-import sim.graph.social.edge.FriendLink;
+import sim.graph.social.link.FriendLink;
 
 /**
  * @author biggie

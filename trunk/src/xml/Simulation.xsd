@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/Simulation" xmlns:tns="http://www.example.org/Simulation" elementFormDefault="qualified">
+
+
+<xs:element name="simulation">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="agents" minOccurs='0' maxOccurs='unbounded' />
+			</xs:sequence>
+			<xs:attribute name="type" type="symType" use="optional"
+				default="social" />			
+			<xs:attribute name="agents" type="xs:decimal" use="required" />
+			<xs:attribute name="duration" type="xs:decimal" use="required" />
+			<xs:attribute name="width" type="xs:decimal" use="required" />
+			<xs:attribute name="length" type="xs:decimal" use="required" />
+
+		</xs:complexType>
+	</xs:element>
+
+	<!-- 
+		Agents
+	 -->		 
+	<xs:element name="agents">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="agent" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+
+	<xs:element name="agent">
+		<xs:complexType>	
+			<xs:attribute name="pcnt" type="xs:integer" use="required" default="0"/>
+			<xs:attribute name="class" type="xs:string" use="required"/>		
+		</xs:complexType>
+	</xs:element>	
+	
+	
+	<!-- 
+		Links
+	 -->		 
+	<xs:element name="links">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="link" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+
+	<xs:element name="link">
+		<xs:complexType>	
+			<xs:attribute name="pcnt" type="xs:integer" use="required" default="0"/>
+			<xs:attribute name="class" type="xs:string" use="required"/>		
+		</xs:complexType>
+	</xs:element>	
+	
+
+
+
+</xs:schema>
