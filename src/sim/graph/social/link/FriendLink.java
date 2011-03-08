@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.graph.social.edge;
+package sim.graph.social.link;
 
 /**
  * @author biggie
