@@ -33,4 +33,10 @@ public class SimpleFriendLink extends FriendLink {
 
     }
 
+    @Override
+    public String toString()
+    {
+	return "";
+    }
+
 }
