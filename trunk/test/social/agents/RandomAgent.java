@@ -47,14 +47,16 @@ public class RandomAgent extends Agent {
     public void step(final SimState state_) {
 	SocialSim socSim = (SocialSim) state_;
 	Double2D currLoc = socSim.fieldEnvironment.getObjectLocation(this);
-	Bag objs = socSim.fieldEnvironment.getObjectsWithinDistance(new Double2D(currLoc.x, currLoc.y), ACTION_DIM);
+	Bag objs = socSim.fieldEnvironment.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y),
+		ACTION_DIM);
 
 	Iterator<Agent> iter = objs.iterator();
-	while(iter.hasNext())
-	{
-	    Agent ag  = iter.next();
-	    if (makeFriend(ag, state_)) {
-		socSim.network.addEdge(this, ag, new SimpleFriendLink(state_.random.nextDouble()));
+	while (iter.hasNext()) {
+	    Agent ag = iter.next();
+	    if (this != ag) {
+		if (makeFriend(ag, state_)) {
+		    socSim.network.addEdge(this, ag, new SimpleFriendLink(state_.random.nextDouble()));
+		}
 	    }
 	}
 
