@@ -3,30 +3,36 @@
  */
 package sim.mason;
 
+import static edu.uci.ics.jung.algorithms.metrics.Metrics.clusteringCoefficients;
+
 import java.util.Collection;
+import java.util.Map;
 
 import sim.agents.Agent;
 import sim.field.network.Network;
 import sim.graph.social.link.FriendLink;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
+;
 /**
  * @author biggie
  *
  */
 public class AgentNetwork extends Network {
-    
-    private Graph<Agent, FriendLink> _jgraph;
+
+    private final Graph<Agent, FriendLink> _jgraph;
 
     public AgentNetwork() {
 	super();
-	_jgraph = new DirectedSparseGraph<Agent, FriendLink>();
+	_jgraph = new UndirectedSparseGraph<Agent, FriendLink>();
     }
 
     public AgentNetwork(boolean directed_) {
 	super(directed_);
+	_jgraph = new UndirectedSparseGraph<Agent, FriendLink>();
+
     }
 
     /**
@@ -66,6 +72,48 @@ public class AgentNetwork extends Network {
      */
     public Collection<FriendLink> getJungEdges() {
 	return _jgraph.getEdges();
+    }
+
+    /**
+     * 
+     * @author biggie
+     * @name hasEdge Purpose TODO
+     * 
+     * @param
+     * @return boolean
+     */
+    public boolean hasEdge(Agent a_, Agent b_) {
+	return _jgraph.getNeighbors(a_).contains(b_);
+    }
+
+    /**
+     * 
+     * @author biggie
+     * @name clusterIndex Purpose TODO
+     * 
+     * @param
+     * @return Double
+     */
+    public Double avgClusterCoeff() {
+	Map<Agent, Double> ciMap = clusteringCoefficients(_jgraph);
+	double ciAvg = 0.0;
+	for (Double ci : ciMap.values()) {
+	    ciAvg += ci;
+	}
+	return ciAvg / ciMap.size();
+    }
+
+    public Double avgDeg() {
+	Collection<Agent> agents = _jgraph.getVertices();
+	double avgDeg = 0.0;
+	for (Agent ag : agents) {
+	    avgDeg += _jgraph.outDegree(ag);
+	}
+	return avgDeg / _jgraph.getVertexCount();
+    }
+
+    public final Graph<Agent, FriendLink> getJGraph() {
+	return _jgraph;
     }
 
 }
