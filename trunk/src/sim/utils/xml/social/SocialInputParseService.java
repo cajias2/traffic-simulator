@@ -6,6 +6,7 @@ package sim.utils.xml.social;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -155,4 +156,42 @@ public class SocialInputParseService {
 	}
 	return classMap;
     }
+
+    /**
+     * 
+     * @author biggie
+     * @name parseCmdLnArgs Purpose TODO
+     * 
+     * @param
+     * @return String
+     */
+    public static String parseCmdLnArgs(String[] args_, Logger log_) {
+	String simXml = "";
+	if (args_.length < 2) {
+	    printMsgAndExit();
+	}
+
+	for (int i = 0; i < args_.length; i++) {
+	    if ("-sim".equals(args_[i])) {
+		simXml = args_[++i];
+	    } else if ("-verbose".equals(args_[i]) || "-v".equals(args_[i])) {
+		log_.setLevel(Level.INFO);
+	    } else if ("-debug".equals(args_[i])) {
+		log_.setLevel(Level.FINE);
+	    }
+	}
+	if (null == simXml || "".equals(simXml)) {
+	    printMsgAndExit();
+	}
+	return System.getProperty("user.dir") + simXml;
+    }
+
+    /**
+     * Error message.
+     */
+    private static void printMsgAndExit() {
+	System.err.println("Usage: java -jar [name].jar -city [xml file]\n" + "See Simulation.xsd for details");
+	System.exit(1);
+    }
+
 }

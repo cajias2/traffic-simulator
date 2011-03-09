@@ -6,6 +6,7 @@ package sim.agents;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
+import sim.util.Double2D;
 
 /**
  * @author biggie
@@ -13,15 +14,18 @@ import sim.engine.Steppable;
  */
 public abstract class Agent implements Steppable {
 
+
     /**
-     * Update the state of this agent.
-     * @param state_ TODO
+     * Move to a new loc. Default is random.
+     * 
+     * @param state_
+     *            TODO
      */
-    public abstract void move(SimState state_);
+    protected abstract Double2D move(SimState state_);
 
     /**
      * @param state_
      * @return
      */
-    public abstract boolean makeFriend(SimState state_);
+    protected abstract boolean makeFriend(Agent ag_, SimState state_);
 }

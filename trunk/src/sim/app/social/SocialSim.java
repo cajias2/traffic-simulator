@@ -10,8 +10,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import sim.agents.Agent;
+import sim.agents.social.MetricsAgent;
 import sim.app.NetworkSimState;
 import sim.engine.Schedule;
+import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.mason.AgentNetwork;
 import sim.util.Double2D;
@@ -25,40 +28,68 @@ public class SocialSim extends NetworkSimState {
     private static String _simXml;
     private static Random _rand = new Random(System.currentTimeMillis());
 
-    private final int AGENT_COUNT;
-    private final int SIM_TIME;
-    private Map _agentMap;
-    public Continuous2D environment = null;
-    public AgentNetwork network = null;
-    /**
-     * Creates a TrafficSim simulation with the given random number seed.
-     */
-    public SocialSim(long seed, String simXml_, Logger log_) {
-	super(seed);
-	simXml_ = System.getProperty("user.dir") + simXml_;
-	SocialInputParseService parsedIn = new SocialInputParseService(simXml_, log_);
+    public static int XMIN = 0;
+    public static int XMAX;
+    public static int YMIN = 0;
+    public static int YMAX;
 
-	AGENT_COUNT = parsedIn.getAgentNum();
-	SIM_TIME = parsedIn.getSimDuration();
-	_log = log_;
-    }
+    public static final double DIAMETER = 8;
+
+    private final int AGENT_COUNT;
+    public final int SIM_TIME;
+    private final Map _agentMap;
+    public AgentNetwork network = null;
+    public Continuous2D fieldEnvironment;
 
     /**
      * Creates a NetworkTest simulation with the given random number seed.
      * _cityXml must be set first!
+     * 
+     * @author biggie SocialSim
      */
     public SocialSim(long seed) {
+	this(seed, _simXml);
+    }
+
+    public SocialSim(long seed, String _simXml) {
 	super(seed);
 	SocialInputParseService parseSrv = new SocialInputParseService(_simXml, _log);
 	parseSrv.parseSim();
 	_agentMap = parseSrv.parseAgents();
 	AGENT_COUNT = parseSrv.getAgentNum();
 	SIM_TIME = parseSrv.getSimDuration();
+	XMAX = parseSrv.getWidth();
+	YMAX = parseSrv.getLen();
+	network = new AgentNetwork();
+	createGrids();
     }
 
-    boolean acceptablePosition(final Agent node, final Double2D location) {
-	if (location.x < DIAMETER / 2 || location.x > (XMAX - XMIN) - DIAMETER / 2 || location.y < DIAMETER / 2
-		|| location.y > (YMAX - YMIN) - DIAMETER / 2)
+    /**
+     * 
+     * @author biggie
+     * @name createGrids Purpose TODO
+     * 
+     * @param
+     * @return void
+     */
+    private void createGrids() {
+	fieldEnvironment = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
+    }
+
+    /**
+     * @author biggie
+     * @name acceptablePosition Purpose Validate new position: Make sure not
+     *       over the boundaries.
+     * 
+     * @param node_
+     *            a given node
+     * @param location_
+     *            proposed location
+     * @return boolean
+     */
+    public boolean acceptablePosition(final Agent node_, final Double2D location_) {
+	if (location_.x < DIAMETER / 2 || location_.x > (XMAX - XMIN) - DIAMETER / 2 || location_.y < DIAMETER / 2
+		|| location_.y > (YMAX - YMIN) - DIAMETER / 2)
 	    return false;
 	return true;
     }
@@ -70,17 +101,36 @@ public class SocialSim extends NetworkSimState {
     public void start() {
 	super.start();
 	schedule.reset(); // clear out the schedule
-	
+
+	// Dummy agent that kills sim after set steps
+	Steppable simKiller = new Steppable() {
+	    public void step(SimState state) {
+		if (SIM_TIME <= schedule.getSteps()) {
+		    state.finish();
+		    System.exit(0);
+		}
+	    }
+	};
+	/*
+	 * Schedule agents by set percent
+	 */
 	for (int i = 0; i < AGENT_COUNT; i++) {
 	    double ticket = _rand.nextDouble() * 100;
 	    double winner = 0.0;
+	    Agent ag;
+
 	    Iterator<Entry<Class<Agent>, Double>> it = _agentMap.entrySet().iterator();
 	    while (it.hasNext()) {
 		Entry<Class<Agent>, Double> entry = it.next();
 		winner += entry.getValue();
 		if (winner >= ticket) {
-		    try {
-			schedule.scheduleRepeating(Schedule.EPOCH, 1, instantiateAgentObj(entry.getKey()), 1);
+		    try {			
+			ag = instantiateAgentObj(entry.getKey());
+			fieldEnvironment.setObjectLocation(ag, new Double2D(random.nextDouble()
+				* (XMAX - XMIN - DIAMETER) + XMIN + DIAMETER / 2, random.nextDouble()
+				* (YMAX - YMIN - DIAMETER) + YMIN + DIAMETER / 2));
+			network.addNode(ag);
+			schedule.scheduleRepeating(Schedule.EPOCH, 1, ag, 1);
 		    } catch (Exception e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
@@ -88,64 +138,44 @@ public class SocialSim extends NetworkSimState {
 		}
 	    }
 	}
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
+	// Schedule simKiller last.
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, simKiller, 1);
     }
 
+
     /**
-     * @param className_
-     * @param agentArgs_
-     * @param agentArgsClass_
-     * @return
-     * @throws ClassNotFoundException
-     * @throws SecurityException
-     * @throws NoSuchMethodException
-     * @throws IllegalArgumentException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
+     * 
+     * @author biggie
+     * @name instantiateAgentObj Purpose TODO
+     * 
+     * @param
+     * @return Agent
      */
     private Agent instantiateAgentObj(Class<Agent> clazz_)
-	    throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
-	    InstantiationException, IllegalAccessException, InvocationTargetException {
+ throws ClassNotFoundException, SecurityException,
+	    NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException,
+	    InvocationTargetException {
 	Constructor<Agent> cons = clazz_.getConstructor();
 	Object obj = cons.newInstance();
 	return (Agent) obj;
     }
 
     /**
-     * Main
      * 
-     * @param args
+     * @author biggie
+     * @name main Purpose TODO
+     * 
+     * @param
+     * @return void
      */
     public static void main(String[] args) {
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
 
-	if (args.length < 2) {
-	    printMsgAndExit();
-	}
-
-	for (int i = 0; i < args.length; i++) {
-	    if ("-sim".equals(args[i])) {
-		_simXml = args[++i];
-	    } else if ("-verbose".equals(args[i]) || "-v".equals(args[i])) {
-		_log.setLevel(Level.INFO);
-	    } else if ("-debug".equals(args[i])) {
-		_log.setLevel(Level.FINE);
-	    }
-	}
-	if (null == _simXml || "".equals(_simXml)) {
-	    printMsgAndExit();
-	}
-	_simXml = System.getProperty("user.dir") + _simXml;
+	_simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
 	doLoop(SocialSim.class, args);
     }
 
-    /**
-     * Error message.
-     */
-    private static void printMsgAndExit() {
-	System.err.println("Usage: java -jar " + clazz + ".jar -city [xml file]\n"
-	    + "See TrafficSimulation.xsd for details");
-	System.exit(1);
-    }
+
 }
