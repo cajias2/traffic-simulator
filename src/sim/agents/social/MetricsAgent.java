@@ -35,7 +35,7 @@ public class MetricsAgent extends Agent {
 	try {
 	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".txt");
 	    _outWrt = new BufferedWriter(outFileWrt);
-	    _outWrt.write("TimeStep\t avgCI\t avgDeg\n");
+	    System.out.println("OUTPUT:\tTimeStep\t avgCI\t avgDeg\t Edges\n");
 
 	} catch (IOException e) {
 	    // TODO Auto-generated catch block
@@ -51,14 +51,19 @@ public class MetricsAgent extends Agent {
     public void step(SimState state_) {
 	if (null != _outWrt) {
 	    SocialSim socSim = (SocialSim) state_;
-	    double ts = socSim.schedule.time();
+	    int nodeCount = socSim.network.getJGraph().getVertexCount();
+	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
+	    double ts = socSim.schedule.time() + 1;
 	    double avgCi = socSim.network.avgClusterCoeff();
 	    double avgDeg = socSim.network.avgDeg();
-	    double myAvgCi = clusterIdx(socSim.network.getJGraph());
+	    double edgepnct = socSim.network.getJGraph().getEdgeCount() / maxEdges;
+	    if (socSim.network.getJGraph().getEdgeCount() > maxEdges) {
+		System.out.println("WTF");
+	    }
 
 	    // Remove duplicates
 	    try {
-		_outWrt.write(ts + "\t" + avgCi + "\t" + myAvgCi + "\t" + avgDeg + "\n");
+		_outWrt.write(ts + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\n");
 		_outWrt.flush();
 		if (socSim.SIM_TIME < ts) {
 		    _outWrt.close();
