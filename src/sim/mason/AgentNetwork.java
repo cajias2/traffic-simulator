@@ -83,7 +83,7 @@ public class AgentNetwork extends Network {
      * @return boolean
      */
     public boolean hasEdge(Agent a_, Agent b_) {
-	return _jgraph.getNeighbors(a_).contains(b_);
+	return _jgraph.findEdge(a_, b_) != null;
     }
 
     /**
