@@ -109,7 +109,7 @@ public class AgentNetwork extends Network {
 	for (Agent ag : agents) {
 	    avgDeg += _jgraph.outDegree(ag);
 	}
-	return avgDeg / _jgraph.getVertexCount();
+	return avgDeg / (_jgraph.getVertexCount() + 0.0);
     }
 
     public final Graph<Agent, FriendLink> getJGraph() {

@@ -14,15 +14,15 @@ import java.io.IOException;
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.graph.social.link.FriendLink;
-import sim.util.Double2D;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
  * 
  */
-public class MetricsAgent extends Agent {
+public class MetricsAgent implements Steppable {
 
     private BufferedWriter _outWrt = null;
 
@@ -106,27 +106,4 @@ public class MetricsAgent extends Agent {
 	}
 	return clusterIdxAvg;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sim.agents.Agent#move(sim.engine.SimState)
-     */
-    @Override
-    protected Double2D move(SimState state_) {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sim.agents.Agent#makeFriend(sim.agents.Agent, sim.engine.SimState)
-     */
-    @Override
-    protected boolean makeFriend(Agent ag_, SimState state_) {
-	// TODO Auto-generated method stub
-	return false;
-    }
-
 }
