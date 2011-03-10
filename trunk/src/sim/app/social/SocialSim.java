@@ -156,8 +156,11 @@ public class SocialSim extends NetworkSimState {
  throws ClassNotFoundException, SecurityException,
 	    NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException,
 	    InvocationTargetException {
-	Constructor<Agent> cons = clazz_.getConstructor();
-	Object obj = cons.newInstance();
+	Object[] argObj = new Object[] { this };
+	Class[] argClass = new Class[] { SimState.class };
+
+	Constructor<Agent> cons = clazz_.getConstructor(argClass);
+	Object obj = cons.newInstance(argObj);
 	return (Agent) obj;
     }
 
