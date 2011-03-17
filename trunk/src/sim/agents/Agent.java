@@ -42,7 +42,6 @@ public class Agent implements Steppable {
 	SocialSim socSim = (SocialSim) state_;
 	_net = socSim.network;
 	_rand = socSim.random;
-
     }
 
     /**
@@ -171,6 +170,8 @@ public class Agent implements Steppable {
 	graphics.setColor(Color.red);
 	graphics.fillOval((int) (info.draw.x - diamx / 2), (int) (info.draw.y - diamy / 2), (int) (diamx),
 		(int) (diamy));
+	graphics.drawOval((int) (info.draw.x - diamx / 2), (int) (info.draw.y - diamy / 2),
+		(int) (diamx + _actionDim / 2), (int) (diamy + _actionDim / 2));
 	graphics.setFont(nodeFont.deriveFont(nodeFont.getSize2D() * (float) info.draw.width));
 	graphics.setColor(Color.blue);
 	// graphics.drawString(toString(), (int) (info.draw.x - diamx / 2),
