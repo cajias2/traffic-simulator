@@ -8,7 +8,6 @@ import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.util.Double2D;
-import ec.util.MersenneTwisterFast;
 
 /**
  * @author biggie
@@ -45,7 +44,6 @@ public class BrownianAgent extends Agent {
      * 
      */
     private static final long serialVersionUID = 8377908360389402790L;
-    private final MersenneTwisterFast _rand = null;
 
     /**
      * @param state_
