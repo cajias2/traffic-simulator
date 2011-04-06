@@ -95,4 +95,9 @@ public class MsgrAgent extends Agent {
     protected boolean matchCriteria(Agent ag_) {
 	return _rand.nextBoolean();
     }
+
+    @Override
+    public String toString() {
+	return "MSGR_" + _id;
+    }
 }
