@@ -10,19 +10,26 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Set;
+
+import org.jgrapht.UndirectedGraph;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.graph.social.link.FriendLink;
-import edu.uci.ics.jung.graph.Graph;
+import sim.graph.social.metrics.BronKerboschKCliqueFinder;
+import sim.graph.social.metrics.CPMCommunityFinder;
 
 /**
  * @author biggie
+ * @param <V>
+ * @param <E>
  * 
  */
-public class MetricsAgent implements Steppable {
+public class MetricsAgent<V, E> implements Steppable {
 
     private BufferedWriter _outWrt = null;
 
@@ -35,7 +42,7 @@ public class MetricsAgent implements Steppable {
 	try {
 	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".txt");
 	    _outWrt = new BufferedWriter(outFileWrt);
-	    System.out.println("OUTPUT:\tTimeStep\t avgCI\t avgDeg\t Edges\n");
+	    System.out.println("OUTPUT:\tTimeStep\t avgCI\t avgDeg\t Edges\tKCliques\n");
 
 	} catch (IOException e) {
 	    // TODO Auto-generated catch block
@@ -52,18 +59,36 @@ public class MetricsAgent implements Steppable {
 	if (null != _outWrt) {
 	    SocialSim socSim = (SocialSim) state_;
 	    int nodeCount = socSim.network.getJGraph().getVertexCount();
+
 	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
 	    double ts = socSim.schedule.time() + 1;
 	    double avgCi = socSim.network.avgClusterCoeff();
 	    double avgDeg = socSim.network.avgDeg();
 	    double edgepnct = socSim.network.getJGraph().getEdgeCount() / maxEdges;
-	    if (socSim.network.getJGraph().getEdgeCount() > maxEdges) {
-		System.out.println("WTF");
+	    Collection<Set<Agent>> kcliques = null;
+	    Collection<Set<Agent>> cpmCom = null;
+	    if (ts % 10 == 0) {
+		kcliques = findKCliques(socSim.network.getJgraphT(), 4);
+		cpmCom = findCPM(kcliques);
 	    }
 
-	    // Remove duplicates
+	    /*
+	     * Print a log line
+	     */
 	    try {
-		_outWrt.write(ts + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\n");
+		_outWrt.write(ts + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\t");
+		if (ts % 10 == 0) {
+		    if (kcliques != null) {
+			_outWrt.write(kcliques.size());
+		    }
+		    _outWrt.write("\t");
+
+		    if (cpmCom != null) {
+			_outWrt.write(cpmCom.size());
+		    }
+
+		}
+		_outWrt.write("\n");
 		_outWrt.flush();
 		if (socSim.SIM_TIME < ts) {
 		    _outWrt.close();
@@ -75,35 +100,27 @@ public class MetricsAgent implements Steppable {
     }
 
     /**
+     * @author biggie
+     * @name findCPM Purpose TODO
      * 
-     * @param g_
-     *            Graph to measure
-     * @return <code>double</code> Characteristic path length
+     * @param
+     * @return Collection<Set<Agent>>
      */
-    private static double clusterIdx(Graph<Agent, FriendLink> g_) {
-	boolean firstPass = true;
-	double clusterIdxAvg = 0.0;
-	for (Agent iNode : g_.getVertices()) {
-	    double kLinks = 0.0;
-	    Agent kNodes[] = new Agent[g_.getNeighborCount(iNode)];
-	    kNodes = g_.getNeighbors(iNode).toArray(kNodes);
-	    for (int i = 0; i < kNodes.length; i++) {
-		for (int j = i + 1; j < kNodes.length; j++) {
-		    if (g_.isNeighbor(kNodes[i], kNodes[j]))
-			kLinks++;
-		}
-	    }
-	    double clusterIdx = (g_.degree(iNode) >= 2) ? kLinks
-		    / (g_.getNeighborCount(iNode) * (g_.getNeighborCount(iNode) - 1) / 2) : 0;
-	    if (firstPass) {
-		clusterIdxAvg = clusterIdx;
-		firstPass = !firstPass;
-	    } else {
-		clusterIdxAvg = (clusterIdxAvg + clusterIdx) / 2;
+    private Collection<Set<Agent>> findCPM(Collection<Set<Agent>> kcliques_) {
 
-	    }
+	CPMCommunityFinder cpm = new CPMCommunityFinder(kcliques_);
+	return cpm.findCommunities();
+    }
 
-	}
-	return clusterIdxAvg;
+    /**
+     * @author biggie
+     * @name findKCliques Purpose TODO
+     * 
+     * @param
+     * @return Collection<Set<V>>
+     */
+    private Collection<Set<Agent>> findKCliques(UndirectedGraph<Agent, FriendLink> graph_, int k_) {
+	BronKerboschKCliqueFinder<Agent, FriendLink> clique = new BronKerboschKCliqueFinder<Agent, FriendLink>(graph_);
+	return clique.getKMaxClique(k_);
     }
 }

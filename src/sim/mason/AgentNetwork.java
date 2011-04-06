@@ -7,10 +7,15 @@ import static edu.uci.ics.jung.algorithms.metrics.Metrics.clusteringCoefficients
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
 
 import sim.agents.Agent;
 import sim.field.network.Network;
 import sim.graph.social.link.FriendLink;
+import social.links.SimpleFriendLink;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
@@ -22,21 +27,23 @@ import edu.uci.ics.jung.graph.util.Pair;
  */
 public class AgentNetwork extends Network {
 
-    private final Graph<Agent, FriendLink> _jgraph;
+    private final Graph<Agent, FriendLink> _jungGraph;
+    private UndirectedGraph<Agent, FriendLink> _jGraphT;
 
     public AgentNetwork() {
 	super();
-	_jgraph = new UndirectedSparseGraph<Agent, FriendLink>();
+	_jungGraph = new UndirectedSparseGraph<Agent, FriendLink>();
+	_jGraphT = new SimpleGraph<Agent, FriendLink>(SimpleFriendLink.class);
     }
 
     public AgentNetwork(boolean directed_) {
 	super(directed_);
-	_jgraph = new UndirectedSparseGraph<Agent, FriendLink>();
+	_jungGraph = new UndirectedSparseGraph<Agent, FriendLink>();
 
     }
 
     /**
-     * Jung hook
+     * Jung/JGraphT hook
      * 
      * @param from_
      * @param to_
@@ -45,15 +52,17 @@ public class AgentNetwork extends Network {
     @Override
     protected void addJungEdge(Object from_, Object to_, Object info_) {
 	Pair<Agent> pair = new Pair<Agent>((Agent) from_, (Agent) to_);
-	_jgraph.addEdge((FriendLink) info_, pair);
+	_jungGraph.addEdge((FriendLink) info_, pair);
+	_jGraphT.addEdge((Agent) from_, (Agent) to_);
     }
 
     /**
-     * Jung hook
+     * Jung/JGraphT hook
      */
     @Override
     protected void addJungNode(Object node_) {
-	_jgraph.addVertex((Agent) node_);
+	_jungGraph.addVertex((Agent) node_);
+	_jGraphT.addVertex((Agent) node_);
     }
 
     /**
@@ -62,8 +71,13 @@ public class AgentNetwork extends Network {
      * @return
      */
     public Collection<Agent> getJungNodes() {
-	return _jgraph.getVertices();
+	return _jungGraph.getVertices();
     }
+
+    public Set<Agent> getJGraphNodes() {
+	return _jGraphT.vertexSet();
+    }
+
 
     /**
      * Jung API wrapper
@@ -71,9 +85,12 @@ public class AgentNetwork extends Network {
      * @return
      */
     public Collection<FriendLink> getJungEdges() {
-	return _jgraph.getEdges();
+	return _jungGraph.getEdges();
     }
 
+    public Set<?> getJGraphEdges() {
+	return _jGraphT.edgeSet();
+    }
     /**
      * 
      * @author biggie
@@ -83,7 +100,7 @@ public class AgentNetwork extends Network {
      * @return boolean
      */
     public boolean hasEdge(Agent a_, Agent b_) {
-	return _jgraph.findEdge(a_, b_) != null;
+	return _jungGraph.findEdge(a_, b_) != null;
     }
 
     /**
@@ -95,7 +112,7 @@ public class AgentNetwork extends Network {
      * @return Double
      */
     public Double avgClusterCoeff() {
-	Map<Agent, Double> ciMap = clusteringCoefficients(_jgraph);
+	Map<Agent, Double> ciMap = clusteringCoefficients(_jungGraph);
 	double ciAvg = 0.0;
 	for (Double ci : ciMap.values()) {
 	    ciAvg += ci;
@@ -104,16 +121,20 @@ public class AgentNetwork extends Network {
     }
 
     public Double avgDeg() {
-	Collection<Agent> agents = _jgraph.getVertices();
+	Collection<Agent> agents = _jungGraph.getVertices();
 	double avgDeg = 0.0;
 	for (Agent ag : agents) {
-	    avgDeg += _jgraph.outDegree(ag);
+	    avgDeg += _jungGraph.outDegree(ag);
 	}
-	return avgDeg / (_jgraph.getVertexCount() + 0.0);
+	return avgDeg / (_jungGraph.getVertexCount() + 0.0);
     }
 
     public final Graph<Agent, FriendLink> getJGraph() {
-	return _jgraph;
+	return _jungGraph;
+    }
+
+    public final UndirectedGraph<Agent, FriendLink> getJgraphT() {
+	return _jGraphT;
     }
 
 }
