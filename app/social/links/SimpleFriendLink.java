@@ -15,6 +15,10 @@ public class SimpleFriendLink extends FriendLink {
 	super(w_);
     }
 
+    public SimpleFriendLink() {
+	super(1.0);
+    }
+
     /* (non-Javadoc)
      * @see sim.graph.social.FriendLink#reinforce()
      */
