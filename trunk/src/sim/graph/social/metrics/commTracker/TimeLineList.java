@@ -25,6 +25,7 @@ public class TimeLineList {
 		Community newComm = new Community(comm_, graph_);
 		_timeLine.get(time_ - 1).add(newComm);
 		searchPredecessors(newComm);
+		newComm.computeAge();
 	}
 
 	public List<Community> get(int pos_) {
@@ -72,7 +73,7 @@ public class TimeLineList {
 
 						if (found) {
 							comm_.addPredecessor(pred);
-							System.out.println(pred + " --> " + comm_);
+//							System.out.println(pred + " --> " + comm_);
 							pred.addSuccessor(comm_);
 							added = true;
 						} else {
@@ -84,11 +85,100 @@ public class TimeLineList {
 					}
 				} else {
 					comm_.addPredecessor(pred);
-					System.out.println(pred + " --> " + comm_);
+//					System.out.println(pred + " --> " + comm_);
 					pred.addSuccessor(comm_);
 				}
 			}
 		}
 
+	}
+
+	public int getTraceSpan(Community comm_){
+		int timeLineLength = _timeLine.size();
+		int i=0;
+		boolean found = false;
+		
+		while(!found && (i<timeLineLength)){
+			List<Community> snapshot = _timeLine.get(i);
+			if(snapshot.contains(comm_)){
+				found = true;
+			}
+			else
+				i++;
+		}
+		return timeLineLength-i;
+	}
+	
+	private List<Community> getMaxPath(Community comm_){
+		List<Community> path = new ArrayList<Community>();
+		List<Community> successors = comm_.getSuccessors();
+		path.add(comm_);
+		
+		if(!successors.isEmpty()){
+			List<List<Community>> paths = new ArrayList<List<Community>>();
+			
+			for(int i=0; i<successors.size(); i++){
+				Community successor = successors.get(i);
+				paths.add(getMaxPath(successor));
+			}
+			
+			int maxPathLength = 0;
+			int maxPathPosition = -1;
+			int index = 0;
+			for(List<Community> successorPath : paths){
+				int size = successorPath.size();
+				if(size > maxPathLength){
+					maxPathLength = size;
+					maxPathPosition = index;
+				}
+				index++;
+			}
+			
+			List<Community> maxPath = paths.get(maxPathPosition);
+			path.addAll(maxPath);
+		}
+		
+		return path;
+	}
+
+	public double getMemberStability(Community comm_){
+		List<Community> path = getMaxPath(comm_);
+		double result = 0;
+		int length = path.size();
+		
+		for(int i = 0; i<length-1; i++){
+			Community pred = path.get(i);
+			Community succ = path.get(i+1);
+			
+			List<Integer> predMembers = pred.getAllNodes();
+			List<Integer> succMembers = succ.getAllNodes();
+			int intersect = 0;
+			
+			if(predMembers.size()<= succMembers.size()){
+				for(Integer member : predMembers){
+					if(succMembers.contains(member))
+						intersect++;
+				}
+			}
+			else{
+				for(Integer member : succMembers){
+					if(predMembers.contains(member))
+						intersect++;
+				}
+			}
+			
+			result += ((double)intersect/(predMembers.size()+succMembers.size()-intersect));
+		}
+		
+		result /= (length-1);
+		
+		return (double)result;
+	}
+
+	public double getMetabolism(Community comm_){
+		int traceSpan = getTraceSpan(comm_);
+		double stability = getMemberStability(comm_);
+		
+		return traceSpan/stability;
 	}
 }
