@@ -16,12 +16,12 @@ import javax.swing.JFrame;
 
 import org.jgrapht.UndirectedGraph;
 
+import sim.app.social.SocialSim;
 import sim.field.network.Edge;
 import sim.graph.social.link.FriendLink;
 import sim.graph.social.metrics.BronKerboschKCliqueFinder;
 import sim.graph.social.metrics.CPMCommunityFinder;
 import sim.mason.AgentNetwork;
-import sim.social.SocialSim;
 import edu.uci.ics.jung.algorithms.layout.HypergraphLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
 import edu.uci.ics.jung.graph.Graph;
@@ -57,14 +57,6 @@ public class SocialSimFlowTest {
 	    BronKerboschKCliqueFinder<Integer, FriendLink> maxCliques = new BronKerboschKCliqueFinder<Integer, FriendLink>(
 		    graph);
 	    Collection<Set<Integer>> kFourCliques = maxCliques.getKMaxClique(4);
-	    // Collection<Set<Integer>> kFiveCliques =
-	    // maxCliques.getKMaxClique(5);
-	    // Collection<Set<Integer>> kSixCliques =
-	    // maxCliques.getKMaxClique(6);
-	    // Collection<Set<Integer>> kSevenCliques =
-	    // maxCliques.getKMaxClique(7);
-	    // Collection<Set<Integer>> kEightCliques =
-	    // maxCliques.getKMaxClique(8);
 
 	    Collection<Set<Integer>> kComs = findCPM(kFourCliques);
 
