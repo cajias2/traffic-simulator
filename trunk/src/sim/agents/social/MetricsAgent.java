@@ -25,11 +25,9 @@ import sim.graph.social.metrics.CPMCommunityFinder;
 
 /**
  * @author biggie
- * @param <V>
- * @param <E>
  * 
  */
-public class MetricsAgent<V, E> implements Steppable {
+public class MetricsAgent implements Steppable {
 
     private BufferedWriter _outWrt = null;
 
@@ -108,8 +106,8 @@ public class MetricsAgent<V, E> implements Steppable {
      */
     private Collection<Set<Agent>> findCPM(Collection<Set<Agent>> kcliques_) {
 
-	CPMCommunityFinder cpm = new CPMCommunityFinder(kcliques_);
-	return cpm.findCommunities();
+	CPMCommunityFinder<Agent> cpm = new CPMCommunityFinder<Agent>(kcliques_);
+	return cpm.findCommunities(4);
     }
 
     /**
