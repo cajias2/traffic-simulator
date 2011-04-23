@@ -2,7 +2,9 @@ package sim.app.social;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -16,6 +18,7 @@ import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
+import sim.field.network.Edge;
 import sim.mason.AgentNetwork;
 import sim.util.Double2D;
 import sim.utils.xml.social.SocialInputParseService;
@@ -27,32 +30,60 @@ public class SocialSim extends NetworkSimState {
     private static Logger _log;
     private static String _simXml;
     private static Random _rand = new Random(System.currentTimeMillis());
-
+    private static GraphGatherer _gatherer = null;
+    private int AGENT_COUNT;
+    private Map<Class<Agent>, Double> _agentMap;
+    public static final double DIAMETER = 8;
+    public int SIM_TIME;
     public static int XMIN = 0;
     public static int XMAX;
     public static int YMIN = 0;
     public static int YMAX;
 
-    public static final double DIAMETER = 8;
-
-    private final int AGENT_COUNT;
-    public final int SIM_TIME;
-    private final Map _agentMap;
     public AgentNetwork network = null;
     public Continuous2D fieldEnvironment;
+
+    /**
+     * TODO Purpose
+     * 
+     * @param
+     * @author biggie
+     */
+    public SocialSim(Long seed, String[] args) {
+	super(seed);
+	_log = Logger.getLogger("SimLogger");
+	_log.setLevel(Level.SEVERE);
+	String simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
+	initializeThis(simXml);
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @param
+     * @author biggie
+     */
+    public SocialSim(Long seed, String simXml_) {
+	super(seed);
+	_log = Logger.getLogger("SimLogger");
+	_log.setLevel(Level.SEVERE);
+	initializeThis(simXml_);
+    }
 
     /**
      * Creates a NetworkTest simulation with the given random number seed.
      * _cityXml must be set first!
      * 
-     * @author biggie SocialSim
+     * @author biggie
      */
     public SocialSim(long seed) {
-	this(seed, _simXml);
+	super(seed);
+	if (null != _simXml) {
+	    initializeThis(_simXml);
+	}
     }
 
-    public SocialSim(long seed, String _simXml) {
-	super(seed);
+    private void initializeThis(String _simXml) {
 	SocialInputParseService parseSrv = new SocialInputParseService(_simXml, _log);
 	parseSrv.parseSim();
 	_agentMap = parseSrv.parseAgents();
@@ -61,26 +92,14 @@ public class SocialSim extends NetworkSimState {
 	XMAX = parseSrv.getWidth();
 	YMAX = parseSrv.getLen();
 	network = new AgentNetwork();
-	createGrids();
-    }
-
-    /**
-     * 
-     * @author biggie
-     * @name createGrids Purpose TODO
-     * 
-     * @param
-     * @return void
-     */
-    private void createGrids() {
 	fieldEnvironment = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
     }
+
 
     /**
      * @author biggie
      * @name acceptablePosition Purpose Validate new position: Make sure not
      *       over the boundaries.
-     * 
      * @param node_
      *            a given node
      * @param location_
@@ -124,7 +143,7 @@ public class SocialSim extends NetworkSimState {
 		Entry<Class<Agent>, Double> entry = it.next();
 		winner += entry.getValue();
 		if (winner >= ticket) {
-		    try {			
+		    try {
 			ag = instantiateAgentObj(entry.getKey());
 			fieldEnvironment.setObjectLocation(ag, new Double2D(random.nextDouble()
 				* (XMAX - XMIN - DIAMETER) + XMIN + DIAMETER / 2, random.nextDouble()
@@ -143,32 +162,22 @@ public class SocialSim extends NetworkSimState {
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, simKiller, 1);
     }
 
-
     /**
-     * 
-     * @author biggie
-     * @name instantiateAgentObj Purpose TODO
+     * Allows the simulation to be called as part of s
      * 
      * @param
-     * @return Agent
+     * @return List<Graph<Agent,FriendLink>> A list of the graph evoltuion o
      */
-    private Agent instantiateAgentObj(Class<Agent> clazz_)
- throws ClassNotFoundException, SecurityException,
-	    NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException,
-	    InvocationTargetException {
-	Object[] argObj = new Object[] { this };
-	Class[] argClass = new Class[] { SimState.class };
-
-	Constructor<Agent> cons = clazz_.getConstructor(argClass);
-	Object obj = cons.newInstance(argObj);
-	return (Agent) obj;
+    public List<Edge[][]> runSim(String[] args_, int snapshotSize_) {
+	_simXml = SocialInputParseService.parseCmdLnArgs(args_, _log);
+	_gatherer = new GraphGatherer(snapshotSize_);
+	doLoop(SocialSim.class, args_);
+	return _gatherer.getGraphEvol();
     }
 
     /**
-     * 
      * @author biggie
      * @name main Purpose TODO
-     * 
      * @param
      * @return void
      */
@@ -180,5 +189,67 @@ public class SocialSim extends NetworkSimState {
 	doLoop(SocialSim.class, args);
     }
 
+    /**
+     * @author biggie
+     * @name createGrids Purpose TODO
+     * @param
+     * @return void
+     */
+    private void createGrids() {
+	fieldEnvironment = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
+    }
+
+    /**
+     * @author biggie
+     * @name instantiateAgentObj Purpose TODO
+     * @param
+     * @return Agent
+     */
+    private Agent instantiateAgentObj(Class<Agent> clazz_) throws ClassNotFoundException, SecurityException,
+	    NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException,
+	    InvocationTargetException {
+	Object[] argObj = new Object[] { this };
+	Class[] argClass = new Class[] { SimState.class };
+
+	Constructor<Agent> cons = clazz_.getConstructor(argClass);
+	Object obj = cons.newInstance(argObj);
+	return (Agent) obj;
+    }
+
+    /**
+     * Kills the simulation after <code>SIM_TIME</code> steps
+     * 
+     * @author biggie
+     * @param <V>
+     */
+    private class GraphGatherer implements Steppable {
+	private final int SNAPSHOT;
+	List<Edge[][]> _graphEvol = new ArrayList<Edge[][]>();
+
+	public GraphGatherer(int snapshotSize_) {
+	    SNAPSHOT = snapshotSize_;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see sim.engine.Steppable#step(sim.engine.SimState)
+	 */
+	@Override
+	public void step(SimState state_) {
+	    SocialSim socSim = (SocialSim) state_;
+	    if (0 == socSim.schedule.getSteps() % SNAPSHOT) {
+		_graphEvol.add(socSim.network.getAdjacencyMatrix());
+	    }
+	}
+
+	/**
+	 * @return the graphEvol
+	 * @author biggie
+	 */
+	public List<Edge[][]> getGraphEvol() {
+	    return _graphEvol;
+	}
+    }
 
 }

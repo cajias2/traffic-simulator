@@ -1,5 +1,5 @@
 /*
-  Copyright 2006 by Daniel Kuebrich
+  Copyright 2006 by 
   Licensed under the Academic Free License version 3.0
   See the file "LICENSE" for more information
  */
@@ -30,13 +30,6 @@ public class SocialSimUI extends GUIState {
     NetworkPortrayal2D edgePortrayal = new NetworkPortrayal2D();
     ContinuousPortrayal2D socPortrayal = new ContinuousPortrayal2D();
 
-    public static void main(String[] args) {
-	String simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
-	SocialSimUI socsimUI = new SocialSimUI(simXml);
-	Console c = new Console(socsimUI);
-	c.setVisible(true);
-    }
-
     public SocialSimUI(String simXml_) {
 	super(new SocialSim(System.currentTimeMillis(), simXml_));
     }
@@ -47,6 +40,23 @@ public class SocialSimUI extends GUIState {
 
     public static String getName() {
 	return "Social Sim";
+    }
+
+    public void setupPortrayals() {
+        edgePortrayal.setField(new SpatialNetwork2D(((SocialSim) state).fieldEnvironment, ((SocialSim) state).network));
+        SimpleEdgePortrayal2D p = new SimpleEdgePortrayal2D(Color.lightGray, Color.lightGray, Color.black);
+        p.setShape(SimpleEdgePortrayal2D.SHAPE_LINE);
+        p.setBaseWidth(2);
+        edgePortrayal.setPortrayalForAll(p);
+    
+        // tell the portrayals what to portray and how to portray them
+        socPortrayal.setField(((SocialSim) state).fieldEnvironment);
+        socPortrayal.setPortrayalForClass(Agent.class, new sim.portrayal.simple.RectanglePortrayal2D(Color.red));
+        // reschedule the displayer
+        display.reset();
+    
+        // redraw the display
+        display.repaint();
     }
 
     @Override
@@ -61,23 +71,6 @@ public class SocialSimUI extends GUIState {
 	super.load(state);
 	// we now have new grids. Set up the portrayals to reflect that
 	setupPortrayals();
-    }
-
-    public void setupPortrayals() {
-	edgePortrayal.setField(new SpatialNetwork2D(((SocialSim) state).fieldEnvironment, ((SocialSim) state).network));
-	SimpleEdgePortrayal2D p = new SimpleEdgePortrayal2D(Color.lightGray, Color.lightGray, Color.black);
-	p.setShape(SimpleEdgePortrayal2D.SHAPE_LINE);
-	p.setBaseWidth(2);
-	edgePortrayal.setPortrayalForAll(p);
-
-	// tell the portrayals what to portray and how to portray them
-	socPortrayal.setField(((SocialSim) state).fieldEnvironment);
-	socPortrayal.setPortrayalForClass(Agent.class, new sim.portrayal.simple.RectanglePortrayal2D(Color.red));
-	// reschedule the displayer
-	display.reset();
-
-	// redraw the display
-	display.repaint();
     }
 
     @Override
@@ -108,5 +101,12 @@ public class SocialSimUI extends GUIState {
 	    displayFrame.dispose();
 	displayFrame = null; // let gc
 	display = null; // let gc
+    }
+
+    public static void main(String[] args) {
+        String simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
+        SocialSimUI socsimUI = new SocialSimUI(simXml);
+        Console c = new Console(socsimUI);
+        c.setVisible(true);
     }
 }

@@ -13,6 +13,7 @@ import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 
 import sim.agents.Agent;
+import sim.field.network.Edge;
 import sim.field.network.Network;
 import sim.graph.social.link.FriendLink;
 import social.links.SimpleFriendLink;
@@ -26,6 +27,7 @@ import edu.uci.ics.jung.graph.util.Pair;
  *
  */
 public class AgentNetwork extends Network {
+
 
     private final Graph<Agent, FriendLink> _jungGraph;
     private UndirectedGraph<Agent, FriendLink> _jGraphT;
@@ -135,6 +137,67 @@ public class AgentNetwork extends Network {
 
     public final UndirectedGraph<Agent, FriendLink> getJgraphT() {
 	return _jGraphT;
+    }
+    
+    /**
+     * @author agpardo
+     * 
+     * @param agent_ Agent Identifier
+     * @return The outDegree of the specified agent
+     */
+    public int degreeOf(Integer agent_){
+    	Collection<Agent> agents = _jungGraph.getVertices();
+    	for (Agent ag : agents) {
+    		if(ag.getID()== agent_)
+    			return _jungGraph.outDegree(ag);
+    	}
+    	
+    	return -1;
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @param
+     * @return UndirectedGraph<Agent,FriendLink>
+     * @author biggie
+     */
+    public static UndirectedGraph<Integer, FriendLink> adjListToJGraphTList(Edge[][] adjList_) {
+	UndirectedGraph<Integer, FriendLink> graph = new SimpleGraph<Integer, FriendLink>(SimpleFriendLink.class);
+
+	for (int i = 0; i < adjList_.length; i++) {
+	    graph.addVertex(i);
+	}
+	for (int i = 0; i < adjList_.length; i++) {
+	    for (int j = i + 1; j < adjList_[i].length; j++) {
+		if (null != adjList_[i][j]) {
+		    graph.addEdge(i, j);
+		}
+	    }
+	}
+	return graph;
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @param
+     * @return Graph<Integer,FriendLink>
+     * @author biggie
+     */
+    public static Graph<Integer, FriendLink> adjListToJungGraph(Edge[][] adjList_) {
+	Graph<Integer, FriendLink> graph = new UndirectedSparseGraph<Integer, FriendLink>();
+	for (int i = 0; i < adjList_.length; i++) {
+	    graph.addVertex(i);
+	}
+	for (int i = 0; i < adjList_.length; i++) {
+	    for (int j = i + 1; j < adjList_[i].length; j++) {
+		if (null != adjList_[i][j]) {
+		    graph.addEdge(new SimpleFriendLink(), i, j);
+		}
+	    }
+	}
+	return graph;
     }
 
 }

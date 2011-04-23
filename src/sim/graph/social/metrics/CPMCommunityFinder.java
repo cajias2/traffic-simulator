@@ -15,29 +15,27 @@ import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.SimpleGraph;
 
-import sim.agents.Agent;
-
 /**
  * @author biggie
  * 
  */
-public class CPMCommunityFinder {
+public class CPMCommunityFinder<T> {
 
-    private final UndirectedGraph<Set<Agent>, Boolean> _cliqueGraph;
+    private final UndirectedGraph<Set<T>, Boolean> _cliqueGraph;
 
     /**
      * 
      * @author biggie CPMCommunityFinder
      */
-    public CPMCommunityFinder(Collection<Set<Agent>> kCliques_) {
-	EdgeFactory<Set<Agent>, Boolean> edge = new EdgeFactory<Set<Agent>, Boolean>() {
+    public CPMCommunityFinder(Collection<Set<T>> kCliques_) {
+	EdgeFactory<Set<T>, Boolean> edge = new EdgeFactory<Set<T>, Boolean>() {
 
 	    @Override
-	    public Boolean createEdge(Set<Agent> sourceVertex_, Set<Agent> targetVertex_) {
+	    public Boolean createEdge(Set<T> sourceVertex_, Set<T> targetVertex_) {
 		return true;
 	    }
 	};
-	_cliqueGraph = new SimpleGraph<Set<Agent>, Boolean>(edge);
+	_cliqueGraph = new SimpleGraph<Set<T>, Boolean>(edge);
 	initializeCliqueGraph(kCliques_);
     }
 
@@ -48,9 +46,9 @@ public class CPMCommunityFinder {
      * @param
      * @return void
      */
-    private void initializeCliqueGraph(Collection<Set<Agent>> kCliques_) {
+    private void initializeCliqueGraph(Collection<Set<T>> kCliques_) {
 	if (kCliques_ != null) {
-	for (Set<Agent> kClique : kCliques_) {
+	    for (Set<T> kClique : kCliques_) {
 	    _cliqueGraph.addVertex(kClique);
 	    }
 	}
@@ -65,18 +63,18 @@ public class CPMCommunityFinder {
      * @param
      * @return Collection<Set<Agent>>
      */
-    public Collection<Set<Agent>> findCommunities() {
+    public Collection<Set<T>> findCommunities(int k_) {
 
-	for (Set<Agent> kCliqueA : _cliqueGraph.vertexSet()) {
-	    for (Set<Agent> kCliqueB : _cliqueGraph.vertexSet()) {		
+	for (Set<T> kCliqueA : _cliqueGraph.vertexSet()) {
+	    for (Set<T> kCliqueB : _cliqueGraph.vertexSet()) {
 		
-		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB)) {
+		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB, k_)) {
 			_cliqueGraph.addEdge(kCliqueA, kCliqueB);
 		    }
 		}
 	    }
 
-	ConnectivityInspector<Set<Agent>, Boolean> conInsp = new ConnectivityInspector<Set<Agent>, Boolean>(
+	ConnectivityInspector<Set<T>, Boolean> conInsp = new ConnectivityInspector<Set<T>, Boolean>(
 		_cliqueGraph);
 
 	return unifyConnectedComponents(conInsp.connectedSets());
@@ -89,12 +87,12 @@ public class CPMCommunityFinder {
      * @param
      * @return Collection<Set<Agent>>
      */
-    private Collection<Set<Agent>> unifyConnectedComponents(List<Set<Set<Agent>>> connectedSets_) {
-	Collection<Set<Agent>> unifiedSet = new ArrayList<Set<Agent>>();
+    private Collection<Set<T>> unifyConnectedComponents(List<Set<Set<T>>> connectedSets_) {
+	Collection<Set<T>> unifiedSet = new ArrayList<Set<T>>();
 	
-	Iterator<Set<Set<Agent>>> comIter = connectedSets_.iterator();
+	Iterator<Set<Set<T>>> comIter = connectedSets_.iterator();
 	while(comIter.hasNext()){
-	    Set<Set<Agent>> currCom = comIter.next();
+	    Set<Set<T>> currCom = comIter.next();
 	    //Unify Community
 	    unifiedSet.add(unifyCommunity(currCom));
 	}
@@ -108,10 +106,10 @@ public class CPMCommunityFinder {
      * @param
      * @return Set<Agent>
      */
-    private Set<Agent> unifyCommunity(Set<Set<Agent>> currCom_) {
-	Set<Agent> community = new HashSet<Agent>();
+    private Set<T> unifyCommunity(Set<Set<T>> currCom_) {
+	Set<T> community = new HashSet<T>();
 
-	for (Set<Agent> currClique : currCom_) {
+	for (Set<T> currClique : currCom_) {
 	    community.addAll(currClique);
 	}
 	return community;
@@ -125,14 +123,14 @@ public class CPMCommunityFinder {
      * @param
      * @return boolean
      */
-    private boolean adjecent(Set<Agent> currClq_, Set<Agent> nxtClq_) {
-	int k = currClq_.size();
+    private boolean adjecent(Set<T> currClq_, Set<T> nxtClq_, int k_) {
+
 	int matched = 0;
 	boolean isAdj = false;
-	for (Agent ag : currClq_) {
+	for (T ag : currClq_) {
 	    if (nxtClq_.contains(ag)) {
 		matched++;
-		if (matched == (k - 1)) {
+		if (matched == (k_ - 1)) {
 		    isAdj = true;
 		    break;
 		}
