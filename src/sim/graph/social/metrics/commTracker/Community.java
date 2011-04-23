@@ -11,22 +11,24 @@ import sim.mason.AgentNetwork;
 public class Community {
 	private List<Integer> _members, _core;
 	private List<Community> _predecessors, _successors;
+	private int _age, _traceSpan;
 		
 	public Community(List<Integer> comm_, AgentNetwork graph_) {
 		_members = new ArrayList<Integer>();
 		_members.addAll(comm_);
+		_traceSpan = -1;
 		coreDectection(comm_, graph_);
 		_predecessors = new ArrayList<Community>();
 		_successors = new ArrayList<Community>();
 	}
-
+	
 	private void coreDectection(List<Integer> comm_, AgentNetwork graph_) {
 		boolean sameDegree = true;
 		Iterator<Integer> iterador = comm_.iterator();
 		int degree = 0;
 		boolean firstNode = true;
 
-		while (iterador.hasNext() || (sameDegree == true)) {
+		while (iterador.hasNext() && (sameDegree == true)) {
 			Integer nodo = iterador.next();
 			if (firstNode) {
 				degree = graph_.degreeOf(nodo);
@@ -51,15 +53,15 @@ public class Community {
 				nodos.add(nodo);
 			}
 
-			Edge[][] adjacencyMatrix = graph_.getAdjacencyMatrix();
+			Edge[][] adjacencyMatrix = graph_.getAdjacencyMatrix();			
 
 			for (i = 0; i < nodos.size(); i++) {
 				for (int j = (i + 1); j < nodos.size(); j++) {
-
-					if ((adjacencyMatrix[i][j] != null)|| (adjacencyMatrix[j][i] != null)) {
-						Integer node1 = nodos.elementAt(i);
-						Integer node2 = nodos.elementAt(j);
-
+					Integer node1 = nodos.elementAt(i);
+					Integer node2 = nodos.elementAt(j);
+					
+					boolean connected = existEdge(node1, node2, adjacencyMatrix);
+					if (connected) {
 						int grado1 = graph_.degreeOf(node1);
 						int grado2 = graph_.degreeOf(node2);
 
@@ -135,5 +137,79 @@ public class Community {
 		}
 		community += ")";
 		return community;
+	}
+
+	public int getSize(){
+		return _members.size();
+	}
+	
+	public int getAge(){
+		return _age;
+	}
+	
+	public void computeAge(){
+		if(!_predecessors.isEmpty()){
+			int maxAge = 0;
+			for(Community pred : _predecessors){
+				int predAge = pred.getAge();
+				if(predAge > maxAge)
+					maxAge = predAge;
+			}
+			_age = maxAge+1;
+		}			
+		else
+			_age = 1;
+	}
+	
+	public int getTraceSpan(){
+		if(_traceSpan != -1)
+			return _traceSpan;
+		
+		if(!_predecessors.isEmpty()){
+			int maxTrace = 0;
+			for(Community pred : _predecessors){
+				int predTrace = pred.getTraceSpan();
+				if(predTrace > maxTrace)
+					maxTrace = predTrace;
+			}
+			_traceSpan = maxTrace+1;
+			return _traceSpan;
+		}
+		
+		_traceSpan = 1;	
+		return _traceSpan;
+	}
+	
+	public double getGrowth(){			
+		return _members.size()/_age;
+	}
+	
+	public boolean equals(Community comm_){
+		return (_members.containsAll(comm_._members) && _core.containsAll(comm_._core));
+	}
+	
+	public boolean existEdge(Integer part1_, Integer part2_, Edge[][] matrix_){
+		boolean result = false;
+		int counter = 0;
+		while( !result && counter < matrix_.length){
+			Edge[] fila = matrix_[counter];
+			counter++;
+			
+			for(Edge ed : fila){
+				if(ed!=null){
+				Integer from = (Integer)ed.getFrom();
+				Integer to = (Integer)ed.getTo();
+				
+				if((from==part1_) && (to == part2_) ){
+					result = true;
+				}
+				else if((from==part2_) && (to == part1_) ){
+					result = true;
+				}
+				}
+			}
+		}
+		
+		return result;
 	}
 }
