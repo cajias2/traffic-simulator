@@ -121,18 +121,22 @@ public class SocialSim extends NetworkSimState {
 	super.start();
 	schedule.reset(); // clear out the schedule
 
-	// Dummy agent that kills sim after set steps
-	Steppable simKiller = new Steppable() {
-	    public void step(SimState state) {
-		if (SIM_TIME <= schedule.getSteps()) {
-		    state.finish();
-		    System.exit(0);
-		}
-	    }
-	};
-	/*
-	 * Schedule agents by set percent
-	 */
+	scheduleAgents();
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
+	// Schedule simKiller last.
+	if (null != _gatherer) {
+	    schedule.scheduleRepeating(Schedule.EPOCH, 1, _gatherer, 1);
+	}
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
+    }
+
+    /**
+     * @author biggie
+     * @name scheduleAgents Purpose Schedule agents by set percent
+     * @param
+     * @return void
+     */
+    private void scheduleAgents() {
 	for (int i = 0; i < AGENT_COUNT; i++) {
 	    double ticket = _rand.nextDouble() * 100;
 	    double winner = 0.0;
@@ -157,9 +161,6 @@ public class SocialSim extends NetworkSimState {
 		}
 	    }
 	}
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
-	// Schedule simKiller last.
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, simKiller, 1);
     }
 
     /**
@@ -249,6 +250,26 @@ public class SocialSim extends NetworkSimState {
 	 */
 	public List<Edge[][]> getGraphEvol() {
 	    return _graphEvol;
+	}
+    }
+
+    /**
+     * Kills the simulation after <code>SIM_TIME</code> steps
+     * 
+     * @author biggie
+     */
+    private class SimKiller implements Steppable {
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see sim.engine.Steppable#step(sim.engine.SimState)
+	 */
+	@Override
+	public void step(SimState state) {
+	    if (SIM_TIME <= schedule.getSteps()) {
+		state.finish();
+	    }
 	}
     }
 
