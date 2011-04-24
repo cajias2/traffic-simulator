@@ -16,6 +16,7 @@ import sim.agents.Agent;
 import sim.field.network.Edge;
 import sim.field.network.Network;
 import sim.graph.social.link.FriendLink;
+import sim.util.Bag;
 import social.links.SimpleFriendLink;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -65,6 +66,45 @@ public class AgentNetwork extends Network {
     protected void addJungNode(Object node_) {
 	_jungGraph.addVertex((Agent) node_);
 	_jGraphT.addVertex((Agent) node_);
+    }
+
+    public void removeEdge(Object from_, Object to_) {
+	removeEdgeNetwork(from_, to_);
+	removeEdgeJGraphT(from_, to_);
+	removeEdgeJung(from_, to_);
+    }
+
+    /**
+     * @param from_
+     * @param to_
+     */
+    private void removeEdgeJung(Object from_, Object to_) {
+	_jungGraph.removeEdge(_jungGraph.findEdge((Agent) from_, (Agent) to_));
+
+    }
+
+    /**
+     * @param from_
+     * @param to_
+     */
+    private void removeEdgeJGraphT(Object from_, Object to_) {
+	_jGraphT.removeEdge((Agent) from_, (Agent) to_);
+    }
+
+    /**
+     * @param from_
+     * @param to_
+     */
+    private void removeEdgeNetwork(Object from_, Object to_) {
+	Bag edges = new Bag();
+	getEdges(from_, edges);
+	for (int i = 0; i < edges.size(); i++) {
+	    Edge edge = (Edge) edges.get(i);
+	    if (edge.from() == to_ || edge.to() == to_) {
+		removeEdge(edge);
+	    }
+	}
+
     }
 
     /**
