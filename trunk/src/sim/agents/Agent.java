@@ -30,27 +30,30 @@ public class Agent implements Steppable {
     public Font nodeFont = new Font("SansSerif", Font.PLAIN, 9);
     private int steps = 0;
     private Double2D desiredLocation = null;
-    private final Double2D suggestedLocation = null;
     protected MersenneTwisterFast _rand = null;
     protected AgentNetwork _net;
+    private static int _agentCount = 0;
 
 
-    protected int _id = 0;
+
+    protected int _id;
     protected int _actionDim = 0;
 
     public Agent(final SimState state_) {
 	SocialSim socSim = (SocialSim) state_;
 	_net = socSim.network;
 	_rand = socSim.random;
+	_id = _agentCount;
+	_agentCount++;
     }
 
     /**
      * 
      */
     public void step(final SimState state_) {
-
-	beforeStep(state_);
+	
 	SocialSim socSim = (SocialSim) state_;
+	beforeStep(socSim);
 	Double2D currLoc = socSim.fieldEnvironment.getObjectLocation(this);
 	Bag objs = socSim.fieldEnvironment.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y),
 		_actionDim);
@@ -66,7 +69,7 @@ public class Agent implements Steppable {
 
 	Double2D newLoc = move(state_);
 	socSim.fieldEnvironment.setObjectLocation(this, newLoc);
-	afterStep(state_);
+	afterStep(socSim);
     }
 
     /**
@@ -87,7 +90,7 @@ public class Agent implements Steppable {
      *            The state of the simulation
      * @return void
      */
-    protected void afterStep(SimState state_) {
+    protected void afterStep(SocialSim state_) {
     }
 
     /**
@@ -98,7 +101,7 @@ public class Agent implements Steppable {
      *            The state of the simulation
      * @return void
      */
-    protected void beforeStep(SimState state_) {
+    protected void beforeStep(SocialSim state_) {
     }
 
     /**
@@ -115,7 +118,7 @@ public class Agent implements Steppable {
     /**
      * @return
      */
-    protected boolean makeFriend(Agent ag_) {
+    protected boolean isNewFriend(Agent ag_) {
 	return false;
     }
 
@@ -205,7 +208,13 @@ public class Agent implements Steppable {
      * @return void
      */
     protected void befriend(Agent ag_) {
-	_net.addEdge(this, ag_, new SimpleFriendLink(_rand.nextDouble()));
+	_net.addEdge(this, ag_, new SimpleFriendLink());
     }
 
+    /**
+     * @param ag_
+     */
+    protected void unfriend(Agent ag_) {
+	_net.removeEdge(this, ag_);
+    }
 }

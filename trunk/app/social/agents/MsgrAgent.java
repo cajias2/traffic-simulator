@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import sim.agents.Agent;
+import sim.app.social.SocialSim;
 import sim.engine.SimState;
 
 /**
@@ -39,7 +40,7 @@ public class MsgrAgent extends Agent {
      * @see sim.agents.Agent#makeFriend(sim.agents.Agent, sim.engine.SimState)
      */
     @Override
-    protected boolean makeFriend(Agent ag_) {
+    protected boolean isNewFriend(Agent ag_) {
 	return _rand.nextBoolean();
     }
 
@@ -64,10 +65,10 @@ public class MsgrAgent extends Agent {
      * @see sim.agents.Agent#beforeStep(sim.engine.SimState)
      */
     @Override
-    protected void beforeStep(SimState state_) {
+    protected void beforeStep(SocialSim state_) {
 	while (!_msgs.isEmpty()) {
 	    Agent ag = _msgs.remove();
-	    if (makeFriend(ag)) {
+	    if (isNewFriend(ag)) {
 		befriend(ag);
 	    }
 	}
