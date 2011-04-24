@@ -10,124 +10,127 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.jgrapht.EdgeFactory;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.SimpleGraph;
 
-/**
- * @author biggie
- * 
- */
-public class CPMCommunityFinder<T> {
+import sim.graph.social.link.FriendLink;
+import social.links.SimpleFriendLink;
 
-    private final UndirectedGraph<Set<T>, Boolean> _cliqueGraph;
+/**
+ * TODO Purpose
+ * 
+ * @author biggie
+ * @param <V>
+ */
+public class CPMCommunityFinder<V> {
+
+    private final UndirectedGraph<Set<V>, FriendLink> _cliqueGraph;
 
     /**
+     * TODO Purpose
      * 
-     * @author biggie CPMCommunityFinder
+     * @param
+     * @author biggie
      */
-    public CPMCommunityFinder(Collection<Set<T>> kCliques_) {
-	EdgeFactory<Set<T>, Boolean> edge = new EdgeFactory<Set<T>, Boolean>() {
-
-	    @Override
-	    public Boolean createEdge(Set<T> sourceVertex_, Set<T> targetVertex_) {
-		return true;
-	    }
-	};
-	_cliqueGraph = new SimpleGraph<Set<T>, Boolean>(edge);
+    public CPMCommunityFinder(Collection<Set<V>> kCliques_) {
+	_cliqueGraph = new SimpleGraph<Set<V>, FriendLink>(SimpleFriendLink.class);
 	initializeCliqueGraph(kCliques_);
     }
 
     /**
+     * TODO Purpose
+     * 
+     * @param k_
+     *            TODO
+     * @param
+     * @return Collection<Set<V>>
      * @author biggie
-     * @name initializeCliqueGraph Purpose TODO
+     */
+    public Collection<Set<V>> findCommunities(int k_) {
+
+	for (Set<V> kCliqueA : _cliqueGraph.vertexSet()) {
+	    for (Set<V> kCliqueB : _cliqueGraph.vertexSet()) {
+
+		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB, k_)) {
+		    try {
+			_cliqueGraph.addEdge(kCliqueA, kCliqueB);
+		    } catch (OutOfMemoryError e) {
+			System.err.println(e.getMessage());
+		    }
+		}
+	    }
+	}
+
+	ConnectivityInspector<Set<V>, FriendLink> conInsp = new ConnectivityInspector<Set<V>, FriendLink>(_cliqueGraph);
+
+	return unifyConnectedComponents(conInsp.connectedSets());
+    }
+
+    /**
+     * TODO Purpose
      * 
      * @param
      * @return void
+     * @author biggie
      */
-    private void initializeCliqueGraph(Collection<Set<T>> kCliques_) {
+    private void initializeCliqueGraph(Collection<Set<V>> kCliques_) {
 	if (kCliques_ != null) {
-	    for (Set<T> kClique : kCliques_) {
-	    _cliqueGraph.addVertex(kClique);
+	    for (Set<V> kClique : kCliques_) {
+		_cliqueGraph.addVertex(kClique);
 	    }
 	}
 
     }
 
     /**
-     * 
-     * @author biggie
-     * @name getCPMCommunities Purpose TODO
+     * TODO Purpose
      * 
      * @param
-     * @return Collection<Set<Agent>>
-     */
-    public Collection<Set<T>> findCommunities(int k_) {
-
-	for (Set<T> kCliqueA : _cliqueGraph.vertexSet()) {
-	    for (Set<T> kCliqueB : _cliqueGraph.vertexSet()) {
-		
-		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB, k_)) {
-			_cliqueGraph.addEdge(kCliqueA, kCliqueB);
-		    }
-		}
-	    }
-
-	ConnectivityInspector<Set<T>, Boolean> conInsp = new ConnectivityInspector<Set<T>, Boolean>(
-		_cliqueGraph);
-
-	return unifyConnectedComponents(conInsp.connectedSets());
-    }
-
-    /**
+     * @return Collection<Set<V>>
      * @author biggie
-     * @name unifyConnectedComponents Purpose TODO
-     * 
-     * @param
-     * @return Collection<Set<Agent>>
      */
-    private Collection<Set<T>> unifyConnectedComponents(List<Set<Set<T>>> connectedSets_) {
-	Collection<Set<T>> unifiedSet = new ArrayList<Set<T>>();
-	
-	Iterator<Set<Set<T>>> comIter = connectedSets_.iterator();
-	while(comIter.hasNext()){
-	    Set<Set<T>> currCom = comIter.next();
-	    //Unify Community
+    private Collection<Set<V>> unifyConnectedComponents(List<Set<Set<V>>> connectedSets_) {
+	Collection<Set<V>> unifiedSet = new ArrayList<Set<V>>();
+
+	Iterator<Set<Set<V>>> comIter = connectedSets_.iterator();
+	while (comIter.hasNext()) {
+	    Set<Set<V>> currCom = comIter.next();
+	    // Unify Community
 	    unifiedSet.add(unifyCommunity(currCom));
 	}
 	return unifiedSet;
     }
 
     /**
-     * @author biggie
-     * @name unifyCommunity Purpose TODO
+     * TODO Purpose
      * 
      * @param
-     * @return Set<Agent>
+     * @return Set<V>
+     * @author biggie
      */
-    private Set<T> unifyCommunity(Set<Set<T>> currCom_) {
-	Set<T> community = new HashSet<T>();
+    private Set<V> unifyCommunity(Set<Set<V>> currCom_) {
+	Set<V> community = new HashSet<V>();
 
-	for (Set<T> currClique : currCom_) {
+	for (Set<V> currClique : currCom_) {
 	    community.addAll(currClique);
 	}
 	return community;
     }
 
     /**
-     * @author biggie
-     * @name adjecent Purpose Compares two sets and deems them adjecent if they
-     *       share n-1 elements.
+     * Compares two sets and deems them adjecent if they share n-1 elements.
      * 
+     * @param k_
+     *            TODO
      * @param
      * @return boolean
+     * @author biggie
      */
-    private boolean adjecent(Set<T> currClq_, Set<T> nxtClq_, int k_) {
-
+    private boolean adjecent(Set<V> currClq_, Set<V> nxtClq_, int k_) {
 	int matched = 0;
 	boolean isAdj = false;
-	for (T ag : currClq_) {
+	for (V ag : currClq_) {
 	    if (nxtClq_.contains(ag)) {
 		matched++;
 		if (matched == (k_ - 1)) {
