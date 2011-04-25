@@ -2,7 +2,11 @@ package sim.graph.social.metrics.commTracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import edu.uci.ics.jung.graph.Graph;
+
+import sim.graph.social.link.FriendLink;
 import sim.mason.AgentNetwork;
 
 public class TimeLineList {
@@ -12,7 +16,7 @@ public class TimeLineList {
 		_timeLine = new ArrayList<List<Community>>();
 	}
 
-	public void add(int time_, List<Integer> comm_, AgentNetwork graph_) {
+	public void add(int time_, Set<Integer> comm_, Graph<Integer,FriendLink> graph_) {
 
 		if (_timeLine.isEmpty() || (time_ == _timeLine.size() + 1)) {
 			List<Community> aux = new ArrayList<Community>();
@@ -22,10 +26,13 @@ public class TimeLineList {
 		if ((time_ < 1) || (time_ > _timeLine.size() + 1)) {
 			return;
 		}
-		Community newComm = new Community(comm_, graph_);
-		_timeLine.get(time_ - 1).add(newComm);
-		searchPredecessors(newComm);
-		newComm.computeAge();
+		
+		if(!comm_.isEmpty()){
+			Community newComm = new Community(comm_, graph_);
+			_timeLine.get(time_ - 1).add(newComm);
+			searchPredecessors(newComm);			
+			newComm.computeAge();
+		}
 	}
 
 	public List<Community> get(int pos_) {
@@ -73,7 +80,6 @@ public class TimeLineList {
 
 						if (found) {
 							comm_.addPredecessor(pred);
-//							System.out.println(pred + " --> " + comm_);
 							pred.addSuccessor(comm_);
 							added = true;
 						} else {
@@ -85,7 +91,6 @@ public class TimeLineList {
 					}
 				} else {
 					comm_.addPredecessor(pred);
-//					System.out.println(pred + " --> " + comm_);
 					pred.addSuccessor(comm_);
 				}
 			}
@@ -111,6 +116,15 @@ public class TimeLineList {
 	
 	private List<Community> getMaxPath(Community comm_){
 		List<Community> path = new ArrayList<Community>();
+		
+//		path.add(comm_);
+//		Community aux = comm_.getMaxSuccessor();
+//		while(aux!=null){
+//			path.add(aux);
+//			aux = aux.getMaxSuccessor();
+//		}
+		
+		
 		List<Community> successors = comm_.getSuccessors();
 		path.add(comm_);
 		
@@ -181,4 +195,37 @@ public class TimeLineList {
 		
 		return traceSpan/stability;
 	}
+
+	public List<List<Double>> getMetrics(){
+    	List<List<Double>> metrics = new ArrayList<List<Double>>();
+    	
+    	for(List<Community> snapshot : _timeLine){
+    		double growth = 0;
+    		double metabolism = 0;
+    		int count=0;
+    		if(!snapshot.isEmpty()){
+	    		for(Community comm : snapshot){
+	    			growth += comm.getGrowth();
+	    			metabolism += getMetabolism(comm);
+	    			count++;
+	    		}
+	    		List<Double> results = new ArrayList<Double>();
+	    		double value1 = (Double)(growth/count);
+	    		double value2 = (Double)(metabolism/count);
+	    		if(value2 == Double.NaN){
+	    			System.out.println("Error!");
+	    		}
+	    		results.add(value1);
+	    		results.add(value2);
+	    		metrics.add(results);
+    		}
+    		else{
+    			List<Double> results = new ArrayList<Double>();
+	    		results.add(growth);
+	    		results.add(metabolism);
+	    		metrics.add(results);
+    		}   		
+    	}
+    	return metrics;
+    }
 }
