@@ -126,6 +126,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      * 
      * @see sim.engine.Steppable#step(sim.engine.SimState)
      */
+    @Override
     public void step(SimState state_) {
 	_rdStart++;
 	if (!_outputElement.hasAttribute(VHCL_ATTR_START)) {
