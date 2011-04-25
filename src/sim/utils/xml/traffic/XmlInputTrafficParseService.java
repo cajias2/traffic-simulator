@@ -222,7 +222,7 @@ public class XmlInputTrafficParseService {
 	List<Road> rdList = new LinkedList<Road>();
 	StreetXing currXing = xingList_.remove(0);
 	while (!xingList_.isEmpty()) {
-	    StreetXing nextXing = xingList_.remove(0);	    
+	    StreetXing nextXing = xingList_.remove(0);
 	    if (currXing.getLocation() != nextXing.getLocation()) {
 
 		Pair<StreetXing> xingPair = new Pair<StreetXing>(currXing, nextXing);
@@ -457,7 +457,10 @@ public class XmlInputTrafficParseService {
 	Road rdB = _roadMap.get(to_);
 
 	for (Road subRd : rdA.getSubRoadList()) {
-	    Pair<StreetXing> pair = getGraph().getEndpoints(subRd); // Find a xing pair (from, to)
+	    Pair<StreetXing> pair = getGraph().getEndpoints(subRd); // Find a
+								    // xing pair
+								    // (from,
+								    // to)
 	    Collection<Road> rdAlist = getGraph().getInEdges(pair.getSecond()); // use the 'to' and get all roads into it.
 	    boolean found = false;
 
