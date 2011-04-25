@@ -163,7 +163,7 @@ public class JungDisplay extends JComponent implements Steppable {
 	 * Layout is the JUNG's procedure which plans how the graph will be
 	 * drawn. Check out other layouts, by default we will use Kamada-Kawai.
 	 */
-	Graph<StreetXing, Road> city = ((NetworkSimState) simulation.state).getNwrk();
+	Graph<StreetXing, Road> city = ((NetworkSimState) simulation.state).getTrafficNet();
 	DijkstraDistance<StreetXing, Road> distance = new DijkstraDistance<StreetXing, Road>(city);
 	layout = new KKLayout<StreetXing, Road>(city, distance);
 
