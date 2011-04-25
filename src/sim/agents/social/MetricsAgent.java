@@ -11,9 +11,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.jgrapht.GraphPath;
 import org.jgrapht.UndirectedGraph;
+import org.jgrapht.alg.FloydWarshallShortestPaths;
+
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
@@ -40,7 +46,7 @@ public class MetricsAgent implements Steppable {
 	try {
 	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".txt");
 	    _outWrt = new BufferedWriter(outFileWrt);
-	    System.out.println("OUTPUT:\tTimeStep\t avgCI\t avgDeg\t Edges\tKCliques\n");
+	    System.out.println("OUTPUT:\tTimeStep\t avgPL\t avgCI\t avgDeg\t Edges\tKCliques\n");
 
 	} catch (IOException e) {
 	    // TODO Auto-generated catch block
@@ -55,7 +61,7 @@ public class MetricsAgent implements Steppable {
      */
     public void step(SimState state_) {
 	if (null != _outWrt) {
-	    SocialSim socSim = (SocialSim) state_;
+	    SocialSim socSim = (SocialSim) state_;	    
 	    int nodeCount = socSim.network.getJGraph().getVertexCount();
 
 	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
@@ -63,6 +69,33 @@ public class MetricsAgent implements Steppable {
 	    double avgCi = socSim.network.avgClusterCoeff();
 	    double avgDeg = socSim.network.avgDeg();
 	    double edgepnct = socSim.network.getJGraph().getEdgeCount() / maxEdges;
+	    
+	    
+	    DijkstraDistance<Agent, FriendLink> dijkstra = new DijkstraDistance(socSim.network.getJGraph(), true);
+	    Collection<Agent> nodes = socSim.network.getJungNodes();
+	    
+	    int totalLength = 0;
+	    int totalPaths = 0;
+	    for(Agent agent : nodes){
+	    	Map<Agent, Number> map = dijkstra.getDistanceMap(agent);
+	    	
+	    	Set<Agent> agents = map.keySet();
+	    	
+	    	for(Agent dest : agents){
+	    		if(dest != agent){
+	    			if(map.get(dest)!=null){
+		    			totalLength += (Double)map.get(dest);
+		    			totalPaths++;
+	    			}
+	    		}
+	    	}	    	
+	    }
+	    	    
+	    double avgPL = 0;
+	    if(totalPaths != 0){
+	    	avgPL = (totalLength/totalPaths);
+	    }
+	    
 	    Collection<Set<Agent>> kcliques = null;
 	    Collection<Set<Agent>> cpmCom = null;
 	    if (ts % 10 == 0) {
@@ -74,7 +107,7 @@ public class MetricsAgent implements Steppable {
 	     * Print a log line
 	     */
 	    try {
-		_outWrt.write(ts + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\t");
+		_outWrt.write(ts + "\t" + avgPL + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\t");
 		if (ts % 10 == 0) {
 		    if (kcliques != null) {
 			_outWrt.write(kcliques.size());
