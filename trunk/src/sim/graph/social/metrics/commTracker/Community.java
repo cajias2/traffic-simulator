@@ -3,26 +3,33 @@ package sim.graph.social.metrics.commTracker;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import edu.uci.ics.jung.graph.Graph;
+
 import sim.field.network.Edge;
+import sim.graph.social.link.FriendLink;
 import sim.mason.AgentNetwork;
 
 public class Community {
 	private List<Integer> _members, _core;
 	private List<Community> _predecessors, _successors;
-	private int _age, _traceSpan;
-		
-	public Community(List<Integer> comm_, AgentNetwork graph_) {
+	private int _age, _traceSpan, _maxPathLength;
+	private Community _maxSuccessor;
+	
+	public Community(Set<Integer> comm_, Graph<Integer,FriendLink> graph_) {
 		_members = new ArrayList<Integer>();
 		_members.addAll(comm_);
 		_traceSpan = -1;
 		coreDectection(comm_, graph_);
 		_predecessors = new ArrayList<Community>();
 		_successors = new ArrayList<Community>();
+		_maxPathLength = 0;
+		_maxSuccessor = null;
 	}
 	
-	private void coreDectection(List<Integer> comm_, AgentNetwork graph_) {
+	private void coreDectection(Set<Integer> comm_, Graph<Integer,FriendLink> graph_) {
 		boolean sameDegree = true;
 		Iterator<Integer> iterador = comm_.iterator();
 		int degree = 0;
@@ -31,10 +38,10 @@ public class Community {
 		while (iterador.hasNext() && (sameDegree == true)) {
 			Integer nodo = iterador.next();
 			if (firstNode) {
-				degree = graph_.degreeOf(nodo);
+				degree = graph_.degree(nodo);
 				firstNode = false;
 			} else
-				sameDegree &= (graph_.degreeOf(nodo) == degree);
+				sameDegree &= (graph_.degree(nodo) == degree);
 		}
 
 		if (sameDegree) {
@@ -53,17 +60,20 @@ public class Community {
 				nodos.add(nodo);
 			}
 
-			Edge[][] adjacencyMatrix = graph_.getAdjacencyMatrix();			
+//			Edge[][] adjacencyMatrix = graph_.getAdjacencyMatrix();			
 
 			for (i = 0; i < nodos.size(); i++) {
 				for (int j = (i + 1); j < nodos.size(); j++) {
 					Integer node1 = nodos.elementAt(i);
 					Integer node2 = nodos.elementAt(j);
 					
-					boolean connected = existEdge(node1, node2, adjacencyMatrix);
-					if (connected) {
-						int grado1 = graph_.degreeOf(node1);
-						int grado2 = graph_.degreeOf(node2);
+					FriendLink edge1 = graph_.findEdge(node1, node2);
+					FriendLink edge2 = graph_.findEdge(node2, node1);
+//					boolean connected = existEdge(node1, node2, adjacencyMatrix);
+//					if (connected) {
+					if ((edge1 != null) || (edge2!= null)){
+						int grado1 = graph_.degree(node1);
+						int grado2 = graph_.degree(node2);
 
 						if (grado1 < grado2) {
 							centralDegree[i] -= Math.abs((grado1 - grado2));
@@ -108,6 +118,8 @@ public class Community {
 	public void addSuccessor(Community succ_){
 		if(!_successors.contains(succ_))
 			_successors.add(succ_);
+		
+		//computeMaxPath();
 	}
 
 	public void addSuccessors(List<Community> succs_){
@@ -115,6 +127,8 @@ public class Community {
 			if(!_successors.contains(succ))
 				_successors.add(succ);
 		}
+		
+		//computeMaxPath();
 	}
 	
 	public List<Community> getPredecessors(){
@@ -211,5 +225,32 @@ public class Community {
 		}
 		
 		return result;
+	}
+
+	public void computeMaxPath(){
+			int maxPos = 0;
+			int maxLength = -1;
+			for(int i=0; i<_successors.size(); i++){
+				Community succ = _successors.get(i);
+				int maxPath = succ.getMaxPathLength();
+				if(maxPath > maxLength){
+					maxLength = maxPath;
+					maxPos = i;
+				}
+			}
+			_maxPathLength = maxLength+1;
+			_maxSuccessor = _successors.get(maxPos);
+			
+			for(Community pred : _predecessors){
+				pred.computeMaxPath();
+			}		
+	}
+	
+	public int getMaxPathLength(){
+		return _maxPathLength;
+	}
+	
+	public Community getMaxSuccessor(){
+		return _maxSuccessor;
 	}
 }
