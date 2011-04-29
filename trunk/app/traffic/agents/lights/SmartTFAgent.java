@@ -27,7 +27,7 @@ public class SmartTFAgent extends TLAgent {
      * @author biggie SmartTFAgent
      */
     public SmartTFAgent(int duration_, double split_, Logger log_) {
-	super(duration_, split_, log_);
+	super(null, duration_, split_, log_);
 	_flowMap.put(Orientation.NS, 0.0);
 	_flowMap.put(Orientation.EW, 0.0);
     }
