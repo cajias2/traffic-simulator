@@ -8,6 +8,7 @@ package social;
 
 import java.awt.Dimension;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import sim.field.network.Edge;
 import sim.graph.social.link.FriendLink;
 import sim.graph.social.metrics.BronKerboschKCliqueFinder;
 import sim.graph.social.metrics.CPMCommunityFinder;
+import sim.graph.social.metrics.commTracker.TimeLineList;
 import sim.mason.AgentNetwork;
 import edu.uci.ics.jung.algorithms.layout.HypergraphLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
@@ -46,30 +48,61 @@ public class SocialSimFlowTest {
      */
     public static void main(String[] args) {
 	SocialSim sim = new SocialSim(System.currentTimeMillis());
+	//El 100 es el snapshot
 	List<Edge[][]> adjList = sim.runSim(args, 100);
 	System.out.println("Finding Communities....");
 	System.out.println("Cliques\tCommunities");
 	List<Collection<Set<Integer>>> kEvol = new LinkedList<Collection<Set<Integer>>>();
 	List<Graph<Integer, FriendLink>> graphEvol = new LinkedList<Graph<Integer, FriendLink>>();
 	int lastKsize = -1;
+	
+	TimeLineList evolution = new TimeLineList();
+	int snapshot = 1;
+	
 	for (Edge[][] eAr : adjList) {
-	    UndirectedGraph<Integer, FriendLink> graph = AgentNetwork.adjListToJGraphTList(eAr);
+		UndirectedGraph<Integer, FriendLink> graph = AgentNetwork.adjListToJGraphTList(eAr);
 	    BronKerboschKCliqueFinder<Integer, FriendLink> maxCliques = new BronKerboschKCliqueFinder<Integer, FriendLink>(
 		    graph);
-	    Collection<Set<Integer>> kFourCliques = maxCliques.getKMaxClique(4);
+	    Collection<Set<Integer>> kFourCliques = maxCliques.getKMaxClique(3);
 
+	    // Conjunto de communidades en ese snapshot
 	    Collection<Set<Integer>> kComs = findCPM(kFourCliques);
-
+	    	    	    
 	    kEvol.add(kComs);
 	    graphEvol.add(AgentNetwork.adjListToJungGraph(eAr));
 
 	    System.out.println(kFourCliques.size() + "\t" + kComs.size());
+	    
+	    Graph<Integer, FriendLink> g = AgentNetwork.adjListToJungGraph(eAr);
+	    if(kComs.isEmpty()){
+	    	evolution.add(snapshot,new HashSet<Integer>(), g);
+	    }
+	    else{
+	    	for(Set<Integer> community : kComs){
+	    		evolution.add(snapshot, community, g);	    	
+	    	}
+	    }
+	    snapshot++;
+	    
 	    if (-1 == lastKsize) {
 		lastKsize = kComs.size();
 	    } else if (1 == kComs.size() && kComs.size() < lastKsize) {
 		break;
 	    }
 	    lastKsize = kComs.size();
+	}
+	
+	System.out.println("GROWTH\tMETABOLISM");
+	List<List<Double>> metrics = evolution.getMetrics();
+	
+	for(List<Double> frame : metrics){
+		for(int i = 0; i<2; i++){
+			if(i==0)
+				System.out.print(frame.get(i) + "\t");
+			else
+				System.out.println(frame.get(i));
+		}
+		//System.out.println();
 	}
 
 	JFrame frame = new JFrame("Simple Graph View");
@@ -126,5 +159,5 @@ public class SocialSimFlowTest {
 	CPMCommunityFinder<Integer> cpm = new CPMCommunityFinder<Integer>(kcliques_);
 	return cpm.findCommunities(4);
     }
-
+    
 }
