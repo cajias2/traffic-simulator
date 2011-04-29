@@ -23,6 +23,7 @@ import sim.geo.distance.Distance;
 import sim.geo.distance.Meters;
 import sim.graph.traffic.Road;
 import sim.graph.traffic.StreetXing;
+import sim.util.Double2D;
 import sim.utils.TrafficLightState;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -62,7 +63,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
     private static List<Vehicle> _vhclList = new LinkedList<Vehicle>();
 
     private final String ID;
-    private Point2D _currLocation; // How close to next intersection
+    private Double2D _currLocation; // How close to next intersection
     private Line2D _currRoadLine;
     private Double _currSpeed;
     private long _time;
@@ -84,10 +85,11 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 
     /**
      * Class constructor.
-     * 
+     * @param state_ TODO
      * @param route_
      */
-    public Vehicle(List<Road> route_, Graph<StreetXing, Road> city_, Logger log_, PApplet parent_) {
+    public Vehicle(SimState state_, List<Road> route_, Graph<StreetXing, Road> city_, Logger log_, PApplet parent_) {
+	super(state_);
 	super.applet = parent_;
 	_isAlive = true;
 	ID = "Car_" + _idToken++;
@@ -116,7 +118,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      *            TODO
      */
     public Vehicle(List<Road> route_, Graph<StreetXing, Road> city_, Document doc_, Logger log_) {
-	this(route_, city_, log_, null);
+	this(null, route_, city_, log_, null);
 	_outDoc = doc_;
 	_outputElement = _outDoc.createElement(VHCL_NODE);
     }
@@ -143,7 +145,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      * @throws Exception
      */
     @Override
-    public void move(SimState state_) {
+    public Double2D move(SimState state_) {
 
 	if (!_routeList.isEmpty()) {
 	    updateRoadSpeed();
@@ -158,6 +160,8 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 	} else {
 	    die(state_);
 	}
+	
+	return _currLocation;
     }
 
     /**
@@ -255,7 +259,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 	return _vhclList;
     }
 
-    public Point2D getLocation() {
+    public Double2D getLocation() {
 	return _currLocation;
     }
 

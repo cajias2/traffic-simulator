@@ -15,6 +15,7 @@ import sim.agents.DisplayableAgent;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.graph.traffic.Road;
+import sim.util.Double2D;
 import sim.utils.Orientation;
 import sim.utils.TrafficLightState;
 
@@ -32,7 +33,7 @@ public class TLAgent extends DisplayableAgent implements Steppable {
     private int _timeLeft;
     private int _stateIdx;
     private final Map<Orientation, TLState> _stateMap;
-    private Point2D _location;
+    private Double2D _location;
 
     private final int ID;
     private final int _duration;
@@ -40,32 +41,33 @@ public class TLAgent extends DisplayableAgent implements Steppable {
     /**
      * Constructor, Mason
      * 
+     * @param state_
+     *            TODO
      * @param duration_
      *            total time
      * @param split_
      *            number ranging from 0 - 1
      * @param log_
      */
-    public TLAgent(int duration_, double split_,
-	    Logger log_)
-    {
-        assert split_ <= 1 && split_ >= 0;
-        _split = (int) (100.0 * split_);
-        _duration = duration_;
-        _log = log_;
-        ID = _lightCount;
-        _lightCount++;
-        _durationArr = new int[2];
-        resetDurationArr();
-    
-        // Initialize state map
-        _stateMap = new HashMap<Orientation, TLState>(2);
-        _stateMap.put(Orientation.EW, new TLState(TrafficLightState.GREEN));
-        _stateMap.put(Orientation.NS, new TLState(TrafficLightState.RED));
-    
-        _stateIdx = 0;
-        resetTimer(_stateIdx);
-    
+    public TLAgent(SimState state_, int duration_, double split_, Logger log_) {
+	super(state_);
+	assert split_ <= 1 && split_ >= 0;
+	_split = (int) (100.0 * split_);
+	_duration = duration_;
+	_log = log_;
+	ID = _lightCount;
+	_lightCount++;
+	_durationArr = new int[2];
+	resetDurationArr();
+
+	// Initialize state map
+	_stateMap = new HashMap<Orientation, TLState>(2);
+	_stateMap.put(Orientation.EW, new TLState(TrafficLightState.GREEN));
+	_stateMap.put(Orientation.NS, new TLState(TrafficLightState.RED));
+
+	_stateIdx = 0;
+	resetTimer(_stateIdx);
+
     }
 
     /*
@@ -73,33 +75,34 @@ public class TLAgent extends DisplayableAgent implements Steppable {
      * 
      * @see sim.engine.Steppable#step(sim.engine.SimState)
      */
+    @Override
     public void step(SimState state_) {
-        move(state_);
+	move(state_);
     }
 
     /**
      * Count down on the time this light remains on the current state. If the
      * time runs out, the state changes and the timer is resetted
+     * @return 
      */
     @Override
-    public void move(SimState state_)
-    {
-        // Reduce time left at each stage
-        _timeLeft--;
-        if (0 > _timeLeft) {
-            updateLights();
-            _stateIdx++;
-            if (_stateIdx >= _durationArr.length)
-        	_stateIdx = 0;
-            resetTimer(_stateIdx);
-        }
-    
+    public Double2D move(SimState state_) {
+	// Reduce time left at each stage
+	_timeLeft--;
+	if (0 > _timeLeft) {
+	    updateLights();
+	    _stateIdx++;
+	    if (_stateIdx >= _durationArr.length)
+		_stateIdx = 0;
+	    resetTimer(_stateIdx);
+	}
+	return _location;
     }
 
     public void setSplit(int newSplit_) {
-        if (100 >= newSplit_ && 0 <= newSplit_)
-            _split = newSplit_;
-        resetDurationArr();
+	if (100 >= newSplit_ && 0 <= newSplit_)
+	    _split = newSplit_;
+	resetDurationArr();
     }
 
     /**
@@ -147,7 +150,7 @@ public class TLAgent extends DisplayableAgent implements Steppable {
     }
 
     public void setLocation(Point2D _location) {
-	this._location = _location;
+	this._location = new Double2D(_location);
     }
 
     /**
@@ -165,7 +168,8 @@ public class TLAgent extends DisplayableAgent implements Steppable {
     public List<Road> getRoads() {
 	return _roadList;
     }
-    public Point2D getLocation() {
+
+    public Double2D getLocation() {
 	return _location;
     }
 
@@ -193,15 +197,14 @@ public class TLAgent extends DisplayableAgent implements Steppable {
 
     /**
      * @author biggie
-     * @name   resetDurationArr
-     * Purpose TODO
+     * @name resetDurationArr Purpose TODO
      * 
-     * @param 
+     * @param
      * @return void
      */
     private void resetDurationArr() {
-        _durationArr[0] = (int) (_duration * _split / 100.0);
-        _durationArr[1] = (int) (_duration * (1 - _split / 100.0));
+	_durationArr[0] = (int) (_duration * _split / 100.0);
+	_durationArr[1] = (int) (_duration * (1 - _split / 100.0));
     }
 
 }

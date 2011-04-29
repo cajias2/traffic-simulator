@@ -26,7 +26,7 @@ public class Car extends Vehicle {
     private final Distance SIZE = new Meters(4.0);
 
     public Car(List<Road> trayectory_, Graph<StreetXing, Road> city_, Logger log_, PApplet parent_) {
-	super(trayectory_, city_, log_, parent_);
+	super(null, trayectory_, city_, log_, parent_);
     }
 
     public Car(List<Road> route_, Graph<StreetXing, Road> city_, Document doc_, Logger log_) {
