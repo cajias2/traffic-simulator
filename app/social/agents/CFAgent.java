@@ -17,8 +17,8 @@ public class CFAgent extends Agent {
 
     private static final int INIT_Y_VAR = 10;
     private static final int INIT_Y_MEDIAN = 50;
-    private static final double PEER_BIAS = 0.02;
-    private static final double B0_TIE_FORMING_COEFF = 0.5;
+    private static final double PEER_BIAS = 0.5;
+    private static final double B0_TIE_RETAINING_COEFF = 0.5;
     private static final double B1_HOMOPHILY_COEFF = 0.0125;
 
     private final static int DIM = 7;
@@ -116,7 +116,7 @@ public class CFAgent extends Agent {
 	    CFAgent alter = (CFAgent) ag_;
 	    double epsilonThresh = _rand.nextGaussian();
 	    double pDiff = -Math.abs(getPeerInfluencedPersonality() - alter.getPeerInfluencedPersonality());
-	    double aStar = B0_TIE_FORMING_COEFF + B1_HOMOPHILY_COEFF * pDiff;
+	    double aStar = B0_TIE_RETAINING_COEFF + B1_HOMOPHILY_COEFF * pDiff;
 	    if (0 < Double.compare(aStar, epsilonThresh)) {
 		isNewFriend = true;
 	    }
