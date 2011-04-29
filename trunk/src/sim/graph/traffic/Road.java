@@ -16,6 +16,7 @@ import sim.agents.traffic.vhcl.Vehicle;
 import sim.geo.distance.Distance;
 import sim.geo.distance.Kilometers;
 import sim.geo.distance.Meters;
+import sim.util.Double2D;
 import sim.utils.Orientation;
 import sim.utils.TrafficLightState;
 
@@ -462,16 +463,18 @@ public abstract class Road {
 
     /**
      * @param l_
-     * @param pt_
+     * @param currLocation_
      * @return
      */
-    public int getSegIdx(Line2D l_, Point2D pt_) {
+    public int getSegIdx(Line2D l_, Double2D currLocation_) {
 	int seg;
+	Point2D currPt = new Point2D();
+	currPt.setLocation(currLocation_.x, currLocation_.y);
 
-	if (l_.ptLineDist(pt_) <= DISTANCE_THRESHOLD) {
-	    seg = (int) (l_.getP1().distance(pt_) / LAYER_SEG.getVal());
+	if (l_.ptLineDist(currPt) <= DISTANCE_THRESHOLD) {
+	    seg = (int) (l_.getP1().distance(currPt) / LAYER_SEG.getVal());
 	    // Hack in cases that the point is right on the border
-	    if (pt_.getX() == l_.getX2() && pt_.getY() == l_.getY2()) {
+	    if (currLocation_.getX() == l_.getX2() && currLocation_.getY() == l_.getY2()) {
 		seg--;
 	    }
 	} else
