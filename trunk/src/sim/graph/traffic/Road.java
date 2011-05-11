@@ -249,7 +249,8 @@ public abstract class Road {
     public void update() {
 	for (Vehicle v : _vehiclesOnRoad) {
 	    Line2D currLine = v.getRoadLine();
-	    int segIdx = (int) Math.ceil((currLine.getP1().distance(v.getLocation()) / LAYER_SEG.getVal()));
+	    Point2D pt = new Point2D.Double(v.getLocation().x, v.getLocation().y);
+	    int segIdx = (int) Math.ceil((currLine.getP1().distance(pt) / LAYER_SEG.getVal()));
 	    Line2D seg = _segmentList.get(v.getRoadLineIdx()).get(segIdx);
 	    _vehicleOnSeg.get(seg).add(v);
 	}
@@ -292,8 +293,8 @@ public abstract class Road {
 
     }
 
-    public Point2D startLoc() {
-	return _lineList.get(0).getP1();
+    public Double2D startLoc() {
+	return new Double2D(_lineList.get(0).getP1());
     }
 
     public Point2D endLoc() {
@@ -468,11 +469,10 @@ public abstract class Road {
      */
     public int getSegIdx(Line2D l_, Double2D currLocation_) {
 	int seg;
-	Point2D currPt = new Point2D();
-	currPt.setLocation(currLocation_.x, currLocation_.y);
+	Point2D pt = new Point2D.Double(currLocation_.x, currLocation_.y);
 
-	if (l_.ptLineDist(currPt) <= DISTANCE_THRESHOLD) {
-	    seg = (int) (l_.getP1().distance(currPt) / LAYER_SEG.getVal());
+	if (l_.ptLineDist(pt) <= DISTANCE_THRESHOLD) {
+	    seg = (int) (l_.getP1().distance(pt) / LAYER_SEG.getVal());
 	    // Hack in cases that the point is right on the border
 	    if (currLocation_.getX() == l_.getX2() && currLocation_.getY() == l_.getY2()) {
 		seg--;
@@ -593,7 +593,9 @@ public abstract class Road {
     /**
      * @return The coordinates of the road origin.
      */
-    public Point2D getP1() {
+    public Double2D getP1() {
+	Double2D pt = new Double2D();
+	pt.
 	return _lineList.get(0).getP1();
     }
 

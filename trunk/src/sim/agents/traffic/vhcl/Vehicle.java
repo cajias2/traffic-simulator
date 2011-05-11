@@ -345,7 +345,6 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      * Resets locations variables when a new road is reached.
      */
     private void updateRoad() {
-
 	_currLocation = currentRoad().startLoc();
 	_roadLineIdx = 0;
 	_currRoadLine = currentRoad().getLineList().get(_roadLineIdx);
@@ -387,6 +386,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      */
     private void logRoadInfo(Road rd_) {
 	String rdId = rd_.ID;
+	Point2D 
 	Double distance = rd_.getP1().distance(_currLocation);
 	_currSpeed = distance / _rdStart;
 	Element sectionEl = _outDoc.createElement(VHCL_SECTION_NODE);
