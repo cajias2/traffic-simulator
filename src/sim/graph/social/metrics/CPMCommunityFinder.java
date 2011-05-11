@@ -7,15 +7,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.alg.ConnectivityInspector;
-import org.jgrapht.graph.SimpleGraph;
 
 import sim.graph.social.link.FriendLink;
 import social.links.SimpleFriendLink;
+import edu.uci.ics.jung.algorithms.cluster.EdgeBetweennessClusterer;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 /**
  * TODO Purpose
@@ -25,7 +23,7 @@ import social.links.SimpleFriendLink;
  */
 public class CPMCommunityFinder<V> {
 
-    private final UndirectedGraph<Set<V>, FriendLink> _cliqueGraph;
+    private final Graph<Set<V>, FriendLink> _cliqueGraph;
 
     /**
      * TODO Purpose
@@ -34,7 +32,7 @@ public class CPMCommunityFinder<V> {
      * @author biggie
      */
     public CPMCommunityFinder(Collection<Set<V>> kCliques_) {
-	_cliqueGraph = new SimpleGraph<Set<V>, FriendLink>(SimpleFriendLink.class);
+	_cliqueGraph = new UndirectedSparseGraph<Set<V>, FriendLink>();
 	initializeCliqueGraph(kCliques_);
     }
 
@@ -49,12 +47,12 @@ public class CPMCommunityFinder<V> {
      */
     public Collection<Set<V>> findCommunities(int k_) {
 
-	for (Set<V> kCliqueA : _cliqueGraph.vertexSet()) {
-	    for (Set<V> kCliqueB : _cliqueGraph.vertexSet()) {
+	for (Set<V> kCliqueA : _cliqueGraph.getVertices()) {
+	    for (Set<V> kCliqueB : _cliqueGraph.getVertices()) {
 
 		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB, k_)) {
 		    try {
-			_cliqueGraph.addEdge(kCliqueA, kCliqueB);
+			_cliqueGraph.addEdge(new SimpleFriendLink(), kCliqueA, kCliqueB);
 		    } catch (OutOfMemoryError e) {
 			System.err.println(e.getMessage());
 		    }
@@ -62,9 +60,9 @@ public class CPMCommunityFinder<V> {
 	    }
 	}
 
-	ConnectivityInspector<Set<V>, FriendLink> conInsp = new ConnectivityInspector<Set<V>, FriendLink>(_cliqueGraph);
+	EdgeBetweennessClusterer<Set<V>, FriendLink> ebc = new EdgeBetweennessClusterer<Set<V>, FriendLink>(0);
 
-	return unifyConnectedComponents(conInsp.connectedSets());
+	return unifyConnectedComponents(ebc.transform(_cliqueGraph));
     }
 
     /**
@@ -87,13 +85,13 @@ public class CPMCommunityFinder<V> {
      * TODO Purpose
      * 
      * @param
-     * @return Collection<Set<V>>
+     * @return Collection<Set<V>> Set of connected components
      * @author biggie
      */
-    private Collection<Set<V>> unifyConnectedComponents(List<Set<Set<V>>> connectedSets_) {
+    private Collection<Set<V>> unifyConnectedComponents(Collection<Set<Set<V>>> conCompSet_) {
 	Collection<Set<V>> unifiedSet = new ArrayList<Set<V>>();
 
-	Iterator<Set<Set<V>>> comIter = connectedSets_.iterator();
+	Iterator<Set<Set<V>>> comIter = conCompSet_.iterator();
 	while (comIter.hasNext()) {
 	    Set<Set<V>> currCom = comIter.next();
 	    // Unify Community

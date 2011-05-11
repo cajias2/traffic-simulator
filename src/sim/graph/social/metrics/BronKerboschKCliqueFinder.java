@@ -10,8 +10,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-import org.jgrapht.Graph;
-import org.jgrapht.alg.BronKerboschCliqueFinder;
+import edu.uci.ics.jung.algorithms.cluster.BronKerboschCliqueFinder;
+import edu.uci.ics.jung.graph.Graph;
+
+
+
+
 
 /**
  * @author biggie
@@ -36,7 +40,7 @@ public class BronKerboschKCliqueFinder<V, E> extends BronKerboschCliqueFinder<V,
      * @param
      * @return Collection<Set<Agent>>
      */
-    public Collection<Set<V>> getKMaxClique(int _k) {
+    public Collection<Set<V>> getAllMaxKCliques(int _k) {
 	Collection<Set<V>> maxClique = getAllMaximalCliques();
 	Collection<Set<V>> kCliques = new ArrayList<Set<V>>();
 

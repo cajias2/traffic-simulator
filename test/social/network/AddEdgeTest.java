@@ -3,9 +3,6 @@ package social.network;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.field.network.Network;
