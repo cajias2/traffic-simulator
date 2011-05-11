@@ -15,8 +15,6 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 
-import org.jgrapht.UndirectedGraph;
-
 import sim.app.social.SocialSim;
 import sim.field.network.Edge;
 import sim.graph.social.link.FriendLink;
@@ -60,10 +58,10 @@ public class SocialSimFlowTest {
 	int snapshot = 1;
 	
 	for (Edge[][] eAr : adjList) {
-		UndirectedGraph<Integer, FriendLink> graph = AgentNetwork.adjListToJGraphTList(eAr);
+	    Graph<Integer, FriendLink> graph = AgentNetwork.adjListToJungGraph(eAr);
 	    BronKerboschKCliqueFinder<Integer, FriendLink> maxCliques = new BronKerboschKCliqueFinder<Integer, FriendLink>(
 		    graph);
-	    Collection<Set<Integer>> kFourCliques = maxCliques.getKMaxClique(3);
+	    Collection<Set<Integer>> kFourCliques = maxCliques.getAllMaxKCliques(3);
 
 	    // Conjunto de communidades en ese snapshot
 	    Collection<Set<Integer>> kComs = findCPM(kFourCliques);
@@ -118,7 +116,6 @@ public class SocialSimFlowTest {
 	frame.getContentPane().add(v);
 	frame.pack();
 	frame.setVisible(true);
-
 
     }
 

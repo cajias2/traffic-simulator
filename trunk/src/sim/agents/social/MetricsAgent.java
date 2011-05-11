@@ -11,15 +11,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jgrapht.GraphPath;
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.alg.FloydWarshallShortestPaths;
-
-import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
@@ -28,6 +21,8 @@ import sim.engine.Steppable;
 import sim.graph.social.link.FriendLink;
 import sim.graph.social.metrics.BronKerboschKCliqueFinder;
 import sim.graph.social.metrics.CPMCommunityFinder;
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
+import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
@@ -99,7 +94,7 @@ public class MetricsAgent implements Steppable {
 	    Collection<Set<Agent>> kcliques = null;
 	    Collection<Set<Agent>> cpmCom = null;
 	    if (ts % 10 == 0) {
-		kcliques = findKCliques(socSim.network.getJgraphT(), 4);
+		kcliques = findKCliques(socSim.network.getJGraph(), 4);
 		cpmCom = findCPM(kcliques);
 	    }
 
@@ -150,8 +145,8 @@ public class MetricsAgent implements Steppable {
      * @param
      * @return Collection<Set<V>>
      */
-    private Collection<Set<Agent>> findKCliques(UndirectedGraph<Agent, FriendLink> graph_, int k_) {
+    private Collection<Set<Agent>> findKCliques(Graph<Agent, FriendLink> graph_, int k_) {
 	BronKerboschKCliqueFinder<Agent, FriendLink> clique = new BronKerboschKCliqueFinder<Agent, FriendLink>(graph_);
-	return clique.getKMaxClique(k_);
+	return clique.getAllMaxKCliques(k_);
     }
 }
