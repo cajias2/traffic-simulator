@@ -11,7 +11,7 @@ import sim.mason.AgentNetwork;
  * 
  */
 @SuppressWarnings("serial")
-public class NetworkSimState extends SimState {
+public class SocialSimState extends SimState {
 
     private AgentNetwork _ntwrk;
 
@@ -19,7 +19,7 @@ public class NetworkSimState extends SimState {
      * 
      * @param seed
      */
-    public NetworkSimState(long seed) {
+    public SocialSimState(long seed) {
 	super(seed);
     }
 
