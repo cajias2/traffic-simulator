@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 import sim.agents.Agent;
 import sim.agents.social.MetricsAgent;
-import sim.app.NetworkSimState;
+import sim.app.SocialSimState;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -24,9 +24,8 @@ import sim.util.Double2D;
 import sim.utils.xml.social.SocialInputParseService;
 
 @SuppressWarnings("serial")
-public class SocialSim extends NetworkSimState {
+public class SocialSim extends SocialSimState {
 
-    private final static String clazz = SocialSim.class.getSimpleName();
     private static Logger _log;
     private static String _simXml;
     private static Random _rand = new Random(System.currentTimeMillis());
@@ -83,6 +82,13 @@ public class SocialSim extends NetworkSimState {
 	}
     }
 
+    /**
+     * 
+     * TODO Purpose
+     * @params 
+     * @return void
+     * @author biggie
+     */
     private void initializeThis(String _simXml) {
 	SocialInputParseService parseSrv = new SocialInputParseService(_simXml, _log);
 	parseSrv.parseSim();
@@ -190,15 +196,6 @@ public class SocialSim extends NetworkSimState {
 	doLoop(SocialSim.class, args);
     }
 
-    /**
-     * @author biggie
-     * @name createGrids Purpose TODO
-     * @param
-     * @return void
-     */
-    private void createGrids() {
-	fieldEnvironment = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
-    }
 
     /**
      * @author biggie

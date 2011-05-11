@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
 import sim.agents.traffic.TLAgent;
 import sim.agents.traffic.vhcl.Car;
 import sim.agents.traffic.vhcl.Vehicle;
-import sim.app.NetworkSimState;
+import sim.app.CitySimState;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -43,7 +43,7 @@ import sim.utils.xml.traffic.XmlOutputParseService;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 
 @SuppressWarnings("serial")
-public class TrafficSim extends NetworkSimState {
+public class TrafficSim extends CitySimState {
     private static Logger _log;
     private static String clazz = TrafficSim.class.getSimpleName();
     private static String _cityXml;
@@ -63,7 +63,7 @@ public class TrafficSim extends NetworkSimState {
 	super(seed);
 	cityXmlFileName_ = System.getProperty("user.dir") + cityXmlFileName_;
 	XmlInputTrafficParseService parsedGraph = new XmlInputTrafficParseService(cityXmlFileName_, log_);
-	setNetwork(parsedGraph.getGraph());
+	setCity(parsedGraph.getGraph());
 	MAX_CAR_COUNT = parsedGraph.getMaxCars();
 	_sourceXings = parsedGraph.getSourceXings();
 	_destXings = parsedGraph.getDestXings();
@@ -80,7 +80,7 @@ public class TrafficSim extends NetworkSimState {
     public TrafficSim(long seed) {
 	super(seed);
 	XmlInputTrafficParseService parsedGraph = new XmlInputTrafficParseService(_cityXml, _log);
-	setNetwork(parsedGraph.getGraph());
+	setCity(parsedGraph.getGraph());
 	MAX_CAR_COUNT = parsedGraph.getMaxCars();
 	SIM_TIME = parsedGraph.getSimDuration();
 	_sourceXings = parsedGraph.getSourceXings();
@@ -105,7 +105,7 @@ public class TrafficSim extends NetworkSimState {
 	    // DijkstraShortestPath<StreetXing, Road> routeMap = new
 	    // DijkstraShortestPath<StreetXing, Road>(getCity(),
 	    // rdTrans, false);
-	    DijkstraShortestPath<StreetXing, Road> routeMap = new DijkstraShortestPath<StreetXing, Road>(getNwrk());
+	    DijkstraShortestPath<StreetXing, Road> routeMap = new DijkstraShortestPath<StreetXing, Road>(getCity());
 
 	    int carOrder = 0;
 
@@ -139,7 +139,7 @@ public class TrafficSim extends NetworkSimState {
 		    if (!_outputDocMap.containsKey(routeName)) {
 			_outputDocMap.put(routeName, createDom(routeName));
 		    }
-		    Vehicle vhcl = new Car(route, getNwrk(), _outputDocMap.get(routeName), _log);
+		    Vehicle vhcl = new Car(route, getCity(), _outputDocMap.get(routeName), _log);
 		    vhcl.toDiePointer = schedule.scheduleRepeating(schedule.getTime(), carOrder++, vhcl);
 		}
 	    }
@@ -244,8 +244,8 @@ public class TrafficSim extends NetworkSimState {
 	for (Entry<String, Document> entrySet : _outputDocMap.entrySet()) {
 	    String docName = entrySet.getKey();
 	    Document document = entrySet.getValue();
-	    getNwrk().getEdges();
-	    XmlOutputParseService outParser = new XmlOutputParseService(document, getNwrk());
+	    getCity().getEdges();
+	    XmlOutputParseService outParser = new XmlOutputParseService(document, getCity());
 	    Map<String, List<OutputSection>> docMap = outParser.getSectionStartSeries();
 	    // Copy the sections of each out to the map
 	    for (Entry<String, List<OutputSection>> ts : docMap.entrySet()) {
