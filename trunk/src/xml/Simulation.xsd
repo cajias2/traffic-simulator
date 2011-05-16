@@ -8,7 +8,7 @@
 				<xs:element ref="agents" minOccurs='0' maxOccurs='unbounded' />
 			</xs:sequence>
 			<xs:attribute name="type" type="symType" use="optional"
-				default="social" />			
+				default="test.social" />			
 			<xs:attribute name="agents" type="xs:decimal" use="required" />
 			<xs:attribute name="duration" type="xs:decimal" use="required" />
 			<xs:attribute name="width" type="xs:decimal" use="required" />

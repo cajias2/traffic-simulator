@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<simulation type="social" simDuration="100000" width="1000" length="1000" agents="150"
+<simulation type="test.social" simDuration="1000" width="100" length="100" agents="250"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">
 	<agents>
-		<agent classpath="ap.social.agents.PersonalityAgent" pct="100" />
+		<agent classpath="ap.social.agents.CFAgent" pct="100" />
 	</agents>
 	<links>
 		<link classpath="test.social.links.SimpleFriendLink" />
