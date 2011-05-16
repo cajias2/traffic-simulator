@@ -8,12 +8,13 @@ import static edu.uci.ics.jung.algorithms.metrics.Metrics.clusteringCoefficients
 import java.util.Collection;
 import java.util.Map;
 
+import app.social.links.SimpleFriendLink;
+
 import sim.agents.Agent;
 import sim.field.network.Edge;
 import sim.field.network.Network;
 import sim.graph.social.link.FriendLink;
 import sim.util.Bag;
-import social.links.SimpleFriendLink;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;

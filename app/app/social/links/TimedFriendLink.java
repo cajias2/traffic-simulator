@@ -1,22 +1,23 @@
 /**
  * 
  */
-package social.links;
+package app.social.links;
 
+import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.graph.social.link.FriendLink;
 
 /**
  * @author biggie
  *
  */
-public class SimpleFriendLink extends FriendLink {
+public class TimedFriendLink extends FriendLink implements Steppable {
 
-    public SimpleFriendLink(Double w_) {
+    private int _duration;
+
+    public TimedFriendLink(Double w_) {
 	super(w_);
-    }
-
-    public SimpleFriendLink() {
-	super(1.0);
+	_duration = 1;
     }
 
     /* (non-Javadoc)
@@ -37,10 +38,14 @@ public class SimpleFriendLink extends FriendLink {
 
     }
 
-    @Override
-    public String toString()
-    {
-	return "";
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sim.engine.Steppable#step(sim.engine.SimState)
+     */
+    public void step(SimState state_) {
+	_duration++;
+
     }
 
 }

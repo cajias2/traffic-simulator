@@ -9,8 +9,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import app.social.links.SimpleFriendLink;
+
 import sim.graph.social.link.FriendLink;
-import social.links.SimpleFriendLink;
 import edu.uci.ics.jung.algorithms.cluster.EdgeBetweennessClusterer;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;

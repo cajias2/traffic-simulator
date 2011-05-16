@@ -3,11 +3,12 @@ package social.network;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.social.links.SimpleFriendLink;
+
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.field.network.Network;
 import sim.mason.AgentNetwork;
-import social.links.SimpleFriendLink;
 
 public class AddEdgeTest {
 

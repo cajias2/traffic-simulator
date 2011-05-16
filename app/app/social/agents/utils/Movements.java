@@ -1,7 +1,7 @@
 /**
  * 
  */
-package social.agents.utils;
+package app.social.agents.utils;
 
 import static java.lang.Math.sqrt;
 import sim.util.Double2D;

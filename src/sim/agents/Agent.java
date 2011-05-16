@@ -10,6 +10,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.util.Iterator;
 
+import app.social.links.SimpleFriendLink;
+
 import sim.app.networktest.NetworkTest;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
@@ -18,7 +20,6 @@ import sim.mason.AgentNetwork;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Bag;
 import sim.util.Double2D;
-import social.links.SimpleFriendLink;
 import ec.util.MersenneTwisterFast;
 
 /**
