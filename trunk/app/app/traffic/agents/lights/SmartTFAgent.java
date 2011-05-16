@@ -4,7 +4,7 @@
  * 
  */
 
-package traffic.agents.lights;
+package app.traffic.agents.lights;
 
 import java.util.HashMap;
 import java.util.Map;
