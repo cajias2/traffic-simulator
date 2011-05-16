@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">
 	<agents>
-		<agent classpath="ap.social.agents.CFAgent" pct="100" />
+		<agent classpath="app.social.agents.CFAgent" pct="100" />
 	</agents>
 	<links>
 		<link classpath="test.social.links.SimpleFriendLink" />
