@@ -10,7 +10,6 @@ import edu.uci.ics.jung.graph.Graph;
 
 import sim.field.network.Edge;
 import sim.graph.social.link.FriendLink;
-import sim.mason.AgentNetwork;
 
 public class Community {
 	private List<Integer> _members, _core;
@@ -20,7 +19,6 @@ public class Community {
 	public String name;
 	private static int numCommunities = 0;
 	private List<List<Community>> _traces;
-	private int _traceSpan;
 	
 	public Community(Set<Integer> comm_, Graph<Integer,FriendLink> graph_) {
 		_members = new ArrayList<Integer>();
@@ -31,7 +29,6 @@ public class Community {
 		_successors = new ArrayList<Community>();
 		_maxPathLength = 0;
 		_maxSuccessor = null;
-		_traceSpan = -1;
 		numCommunities++;
 	}
 	
@@ -43,7 +40,6 @@ public class Community {
 		_maxPathLength = 0;
 		_maxSuccessor = null;
 		name = n_;
-		_traceSpan = -1;
 		numCommunities++;
 	}
 	
@@ -78,8 +74,6 @@ public class Community {
 				nodos.add(nodo);
 			}
 
-//			Edge[][] adjacencyMatrix = graph_.getAdjacencyMatrix();			
-
 			for (i = 0; i < nodos.size(); i++) {
 				for (int j = (i + 1); j < nodos.size(); j++) {
 					Integer node1 = nodos.elementAt(i);
@@ -87,8 +81,6 @@ public class Community {
 					
 					FriendLink edge1 = graph_.findEdge(node1, node2);
 					FriendLink edge2 = graph_.findEdge(node2, node1);
-//					boolean connected = existEdge(node1, node2, adjacencyMatrix);
-//					if (connected) {
 					if ((edge1 != null) || (edge2!= null)){
 						int grado1 = graph_.degree(node1);
 						int grado2 = graph_.degree(node2);
@@ -212,11 +204,10 @@ public class Community {
 
 				if (!predTraces.isEmpty()) {
 					for (List<Community> trace : predTraces) {
-						_traces.add(new ArrayList<Community>());
-						int size = _traces.size();
-
-						_traces.get(size - 1).addAll(trace);
-						_traces.get(size - 1).add(predecessor);
+						List<Community> newTrace = new ArrayList<Community>();
+						newTrace.addAll(trace);
+						newTrace.add(predecessor);
+						_traces.add(newTrace);
 					}
 
 				} else {
@@ -232,39 +223,16 @@ public class Community {
 		_age = traceSpan.size()+1;
 	}
 	
-	/**
-	 * TODO: REVISAR
-	 * @return
-	 */
-//	public int getTraceSpan(){
-//		if(_traceSpan != -1)
-//			return _traceSpan;
-//		
-//		if(!_predecessors.isEmpty()){
-//			int maxTrace = 0;
-//			for(Community pred : _predecessors){
-//				int predTrace = pred.getTraceSpan();
-//				if(predTrace > maxTrace)
-//					maxTrace = predTrace;
-//			}
-//			_traceSpan = maxTrace+1;
-//			return _traceSpan;
-//		}
-//		
-//		_traceSpan = 1;	
-//		return _traceSpan;
-//	}
-	
 	public boolean equals(Community comm_){
 		return (_members.containsAll(comm_._members) && _core.containsAll(comm_._core));
 	}
 	
 	/**
-	 * TODO: Revisar este método en el caso de que el grafo sea dirigido.
+	 * TODO: Revisar este metodo en el caso de que el grafo sea dirigido.
 	 * @param part1_ Primer nodo
 	 * @param part2_ Segundo nodo
 	 * @param matrix_ Matriz de adyacencia de la red
-	 * @return Devuelve true si part1_ y part_2 están conectados (sin tener en cuenta la dirección)
+	 * @return Devuelve true si part1_ y part_2 estï¿½n conectados (sin tener en cuenta la direcciï¿½n)
 	 */
 	public boolean existEdge(Integer part1_, Integer part2_, Edge[][] matrix_){
 		boolean result = false;
@@ -273,6 +241,7 @@ public class Community {
 			Edge[] fila = matrix_[counter];
 			counter++;
 
+			
 			for (Edge ed : fila) {
 				if (ed != null) {
 					Integer from = (Integer) ed.getFrom();
