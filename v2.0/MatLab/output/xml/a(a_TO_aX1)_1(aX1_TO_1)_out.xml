@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?sim.xml version="1.0" encoding="UTF-8" standalone="no"?>
 <output route="a(a_TO_aX1)_1(aX1_TO_1)">
 <vhcl end="1000" start="1">
 <section end="999" name="a(a_TO_aX1)" speed="0.5202991452991453" start="63"/>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?sim.xml version="1.0" encoding="UTF-8" standalone="no"?>
 <output route="c(c_TO_cX1)_3(dX3_TO_3)">
 <vhcl end="795" start="3">
 <section end="10" name="c(c_TO_cX1)" speed="0.8" start="5"/>

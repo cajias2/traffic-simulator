@@ -72,7 +72,7 @@ public class XmlParseService
     }
     
     /**
-     * Creates a graph based on the xml file.
+     * Creates a graph based on the sim.xml file.
      */
     private void createGraph ()
     {
@@ -114,7 +114,7 @@ public class XmlParseService
     private void parseSim ( Document doc_ )
     {
         NodeList simNodes = doc_.getElementsByTagName( NODE_SIM );
-        // Only one node per xml is expected. TODO allow for more than one
+        // Only one node per sim.xml is expected. TODO allow for more than one
         // simulation node
         for ( int i = 0; i < simNodes.getLength(); i++ )
         {
@@ -204,7 +204,7 @@ public class XmlParseService
     }
     
     /**
-     * Return the graph generated from the xml file passed in constructor.
+     * Return the graph generated from the sim.xml file passed in constructor.
      * 
      * @return
      */

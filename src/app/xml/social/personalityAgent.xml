@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?sim.xml version="1.0" encoding="UTF-8"?>
 <simulation type="test.social" simDuration="100000" width="1000" length="1000" agents="150"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">

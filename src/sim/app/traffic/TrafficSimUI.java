@@ -101,7 +101,7 @@ public class TrafficSimUI extends GUIState {
 	_log.setLevel(Level.SEVERE);
 
 	if (args.length < 2 || "city".equals(args[0])) {
-	    System.err.println("Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+	    System.err.println("Usage: java -jar " + clazz + ".jar -city [sim.xml file]\n"
 		    + "See TrafficSimulation.xsd for details");
 	    System.exit(1);
 
@@ -117,7 +117,7 @@ public class TrafficSimUI extends GUIState {
 	    }
 	}
 	if (null == cityXml || "".equals(cityXml)) {
-	    System.err.println("Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+	    System.err.println("Usage: java -jar " + clazz + ".jar -city [sim.xml file]\n"
 		    + "See TrafficSimulation.xsd for details");
 	    System.exit(1);
 	}
