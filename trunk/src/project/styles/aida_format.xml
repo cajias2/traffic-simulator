@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?sim.xml version="1.0" encoding="UTF-8" standalone="no"?>
 <profiles version="2">
 <profile kind="CleanUpProfile" name="Eclipse [AIDA]" version="2">
 <setting id="cleanup.remove_unused_private_fields" value="true"/>

@@ -120,7 +120,7 @@ public class TrafficSim extends CitySimState
     
     /**
      * Return a random car destination based on the {@code endOdds} attribute in
-     * the city xml.
+     * the city sim.xml.
      * <p/>
      * See {@link TraffiSimulation.xsd} for more info
      * 
@@ -147,7 +147,7 @@ public class TrafficSim extends CitySimState
     
     /**
      * Return a random car begining based on the {@code startingOdds} attribute
-     * in the city xml.
+     * in the city sim.xml.
      * <p/>
      * See {@link TraffiSimulation.xsd} for more info
      * 
@@ -200,7 +200,7 @@ public class TrafficSim extends CitySimState
         
         if ( args.length < 2 || "city".equals( args[0] ) )
         {
-            System.err.println( "Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+            System.err.println( "Usage: java -jar " + clazz + ".jar -city [sim.xml file]\n"
                     + "See TrafficSimulation.xsd for details" );
             System.exit( 1 );
             
@@ -221,7 +221,7 @@ public class TrafficSim extends CitySimState
         }
         if ( null == _cityXml || "".equals( _cityXml ) )
         {
-            System.err.println( "Usage: java -jar " + clazz + ".jar -city [xml file]\n"
+            System.err.println( "Usage: java -jar " + clazz + ".jar -city [sim.xml file]\n"
                     + "See TrafficSimulation.xsd for details" );
             System.exit( 1 );
         }

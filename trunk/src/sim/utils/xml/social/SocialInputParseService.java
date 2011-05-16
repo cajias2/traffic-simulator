@@ -190,7 +190,7 @@ public class SocialInputParseService {
      * Error message.
      */
     private static void printMsgAndExit() {
-	System.err.println("Usage: java -jar [name].jar -city [xml file]\n" + "See Simulation.xsd for details");
+	System.err.println("Usage: java -jar [name].jar -city [sim.xml file]\n" + "See Simulation.xsd for details");
 	System.exit(1);
     }
 
