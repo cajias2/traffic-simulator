@@ -18,9 +18,9 @@ import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
+import sim.graph.social.algorithms.BronKerboschKCliqueFinder;
+import sim.graph.social.algorithms.CPMCommunityFinder;
 import sim.graph.social.link.FriendLink;
-import sim.graph.social.metrics.BronKerboschKCliqueFinder;
-import sim.graph.social.metrics.CPMCommunityFinder;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -30,6 +30,7 @@ import edu.uci.ics.jung.graph.Graph;
  */
 public class MetricsAgent implements Steppable {
 
+    private static final long serialVersionUID = 4508519047587954841L;
     private BufferedWriter _outWrt = null;
 
     public MetricsAgent() {
@@ -66,7 +67,8 @@ public class MetricsAgent implements Steppable {
 	    double edgepnct = socSim.network.getJGraph().getEdgeCount() / maxEdges;
 	    
 	    
-	    DijkstraDistance<Agent, FriendLink> dijkstra = new DijkstraDistance(socSim.network.getJGraph(), true);
+	    DijkstraDistance<Agent, FriendLink> dijkstra = new DijkstraDistance<Agent, FriendLink>(
+		    socSim.network.getJGraph(), true);
 	    Collection<Agent> nodes = socSim.network.getJungNodes();
 	    
 	    int totalLength = 0;

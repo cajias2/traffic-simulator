@@ -1,4 +1,4 @@
-package sim.graph.social.metrics.commTracker;
+package sim.graph.social.algorithms.commTracker;
 
 import java.io.BufferedWriter;
 import java.io.File;
