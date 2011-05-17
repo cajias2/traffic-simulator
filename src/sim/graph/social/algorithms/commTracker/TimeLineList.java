@@ -11,9 +11,9 @@ import java.util.Set;
 import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
-public class TimeLineList {
-    private final List<List<Community>> _timeLine;
-    private final List<List<Community>> _traces;
+public class TimeLineList<T> {
+    private final List<List<Community<T>>> _timeLine;
+    private final List<List<Community<T>>> _traces;
     private final List<List<List<Double>>> _metrics;
 
     /**
@@ -24,8 +24,8 @@ public class TimeLineList {
      * @author antonio
      */
     public TimeLineList() {
-	_timeLine = new ArrayList<List<Community>>();
-	_traces = new ArrayList<List<Community>>();
+	_timeLine = new ArrayList<List<Community<T>>>();
+	_traces = new ArrayList<List<Community<T>>>();
 	_metrics = new ArrayList<List<List<Double>>>();
     }
 
@@ -37,10 +37,10 @@ public class TimeLineList {
      * @return void
      * @author antonio
      */
-    public void set(int time_, Set<Integer> comm_, Graph<Integer, FriendLink> graph_) {
+    public void set(int time_, Set<T> comm_, Graph<T, FriendLink> graph_) {
 
 	if (_timeLine.isEmpty()) {
-	    List<Community> aux = new ArrayList<Community>();
+	    List<Community<T>> aux = new ArrayList<Community<T>>();
 	    _timeLine.add(aux);
 	}
 
@@ -50,13 +50,13 @@ public class TimeLineList {
 
 	if (time_ >= _timeLine.size() + 1) {
 	    for (int i = _timeLine.size(); i < time_; i++) {
-		List<Community> aux = new ArrayList<Community>();
+		List<Community<T>> aux = new ArrayList<Community<T>>();
 		_timeLine.add(aux);
 	    }
 	}
 
 	if (!comm_.isEmpty()) {
-	    Community newComm = new Community(comm_, graph_);
+	    Community<T> newComm = new Community<T>(comm_, graph_);
 	    _timeLine.get(time_ - 1).add(newComm);
 	    searchPredecessors(newComm);
 	    newComm.buildSpanTraces();
@@ -70,10 +70,10 @@ public class TimeLineList {
      * @param pos_
      * @return
      */
-    public void set(int time_, Community comm_) {
+    public void set(int time_, Community<T> comm_) {
 
 	if (_timeLine.isEmpty() || (time_ == _timeLine.size() + 1)) {
-	    List<Community> aux = new ArrayList<Community>();
+	    List<Community<T>> aux = new ArrayList<Community<T>>();
 	    _timeLine.add(aux);
 	}
 
@@ -83,7 +83,7 @@ public class TimeLineList {
 
 	if (time_ > _timeLine.size() + 1) {
 	    for (int i = _timeLine.size(); i < time_; i++) {
-		List<Community> aux = new ArrayList<Community>();
+		List<Community<T>> aux = new ArrayList<Community<T>>();
 		_timeLine.add(aux);
 	    }
 	}
@@ -99,10 +99,10 @@ public class TimeLineList {
      * TODO Purpose
      * 
      * @params
-     * @return List<Community>
+     * @return List<Community<T>>
      * @author antonio
      */
-    public List<Community> getSnapshot(int pos_) {
+    public List<Community<T>> getSnapshot(int pos_) {
 	return _timeLine.get(pos_);
     }
 
@@ -111,17 +111,17 @@ public class TimeLineList {
      * TODO Purpose
      * 
      * @params
-     * @return List<Community>
+     * @return List<Community<T>>
      * @author antonio
      */
-    public List<Community> getMaxPath(Community comm_) {
+    public List<Community<T>> getMaxPath(Community<T> comm_) {
     
-        List<List<Community>> paths = getPaths(comm_);
+        List<List<Community<T>>> paths = getPaths(comm_);
     
         int maxPathLength = 0;
         int maxPathPosition = -1;
         int index = 0;
-        for (List<Community> path : paths) {
+	for (List<Community<T>> path : paths) {
             int size = path.size();
             if (size > maxPathLength) {
         	maxPathLength = size;
@@ -141,36 +141,36 @@ public class TimeLineList {
      * @return double
      * @author antonio
      */
-    public double getMemberStability(Community comm_) {
-        List<List<Community>> paths = getPaths(comm_);
+    public double getMemberStability(Community<T> comm_) {
+	List<List<Community<T>>> paths = getPaths(comm_);
         double cumStability = 0;
         int count = 0;
     
-        for (List<Community> path : paths) {
+	for (List<Community<T>> path : paths) {
             double result = 0;
     
             int index = path.indexOf(comm_);
-            List<Community> correctPath = path.subList(index, path.size());
+	    List<Community<T>> correctPath = path.subList(index, path.size());
     
             int length = correctPath.size();
     
             if (length > 1) {
     
         	for (int i = 0; i < length - 1; i++) {
-        	    Community pred = correctPath.get(i);
-        	    Community succ = correctPath.get(i + 1);
+		    Community<T> pred = correctPath.get(i);
+		    Community<T> succ = correctPath.get(i + 1);
     
-        	    List<Integer> predMembers = pred.getAllNodes();
-        	    List<Integer> succMembers = succ.getAllNodes();
+        	    List<T> predMembers = pred.getAllNodes();
+		    List<T> succMembers = succ.getAllNodes();
         	    int intersect = 0;
     
         	    if (predMembers.size() <= succMembers.size()) {
-        		for (Integer member : predMembers) {
+			for (T member : predMembers) {
         		    if (succMembers.contains(member))
         			intersect++;
         		}
         	    } else {
-        		for (Integer member : succMembers) {
+			for (T member : succMembers) {
         		    if (predMembers.contains(member))
         			intersect++;
         		}
@@ -213,8 +213,8 @@ public class TimeLineList {
 	int numTraces = _traces.size();
 	int sumSize = 0, sumCores = 0;
 
-	for (List<Community> snapshot : _timeLine) {
-	    for (Community comm : snapshot) {
+	for (List<Community<T>> snapshot : _timeLine) {
+	    for (Community<T> comm : snapshot) {
 		sumSize += comm.getSize();
 		sumCores += comm.getCoreNodes().size();
 	    }
@@ -222,7 +222,7 @@ public class TimeLineList {
 
 	int maxLength = 0;
 	int sumLength = 0;
-	for (List<Community> trace : _traces) {
+	for (List<Community<T>> trace : _traces) {
 	    sumLength += trace.size();
 	    if (trace.size() > maxLength) {
 		maxLength = trace.size();
@@ -280,39 +280,39 @@ public class TimeLineList {
      * @return void
      * @author antonio
      */
-    private void searchPredecessors(Community comm_) {
-        List<Integer> newCores = comm_.getCoreNodes();
-        List<Integer> newNodes = comm_.getAllNodes();
+    private void searchPredecessors(Community<T> comm_) {
+        List<T> newCores = comm_.getCoreNodes();
+        List<T> newNodes = comm_.getAllNodes();
     
         if (_timeLine.size() > 1) {
             int currentTime = _timeLine.size() - 1;
-            List<Community> previousSnapshot = _timeLine.get(currentTime - 1);
+	    List<Community<T>> previousSnapshot = _timeLine.get(currentTime - 1);
     
-            List<Community> predecessors = new ArrayList<Community>();
-            for (Community read : previousSnapshot) {
-        	List<Integer> readCores = read.getCoreNodes();
-        	for (Integer node : readCores) {
+            List<Community<T>> predecessors = new ArrayList<Community<T>>();
+            for (Community<T> read : previousSnapshot) {
+		List<T> readCores = read.getCoreNodes();
+		for (T node : readCores) {
         	    if (newNodes.contains(node) && (!predecessors.contains(read))) {
         		predecessors.add(read);
         	    }
         	}
             }
     
-            for (Community pred : predecessors) {
-        	List<Community> ancestors = pred.getPredecessors();
+            for (Community<T> pred : predecessors) {
+		List<Community<T>> ancestors = pred.getPredecessors();
     
         	if (!ancestors.isEmpty()) {
         	    boolean added = false;
         	    int pointer = 0;
         	    while (!added && pointer < ancestors.size()) {
-        		Community ancestor = ancestors.get(pointer);
+			Community<T> ancestor = ancestors.get(pointer);
         		pointer++;
-        		List<Integer> nodesAncestor = ancestor.getAllNodes();
+			List<T> nodesAncestor = ancestor.getAllNodes();
         		boolean found = false;
         		int secondPointer = 0;
     
         		while (!found && (secondPointer < newCores.size())) {
-        		    int newCore = newCores.get(secondPointer);
+			    T newCore = newCores.get(secondPointer);
         		    secondPointer++;
     
         		    found |= nodesAncestor.contains(newCore);
@@ -323,7 +323,7 @@ public class TimeLineList {
         		    pred.addSuccessor(comm_);
         		    added = true;
         		} else {
-        		    List<Community> olderAncestors = ancestor.getPredecessors();
+			    List<Community<T>> olderAncestors = ancestor.getPredecessors();
         		    if (!olderAncestors.isEmpty())
         			ancestors.addAll(olderAncestors);
         		}
@@ -348,15 +348,15 @@ public class TimeLineList {
     private void computeMetrics() {
 
 	buildTraces();
-	for (List<Community> snapshot : _timeLine) {
+	for (List<Community<T>> snapshot : _timeLine) {
 	    List<List<Double>> commValues = new ArrayList<List<Double>>();
 
-	    for (Community comm : snapshot) {
+	    for (Community<T> comm : snapshot) {
 		int size = comm.getSize();
 		int age = comm.getAge();
 		double stability = getMemberStability(comm);
 
-		List<Community> maxTrace = getMaxPath(comm);
+		List<Community<T>> maxTrace = getMaxPath(comm);
 		int length = maxTrace.size();
 		int pos = maxTrace.indexOf(comm);
 		int evolTrace = length - pos;
@@ -379,12 +379,12 @@ public class TimeLineList {
      * TODO Purpose
      * 
      * @params
-     * @return List<List<Community>>
+     * @return List<List<Community<T>>>
      * @author antonio
      */
-    private List<List<Community>> getPaths(Community _comm) {
-	List<List<Community>> paths = new ArrayList<List<Community>>();
-	for (List<Community> path : _traces) {
+    private List<List<Community<T>>> getPaths(Community<T> _comm) {
+	List<List<Community<T>>> paths = new ArrayList<List<Community<T>>>();
+	for (List<Community<T>> path : _traces) {
 	    if (path.contains(_comm)) {
 		paths.add(path);
 	    }
@@ -403,23 +403,23 @@ public class TimeLineList {
      */
     private void buildTraces() {
 
-	for (List<Community> snapshot : _timeLine) {
-	    for (Community comm : snapshot) {
-		List<List<Community>> commPaths = comm.getTraces();
+	for (List<Community<T>> snapshot : _timeLine) {
+	    for (Community<T> comm : snapshot) {
+		List<List<Community<T>>> commPaths = comm.getTraces();
 
 		if (!commPaths.isEmpty()) {
-		    for (List<Community> path : commPaths) {
+		    for (List<Community<T>> path : commPaths) {
 			if (_traces.contains(path)) {
 			    _traces.remove(path);
 			}
 
-			List<Community> trace = new ArrayList<Community>();
+			List<Community<T>> trace = new ArrayList<Community<T>>();
 			trace.addAll(path);
 			trace.add(comm);
 			_traces.add(trace);
 		    }
 		} else {
-		    List<Community> trace = new ArrayList<Community>();
+		    List<Community<T>> trace = new ArrayList<Community<T>>();
 		    trace.add(comm);
 		    _traces.add(trace);
 		}

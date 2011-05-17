@@ -86,7 +86,7 @@ public class Community<T> {
      * @return void
      * @author antonio
      */
-    public void addPredecessor(Community pred_) {
+    public void addPredecessor(Community<T> pred_) {
 	if (!_predecessors.contains(pred_)) {
 	    _predecessors.add(pred_);
 	}
@@ -100,8 +100,8 @@ public class Community<T> {
      * @return void
      * @author antonio
      */
-    public void addPredecessors(List<Community> preds_) {
-	for (Community comm : preds_) {
+    public void addPredecessors(List<Community<T>> preds_) {
+	for (Community<T> comm : preds_) {
 	    if (!_predecessors.contains(comm))
 		_predecessors.add(comm);
 	}
@@ -114,7 +114,7 @@ public class Community<T> {
      * @return void
      * @author antonio
      */
-    public void addSuccessor(Community succ_) {
+    public void addSuccessor(Community<T> succ_) {
 	if (!_successors.contains(succ_))
 	    _successors.add(succ_);
 
@@ -128,8 +128,8 @@ public class Community<T> {
      * @return void
      * @author antonio
      */
-    public void addSuccessors(List<Community> succs_) {
-	for (Community succ : succs_) {
+    public void addSuccessors(List<Community<T>> succs_) {
+	for (Community<T> succ : succs_) {
 	    if (!_successors.contains(succ))
 		_successors.add(succ);
 	}
@@ -180,7 +180,7 @@ public class Community<T> {
      * @return Community
      * @author antonio
      */
-    public Community getMaxSuccessor() {
+    public Community<T> getMaxSuccessor() {
         return _maxSuccessor;
     }
 
@@ -277,7 +277,7 @@ public class Community<T> {
      *            Segundo nodo
      * @param matrix_
      *            Matriz de adyacencia de la red
-     * @return Devuelve true si part1_ y part_2 est�n conectados (sin tener en
+     * @return Devuelve true si part1_ y part_2 estann conectados (sin tener en
      *         cuenta la direcci�n)
      */
     public boolean existEdge(Integer part1_, Integer part2_, Edge[][] matrix_) {
