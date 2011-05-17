@@ -51,9 +51,8 @@ public class SocialSimFlowTest {
 	System.out.println("Cliques\tCommunities");
 	List<Collection<Set<Integer>>> kEvol = new LinkedList<Collection<Set<Integer>>>();
 	List<Graph<Integer, FriendLink>> graphEvol = new LinkedList<Graph<Integer, FriendLink>>();
-	int lastKsize = -1;
 
-	TimeLineList evolution = new TimeLineList();
+	TimeLineList<Integer> evolution = new TimeLineList<Integer>();
 	int snapshot = 1;
 
 	for (Edge[][] eAr : adjList) {

@@ -42,7 +42,7 @@ public class MetricsAgent implements Steppable {
 	try {
 	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".txt");
 	    _outWrt = new BufferedWriter(outFileWrt);
-	    System.out.println("OUTPUT:\tTimeStep\t avgPL\t avgCI\t avgDeg\t Edges\tKCliques\n");
+	    System.out.println("OUTPUT:\tTimeStep\t avgPL\t avgCI\t avgDeg\t Edges\n");
 
 	} catch (IOException e) {
 	    // TODO Auto-generated catch block
@@ -93,30 +93,13 @@ public class MetricsAgent implements Steppable {
 	    	avgPL = (totalLength/totalPaths);
 	    }
 	    
-	    Collection<Set<Agent>> kcliques = null;
-	    Collection<Set<Agent>> cpmCom = null;
-	    if (ts % 10 == 0) {
-		kcliques = findKCliques(socSim.network.getJGraph(), 4);
-		cpmCom = findCPM(kcliques);
-	    }
+
 
 	    /*
 	     * Print a log line
 	     */
 	    try {
-		_outWrt.write(ts + "\t" + avgPL + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\t");
-		if (ts % 10 == 0) {
-		    if (kcliques != null) {
-			_outWrt.write(kcliques.size());
-		    }
-		    _outWrt.write("\t");
-
-		    if (cpmCom != null) {
-			_outWrt.write(cpmCom.size());
-		    }
-
-		}
-		_outWrt.write("\n");
+		_outWrt.write(ts + "\t" + avgPL + "\t" + avgCi + "\t" + "\t" + avgDeg + "\t" + edgepnct + "\n");
 		_outWrt.flush();
 		if (socSim.SIM_TIME < ts) {
 		    _outWrt.close();
@@ -127,18 +110,6 @@ public class MetricsAgent implements Steppable {
 	}
     }
 
-    /**
-     * @author biggie
-     * @name findCPM Purpose TODO
-     * 
-     * @param
-     * @return Collection<Set<Agent>>
-     */
-    private Collection<Set<Agent>> findCPM(Collection<Set<Agent>> kcliques_) {
-
-	CPMCommunityFinder<Agent> cpm = new CPMCommunityFinder<Agent>(kcliques_);
-	return cpm.findCommunities(4);
-    }
 
     /**
      * @author biggie
@@ -147,8 +118,10 @@ public class MetricsAgent implements Steppable {
      * @param
      * @return Collection<Set<V>>
      */
-    private Collection<Set<Agent>> findKCliques(Graph<Agent, FriendLink> graph_, int k_) {
+    private Collection<Set<Agent>> findKCommunities(Graph<Agent, FriendLink> graph_, int k_) {
 	BronKerboschKCliqueFinder<Agent, FriendLink> clique = new BronKerboschKCliqueFinder<Agent, FriendLink>(graph_);
-	return clique.getAllMaxKCliques(k_);
+	Collection<Set<Agent>> kcliques = clique.getAllMaxKCliques(k_);
+	CPMCommunityFinder<Agent> cpm = new CPMCommunityFinder<Agent>(kcliques);
+	return cpm.findCommunities(k_);
     }
 }

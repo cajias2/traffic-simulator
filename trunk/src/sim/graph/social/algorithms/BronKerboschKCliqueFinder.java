@@ -45,7 +45,7 @@ public class BronKerboschKCliqueFinder<V, E> extends BronKerboschCliqueFinder<V,
 	Collection<Set<V>> kCliques = new ArrayList<Set<V>>();
 
 	for (Set<V> clique : maxClique) {
-	    if (clique.size() == _k) {
+	    if (clique.size() >= _k) {
 		kCliques.add(clique);
 	    }
 	}
