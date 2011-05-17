@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sim.graph.social.metrics;
+package sim.graph.social.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;

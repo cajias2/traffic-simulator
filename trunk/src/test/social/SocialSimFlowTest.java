@@ -16,10 +16,10 @@ import javax.swing.JFrame;
 
 import sim.app.social.SocialSim;
 import sim.field.network.Edge;
+import sim.graph.social.algorithms.BronKerboschKCliqueFinder;
+import sim.graph.social.algorithms.CPMCommunityFinder;
+import sim.graph.social.algorithms.commTracker.TimeLineList;
 import sim.graph.social.link.FriendLink;
-import sim.graph.social.metrics.BronKerboschKCliqueFinder;
-import sim.graph.social.metrics.CPMCommunityFinder;
-import sim.graph.social.metrics.commTracker.TimeLineList;
 import sim.mason.AgentNetwork;
 import edu.uci.ics.jung.algorithms.layout.HypergraphLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout2;

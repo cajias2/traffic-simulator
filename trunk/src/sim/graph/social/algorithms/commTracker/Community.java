@@ -1,4 +1,4 @@
-package sim.graph.social.metrics.commTracker;
+package sim.graph.social.algorithms.commTracker;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,16 +10,24 @@ import sim.field.network.Edge;
 import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
-public class Community {
-    private final List<Integer> _members;
-    private List<Integer> _core;
-    private final List<Community> _predecessors, _successors;
+/**
+ * 
+ * TODO Purpose
+ * 
+ * @author antonio
+ * @param <T>
+ * @date May 17, 2011
+ */
+public class Community<T> {
+    private final List<T> _members;
+    private List<T> _core;
+    private final List<Community<T>> _predecessors, _successors;
     private int _age;
     private final int _maxPathLength;
-    private final Community _maxSuccessor;
+    private final Community<T> _maxSuccessor;
     public String name;
     private static int numCommunities = 0;
-    private final List<List<Community>> _traces;
+    private final List<List<Community<T>>> _traces;
 
     /**
      * 
@@ -40,13 +48,13 @@ public class Community {
      * @param
      * @author antonio
      */
-    public Community(Set<Integer> comm_, Graph<Integer, FriendLink> graph_) {
-	_members = new ArrayList<Integer>();
+    public Community(Set<T> comm_, Graph<T, FriendLink> graph_) {
+	_members = new ArrayList<T>();
 	_members.addAll(comm_);
-	_traces = new ArrayList<List<Community>>();
+	_traces = new ArrayList<List<Community<T>>>();
 	coreDectection(comm_, graph_);
-	_predecessors = new ArrayList<Community>();
-	_successors = new ArrayList<Community>();
+	_predecessors = new ArrayList<Community<T>>();
+	_successors = new ArrayList<Community<T>>();
 	_maxPathLength = 0;
 	_maxSuccessor = null;
 	numCommunities++;
@@ -60,10 +68,10 @@ public class Community {
      * @author antonio
      */
     public Community(String n_) {
-	_members = new ArrayList<Integer>();
-	_traces = new ArrayList<List<Community>>();
-	_predecessors = new ArrayList<Community>();
-	_successors = new ArrayList<Community>();
+	_members = new ArrayList<T>();
+	_traces = new ArrayList<List<Community<T>>>();
+	_predecessors = new ArrayList<Community<T>>();
+	_successors = new ArrayList<Community<T>>();
 	_maxPathLength = 0;
 	_maxSuccessor = null;
 	name = n_;
@@ -184,7 +192,7 @@ public class Community {
      * @return List<List<Community>>
      * @author antonio
      */
-    public List<List<Community>> getTraces() {
+    public List<List<Community<T>>> getTraces() {
         return _traces;
     }
 
@@ -196,7 +204,7 @@ public class Community {
      * @return List<Community>
      * @author antonio
      */
-    public List<Community> getMaxTraceSpan() {
+    public List<Community<T>> getMaxTraceSpan() {
         int maxLength = 0;
         int position = -1;
         for (int i = 0; i < _traces.size(); i++) {
@@ -209,7 +217,7 @@ public class Community {
         if (position != -1) {
             return _traces.get(position);
         }
-        return new ArrayList<Community>();
+	return new ArrayList<Community<T>>();
     }
 
     /**
@@ -220,7 +228,7 @@ public class Community {
      * @return List<Community>
      * @author antonio
      */
-    public List<Community> getPredecessors() {
+    public List<Community<T>> getPredecessors() {
         return _predecessors;
     }
 
@@ -232,7 +240,7 @@ public class Community {
      * @return List<Community>
      * @author antonio
      */
-    public List<Community> getSuccessors() {
+    public List<Community<T>> getSuccessors() {
         return _successors;
     }
 
@@ -244,7 +252,7 @@ public class Community {
      * @return List<Integer>
      * @author antonio
      */
-    public List<Integer> getCoreNodes() {
+    public List<T> getCoreNodes() {
         return _core;
     }
 
@@ -256,7 +264,7 @@ public class Community {
      * @return List<Integer>
      * @author antonio
      */
-    public List<Integer> getAllNodes() {
+    public List<T> getAllNodes() {
         return _members;
     }
 
@@ -306,19 +314,19 @@ public class Community {
      */
     public void buildSpanTraces() {
 	if (!_predecessors.isEmpty()) {
-	    for (Community predecessor : _predecessors) {
-		List<List<Community>> predTraces = predecessor.getTraces();
+	    for (Community<T> predecessor : _predecessors) {
+		List<List<Community<T>>> predTraces = predecessor.getTraces();
 
 		if (!predTraces.isEmpty()) {
-		    for (List<Community> trace : predTraces) {
-			List<Community> newTrace = new ArrayList<Community>();
+		    for (List<Community<T>> trace : predTraces) {
+			List<Community<T>> newTrace = new ArrayList<Community<T>>();
 			newTrace.addAll(trace);
 			newTrace.add(predecessor);
 			_traces.add(newTrace);
 		    }
 
 		} else {
-		    _traces.add(new ArrayList<Community>());
+		    _traces.add(new ArrayList<Community<T>>());
 		    int size = _traces.size();
 		    _traces.get(size - 1).add(predecessor);
 		}
@@ -326,7 +334,7 @@ public class Community {
 	    }
 	}
 
-	List<Community> traceSpan = getMaxTraceSpan();
+	List<Community<T>> traceSpan = getMaxTraceSpan();
 	_age = traceSpan.size() + 1;
     }
 
@@ -341,11 +349,11 @@ public class Community {
         } else {
             community = "( ";
     
-            for (Integer node : _core) {
+	    for (T node : _core) {
         	community += node + " ";
             }
             community += "| ";
-            for (Integer node : _members) {
+	    for (T node : _members) {
         	community += node + " ";
             }
             community += ")";
@@ -365,7 +373,7 @@ public class Community {
     public boolean equals(Object obj_) {
 	boolean isEq = false;
 	if(obj_ instanceof Community){
-	    Community com = (Community)obj_;
+	    Community<T> com = (Community<T>) obj_;
 	    isEq = (_members.containsAll(com._members) && _core.containsAll(com._core));
 	}else{
 	    isEq = super.equals(obj_);
@@ -381,14 +389,14 @@ public class Community {
      * @return void
      * @author antonio
      */
-    private void coreDectection(Set<Integer> comm_, Graph<Integer, FriendLink> graph_) {
+    private void coreDectection(Set<T> comm_, Graph<T, FriendLink> graph_) {
         boolean sameDegree = true;
-        Iterator<Integer> iterador = comm_.iterator();
+	Iterator<T> iterador = comm_.iterator();
         int degree = 0;
         boolean firstNode = true;
     
         while (iterador.hasNext() && (sameDegree == true)) {
-            Integer nodo = iterador.next();
+	    T nodo = iterador.next();
             if (firstNode) {
         	degree = graph_.degree(nodo);
         	firstNode = false;
@@ -397,16 +405,16 @@ public class Community {
         }
     
         if (sameDegree) {
-            _core = new ArrayList<Integer>();
+	    _core = new ArrayList<T>();
             _core.addAll(comm_);
         } else {
             int nodes = comm_.toArray().length;
-            Vector<Integer> nodos = new Vector<Integer>();
+	    Vector<T> nodos = new Vector<T>();
     
             int[] centralDegree = new int[nodes];
     
             int i = 0;
-            for (Integer nodo : comm_) {
+	    for (T nodo : comm_) {
         	centralDegree[i] = 0;
         	i++;
         	nodos.add(nodo);
@@ -414,8 +422,8 @@ public class Community {
     
             for (i = 0; i < nodos.size(); i++) {
         	for (int j = (i + 1); j < nodos.size(); j++) {
-        	    Integer node1 = nodos.elementAt(i);
-        	    Integer node2 = nodos.elementAt(j);
+		    T node1 = nodos.elementAt(i);
+		    T node2 = nodos.elementAt(j);
     
         	    FriendLink edge1 = graph_.findEdge(node1, node2);
         	    FriendLink edge2 = graph_.findEdge(node2, node1);
@@ -434,7 +442,7 @@ public class Community {
         	}
             }
     
-            _core = new ArrayList<Integer>();
+	    _core = new ArrayList<T>();
             for (i = 0; i < nodos.size(); i++) {
         	if (centralDegree[i] >= 0)
         	    _core.add(nodos.elementAt(i));
