@@ -38,17 +38,19 @@ public class TimeLineList<T> {
      * @return void
      * @author antonio
      */
-    public void set(int idx_, Set<T> comm_, Graph<T, FriendLink> graph_) {
+    public void add(int idx_, Set<T> comm_, Graph<T, FriendLink> graph_) {
 
 	// Fill gaps in the timeline if there are any.
-	for (int i = _timeLine.size(); i < idx_; i++) {
-	    _timeLine.add(null);
+	if (idx_ + 1 > _timeLine.size()) {
+	    for (int i = _timeLine.size(); i < idx_; i++) {
+		_timeLine.add(null);
+	    }
+	    _timeLine.add(new ArrayList<Community<T>>());
 	}
-
+	// Add value
 	if (null != comm_ && !comm_.isEmpty()) {
 	    Community<T> newComm = new Community<T>(comm_, graph_);
-	    _timeLine.add(new ArrayList<Community<T>>());
-	    _timeLine.get(_timeLine.size() - 1).add(newComm);
+	    _timeLine.get(idx_).add(newComm);
 	    buildCommTrace(newComm);
 	}
 
@@ -68,21 +70,15 @@ public class TimeLineList<T> {
 	    _timeLine.add(aux);
 	}
 
-	if (time_ < 1) {
-	    return;
-	}
-
-	if (time_ > _timeLine.size() + 1) {
-	    for (int i = _timeLine.size(); i < time_; i++) {
-		List<Community<T>> aux = new ArrayList<Community<T>>();
-		_timeLine.add(aux);
+	if (time_ >= 1) {
+	    if (time_ > _timeLine.size() + 1) {
+		for (int i = _timeLine.size(); i < time_; i++) {
+		    List<Community<T>> aux = new ArrayList<Community<T>>();
+		    _timeLine.add(aux);
+		}
 	    }
+	    _timeLine.get(time_ - 1).add(comm_);
 	}
-
-	_timeLine.get(time_ - 1).add(comm_);
-
-	// comm_.buildSpanTraces();
-
     }
 
     /**
@@ -108,8 +104,9 @@ public class TimeLineList<T> {
     public List<Community<T>> getMaxPredPath(Community<T> comm_) {
 
 	List<Community<T>> maxPath = new LinkedList<Community<T>>();
+	maxPath.add(comm_);
 
-	for (Community<T> curCom = comm_; curCom.getPredecessor() != null; curCom = curCom.getPredecessor()) {
+	for (Community<T> curCom = comm_; curCom.getPredessor() != null; curCom = curCom.getPredessor()) {
 	    maxPath.add(curCom);
 	}
 	return maxPath;
@@ -127,7 +124,7 @@ public class TimeLineList<T> {
 
 	double stability = 0;
 	Community<T> currCom = comm_;
-	for (Community<T> pred = currCom.getPredecessor(); pred != null; pred = pred.getPredecessor()) {
+	for (Community<T> pred = currCom.getPredessor(); pred != null; pred = pred.getPredessor()) {
 	    Set<T> currMem = currCom.getAllNodes();
 	    Set<T> predMembers = pred.getAllNodes();
 
@@ -139,8 +136,8 @@ public class TimeLineList<T> {
 	    currCom = pred;
 	}
 
-	if (comm_.getMaxPredPathLen() > 0) {
-	    stability = (stability / comm_.getMaxPredPathLen());
+	if (comm_.getTimelineLen() > 0) {
+	    stability = (stability / comm_.getTimelineLen());
 	}
 	return stability;
     }
@@ -173,12 +170,6 @@ public class TimeLineList<T> {
 
 	int maxLength = 0;
 	int sumLength = 0;
-	// for (List<Community<T>> trace : _traces) {
-	// sumLength += trace.size();
-	// if (trace.size() > maxLength) {
-	// maxLength = trace.size();
-	// }
-	// }
 
 	BufferedWriter _outWrt = null;
 
@@ -218,7 +209,6 @@ public class TimeLineList<T> {
 	    _outWrt.close();
 
 	} catch (IOException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
     }
@@ -272,61 +262,75 @@ public class TimeLineList<T> {
     }
 
     /**
-     * TODO Purpose
+     * Checks whether community B is a predecessor of community A. A predecesor
+     * should:<br/>
+     * (1) Have at least one core node that is currently a node.<br/>
+     * AND <br/>
+     * (2) Have a node somewhere in it's past that is now a core node. <br/>
      * 
-     * @params
-     * @return boolean
+     * This method checks (2)
+     * 
+     * @param commA_
+     * @param commB_
+     * @return boolean true if (2).
      * @author biggie
      */
-    private boolean isPredecessor(Community<T> currCom_, Community<T> pred_) {
+    private boolean isPredecessor(Community<T> commA_, Community<T> commB_) {
 	boolean isPred = false;
-	List<T> currComCores = currCom_.getCoreNodes();
 
-	if (null == pred_.getPredecessors()) {
-	    isPred = currComCores.retainAll(pred_.getAllNodes());
+	if (null == commB_.getPredecessors()) {
+	    isPred = hasCores(commB_, commA_);
 	} else {
-
-	    for (Community<T> predpred : pred_.getPredecessors()) {
-		isPred = isPredecessor(currCom_, predpred);
+	    for (Community<T> bPred : commB_.getPredecessors()) {
+		isPred = isPredAtAll(commA_, bPred);
 		if (isPred) {
 		    break;
 		}
 	    }
-
 	}
 	return isPred;
-	// for (Community<T> ancestor : ancestors) {
-	// // Get nodes from ancestor
-	// Set<T> nodesAncestor = ancestor.getAllNodes();
-	// // check if curr core nodes exist in ancestor
-	// boolean hasFound = currComCores.retainAll(nodesAncestor);
-	// // check in the ancestors ancestors.
-	// }
-	//
-	// while (!added && pointer < ancestors.size()) {
-	// Community<T> ancestor = ancestors.get(pointer);
-	// pointer++;
-	// Set<T> nodesAncestor = ancestor.getAllNodes();
-	// boolean found = false;
-	// int secondPointer = 0;
-	//
-	// while (!found && (secondPointer < currComCores.size())) {
-	// T newCore = currComCores.get(secondPointer);
-	// secondPointer++;
-	// found |= nodesAncestor.contains(newCore);
-	// }
-	//
-	// if (found) {
-	// createComLink(currCom_, pred);
-	// added = true;
-	// } else {
-	// List<Community<T>> olderAncestors = ancestor.getPredecessors();
-	// if (!olderAncestors.isEmpty()) {
-	// ancestors.addAll(olderAncestors);
-	// }
-	// }
-	// }
-	// return isPred;
+    }
+
+    /**
+     * Checks if any of the cores of community A are in community B
+     * 
+     * @param commA_
+     * @param commB_
+     * @return boolean true is found. false otherwise
+     * @author biggie
+     */
+    private boolean hasCores(Community<T> commA_, Community<T> commB_) {
+	boolean isPred = false;
+	List<T> aCorNods = commA_.getCoreNodes();
+	for (T corNod : aCorNods) {
+	    if (commB_.getAllNodes().contains(corNod)) {
+		isPred = true;
+		break;
+	    }
+	}
+	return isPred;
+    }
+
+    /**
+     * Recurs down the timeline to find the first predecesor it can find.
+     * 
+     * @param commA_
+     *            community to check
+     * @param commB_
+     *            predecessor currently looking at.
+     * @return boolean true if a predecessor was found.
+     * @author biggie
+     */
+    private boolean isPredAtAll(Community<T> commA_, Community<T> commB_) {
+	boolean isPred = false;
+	if (hasCores(commA_, commB_)) {
+	    isPred = true;
+	} else if (null != commB_.getPredecessors()) {
+	    for (Community<T> bPred : commB_.getPredecessors()) {
+		isPredAtAll(commA_, bPred);
+	    }
+	}
+	return isPred;
     }
 
     /**
@@ -386,9 +390,9 @@ public class TimeLineList<T> {
 		    int age = comm.getAge();
 		    Double stability = getMemberStability(comm);
 
-		    List<Community<T>> maxTrace = getMaxPredPath(comm);
-		    int length = maxTrace.size();
-		    int pos = maxTrace.indexOf(comm);
+		    int length = comm.getTimelineLen();
+		    int totalLen = (comm.getOldestPred() == null) ? comm.getOldestPred().getTimelineLen() : length;
+		    int pos = totalLen - length + 1;
 		    int evolTrace = length - pos;
 
 		    if (null != stability) {
@@ -404,24 +408,4 @@ public class TimeLineList<T> {
 	    }
 	}
     }
-
-    /**
-     * 
-     * TODO Purpose
-     * 
-     * @params
-     * @return List<List<Community<T>>>
-     * @author antonio
-     */
-    private List<List<Community<T>>> getPaths(Community<T> _comm) {
-	List<List<Community<T>>> paths = new ArrayList<List<Community<T>>>();
-	for (List<Community<T>> path : _traces) {
-	    if (path.contains(_comm)) {
-		paths.add(path);
-	    }
-	}
-
-	return paths;
-    }
-
 }
