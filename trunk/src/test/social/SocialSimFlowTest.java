@@ -71,7 +71,7 @@ public class SocialSimFlowTest {
 	    kEvol.add(kComs);
 
 	    for (Set<Integer> community : kComs) {
-		evolution.set(snapshot, community, graph);
+		evolution.add(snapshot, community, graph);
 	    }
 	    snapshot++;
 
@@ -119,8 +119,6 @@ public class SocialSimFlowTest {
      * @return void
      * @author biggie
      * @param <V>
-     * @param <V>
-     * @param <E>
      * @param <E>
      */
     private static <V, E> Hypergraph<V, Integer> populateHg(Graph<V, E> graph_, Collection<Set<V>> collection_) {

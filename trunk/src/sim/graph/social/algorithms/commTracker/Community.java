@@ -23,7 +23,8 @@ public class Community<T> {
     private List<T> _core;
     private Set<Community<T>> _predecessors;
     private Set<Community<T>> _successors;
-    private int _maxPredPathLen = 0;
+    private int _bckTimelineLen = 0;
+    private final int _totalTimeLinelen = -1;
     private Community<T> _maxPredecessor;
     private Community<T> _predListTop;
 
@@ -53,7 +54,7 @@ public class Community<T> {
 	_core = getCommunityCores(_members, graph_);
 	_predecessors = null;
 	_successors = null;
-	_maxPredPathLen = 0;
+	_bckTimelineLen = 0;
 	_predListTop = this;
     }
 
@@ -69,7 +70,7 @@ public class Community<T> {
 	_members = new HashSet<T>();
 	_predecessors = null;
 	_successors = null;
-	_maxPredPathLen = 0;
+	_bckTimelineLen = 0;
 	_maxPredecessor = null;
 	_predListTop = this;
     }
@@ -86,10 +87,15 @@ public class Community<T> {
 	if (null == _predecessors) {
 	    _predecessors = new HashSet<Community<T>>();
 	}
-	if (_predecessors.add(pred_) && ((pred_.getMaxPredPathLen() + 1) > _maxPredPathLen)) {
+	if (_predecessors.add(pred_) && ((pred_.getTimelineLen() + 1) > _bckTimelineLen)) {
 	    _maxPredecessor = pred_;
-	    _maxPredPathLen = pred_.getMaxPredPathLen() + 1;
-	    _predListTop = pred_.getPredListTop();
+	    _bckTimelineLen = pred_.getTimelineLen() + 1;
+	    if (null != pred_.getOldestPred()) {
+		_predListTop = pred_.getOldestPred();
+	    } else {
+		_predListTop = pred_;
+	    }
+
 	}
     }
 
@@ -100,7 +106,7 @@ public class Community<T> {
      * @return Community<T>
      * @author biggie
      */
-    public Community<T> getPredListTop() {
+    public Community<T> getOldestPred() {
 	return _predListTop;
     }
 
@@ -116,7 +122,6 @@ public class Community<T> {
 	    _successors = new HashSet<Community<T>>();
 	}
 	_successors.add(succ_);
-
     }
 
     /**
@@ -140,7 +145,7 @@ public class Community<T> {
      * @author antonio
      */
     public int getAge() {
-	return _predListTop.getMaxPredPathLen() - getMaxPredPathLen() + 1;
+	return _predListTop.getTimelineLen() - getTimelineLen() + 1;
     }
 
     /**
@@ -151,20 +156,8 @@ public class Community<T> {
      * @return int
      * @author antonio
      */
-    public int getMaxPredPathLen() {
-	return _maxPredPathLen;
-    }
-
-    /**
-     * 
-     * TODO Purpose
-     * 
-     * @params
-     * @return Community
-     * @author antonio
-     */
-    public final Community<T> getMaxSuccessor() {
-	return _maxPredecessor;
+    public int getTimelineLen() {
+	return _bckTimelineLen;
     }
 
     /**
@@ -215,6 +208,57 @@ public class Community<T> {
 	return _members;
     }
 
+    /**
+     * 
+     * TODO Purpose
+     * 
+     * @params
+     * @return int
+     * @author biggie
+     */
+    public int getTotalTimeLineLen() {
+	return _totalTimeLinelen;
+    }
+
+    // protected void setTotalTimeLineLen(int totalTimelineLen_) {
+    // _totalTimeLinelen = totalTimelineLen_;
+    // }
+    //
+    // public int findTotalTimeLineLen() {
+    // _totalTimeLinelen = _bckTimelineLen + getFWDtimelineLen(_successors);
+    // return _totalTimeLinelen;
+    // }
+    //
+    // /**
+    // * TODO Purpose
+    // *
+    // * @params
+    // * @return int
+    // * @author biggie
+    // */
+    // private int getFWDtimelineLen(Set<Community<T>> successors_) {
+    // int currMaxLen = 0;
+    // for(Community<T> next : successors_){
+    // if(null != next.getSuccessors() && currMaxLen < 1){
+    // currMaxLen = 1;
+    // }else{
+    // currMaxLen = 1 + getFWDtimelineLen(next.getSuccessors(), currMaxLen);
+    // }
+    // }
+    // return currMaxLen;
+    // }
+    //
+    // /**
+    // * TODO Purpose
+    // * @params
+    // * @return int
+    // * @author biggie
+    // */
+    // private int getFWDtimelineLen(Set<Community<T>> successors_, int
+    // currMaxLen_) {
+    // // TODO Auto-generated method stub
+    // return 0;
+    // }
 
     /**
      * Returns predecessor with longest span trace by default.
@@ -222,44 +266,9 @@ public class Community<T> {
      * @return Community<T>
      * @author biggie
      */
-    public Community<T> getPredecessor() {
-        return _maxPredecessor;
+    public Community<T> getPredessor() {
+	return _maxPredecessor;
     }
-
-    // /**
-    // *
-    // * TODO Purpose
-    // *
-    // * @params
-    // * @return void
-    // * @author antonio
-    // */
-    // public void buildSpanTraces() {
-    // if (!_predecessors.isEmpty()) {
-    // for (Community<T> predecessor : _predecessors) {
-    // List<List<Community<T>>> predTraces = predecessor.getTraces();
-    //
-    // if (!predTraces.isEmpty()) {
-    // for (List<Community<T>> trace : predTraces) {
-    // List<Community<T>> newTrace = new ArrayList<Community<T>>();
-    // newTrace.addAll(trace);
-    // newTrace.add(predecessor);
-    // _traces.add(newTrace);
-    // }
-    //
-    // } else {
-    // _traces.add(new ArrayList<Community<T>>());
-    // int size = _traces.size();
-    // _traces.get(size - 1).add(predecessor); // TODO only add
-    // // node. Not lists
-    // }
-    //
-    // }
-    // }
-    //
-    // List<Community<T>> traceSpan = getMaxTraceSpan();
-    // _age = traceSpan.size() + 1;
-    // }
 
     /**
      * 
@@ -336,21 +345,21 @@ public class Community<T> {
 		T node1 = comNodList_.get(i);
 		T node2 = comNodList_.get(j);
 
-	    FriendLink edge1 = graph_.findEdge(node1, node2);
+		FriendLink edge1 = graph_.findEdge(node1, node2);
 		FriendLink edge2 = graph_.findEdge(node2, node1);
 		if ((edge1 != null) || (edge2 != null)) {
 		    int grado1 = graph_.degree(node1);
 		    int grado2 = graph_.degree(node2);
 
-		if (grado1 < grado2) {
+		    if (grado1 < grado2) {
 			centralDeg[i] = centralDeg[i] - Math.abs((grado1 - grado2));
 			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
 		    } else {
 			centralDeg[i] = centralDeg[i] + Math.abs((grado1 - grado2));
 			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+		    }
 		}
 	    }
-	}
 	}
 	return centralDeg;
     }
@@ -384,4 +393,5 @@ public class Community<T> {
 	}
 	return sameDegree;
     }
+
 }
