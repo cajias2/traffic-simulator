@@ -3,8 +3,8 @@
  * @author biggie
  * 
  */
-    
-    package test.social;
+
+package test.social;
 
 import java.awt.Dimension;
 import java.util.Collection;
@@ -14,10 +14,13 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 
+import org.jgrapht.UndirectedGraph;
+
 import sim.app.social.SocialSim;
 import sim.field.network.Edge;
 import sim.graph.social.algorithms.BronKerboschKCliqueFinder;
 import sim.graph.social.algorithms.CPMCommunityFinder;
+import sim.graph.social.algorithms.OldBronKerboschKCliqueFinder;
 import sim.graph.social.algorithms.commTracker.TimeLineList;
 import sim.graph.social.link.FriendLink;
 import sim.mason.AgentNetwork;
@@ -29,11 +32,11 @@ import edu.uci.ics.jung.graph.SetHypergraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.renderers.BasicHypergraphRenderer;
 
-    /**
-     * TODO Purpose
-     * 
-     * @author biggie
-     */
+/**
+ * TODO Purpose
+ * 
+ * @author biggie
+ */
 public class SocialSimFlowTest {
 
     /**
@@ -47,32 +50,28 @@ public class SocialSimFlowTest {
 	SocialSim sim = new SocialSim(System.currentTimeMillis());
 	// El 100 es el snapshot
 	List<Edge[][]> adjList = sim.runSim(args, 1);
-	System.out.println("Finding Communities....");
+
 	System.out.println("Cliques\tCommunities");
 	List<Collection<Set<Integer>>> kEvol = new LinkedList<Collection<Set<Integer>>>();
 	List<Graph<Integer, FriendLink>> graphEvol = new LinkedList<Graph<Integer, FriendLink>>();
 
-	TimeLineList<Integer> evolution = new TimeLineList<Integer>();
+	TimeLineList<Integer> evolution = new TimeLineList<Integer>(adjList.size());
 	int snapshot = 1;
 
 	for (Edge[][] eAr : adjList) {
 
 	    Graph<Integer, FriendLink> graph = AgentNetwork.adjListToJungGraph(eAr);
-	    BronKerboschKCliqueFinder<Integer, FriendLink> maxCliques = new BronKerboschKCliqueFinder<Integer, FriendLink>(
-		    graph);
-	    Collection<Set<Integer>> kFourCliques = maxCliques.getAllMaxKCliques(3);
+	    graphEvol.add(graph);
 
-	    // Conjunto de communidades en ese snapshot
-	    Collection<Set<Integer>> kComs = findCPM(kFourCliques);
+	    UndirectedGraph<Integer, FriendLink> testGraph = AgentNetwork.adjListToJGraphTList(eAr);
+	    OldBronKerboschKCliqueFinder<Integer, FriendLink> oldmaxClique = new OldBronKerboschKCliqueFinder<Integer, FriendLink>(
+		    testGraph);
 
+	    Collection<Set<Integer>> kComs = findCommunities(graph);
 	    kEvol.add(kComs);
-	    graphEvol.add(AgentNetwork.adjListToJungGraph(eAr));
-
-	    // System.out.println(kFourCliques.size() + "\t" + kComs.size());
-	    Graph<Integer, FriendLink> g = AgentNetwork.adjListToJungGraph(eAr);
 
 	    for (Set<Integer> community : kComs) {
-		evolution.set(snapshot, community, g);
+		evolution.set(snapshot, community, graph);
 	    }
 	    snapshot++;
 
@@ -93,6 +92,24 @@ public class SocialSimFlowTest {
 	frame.pack();
 	frame.setVisible(true);
 
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @params
+     * @return Collection<Set<Integer>>
+     * @author biggie
+     */
+    private static Collection<Set<Integer>> findCommunities(Graph<Integer, FriendLink> graph) {
+	BronKerboschKCliqueFinder<Integer, FriendLink> maxCliques = new BronKerboschKCliqueFinder<Integer, FriendLink>(
+		graph);
+
+	Collection<Set<Integer>> kFourCliques = maxCliques.getAllMaxKCliques(4);
+
+	// Conjunto de communidades en ese snapshot
+	Collection<Set<Integer>> kComs = findCPM(kFourCliques);
+	return kComs;
     }
 
     /**
@@ -133,4 +150,4 @@ public class SocialSimFlowTest {
 	return cpm.findCommunities(4);
     }
 
-    }
+}
