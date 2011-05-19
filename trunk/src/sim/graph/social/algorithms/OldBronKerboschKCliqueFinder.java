@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-import edu.uci.ics.jung.algorithms.cluster.BronKerboschCliqueFinder;
-import edu.uci.ics.jung.graph.Graph;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.BronKerboschCliqueFinder;
 
 
 
@@ -23,12 +23,12 @@ import edu.uci.ics.jung.graph.Graph;
  * @param <E>
  * 
  */
-public class BronKerboschKCliqueFinder<V, E> extends BronKerboschCliqueFinder<V, E> {
+public class OldBronKerboschKCliqueFinder<V, E> extends BronKerboschCliqueFinder<V, E> {
 
     /**
      * @author biggie BronKerboschKCliqueFinder
      */
-    public BronKerboschKCliqueFinder(Graph<V, E> graph_) {
+    public OldBronKerboschKCliqueFinder(Graph<V, E> graph_) {
 	super(graph_);
     }
 

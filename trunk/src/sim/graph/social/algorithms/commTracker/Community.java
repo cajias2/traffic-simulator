@@ -1,12 +1,10 @@
 package sim.graph.social.algorithms.commTracker;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
-import sim.field.network.Edge;
 import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -21,15 +19,13 @@ import edu.uci.ics.jung.graph.Graph;
 public class Community<T> {
     private static int count_ = 0;
     private final int ID;
-    private final List<T> _members;
+    private final Set<T> _members;
     private List<T> _core;
-    private final List<Community<T>> _predecessors;
-    private final List<Community<T>> _successors;
-    private int _age;
+    private Set<Community<T>> _predecessors;
+    private Set<Community<T>> _successors;
     private int _maxPredPathLen = 0;
     private Community<T> _maxPredecessor;
-
-    // private final List<List<Community<T>>> _traces;
+    private Community<T> _predListTop;
 
     /**
      * 
@@ -39,7 +35,7 @@ public class Community<T> {
      * @return int
      * @author antonio
      */
-    public static int getNumCommunities() {
+    public static int count() {
 	return count_;
     }
 
@@ -52,13 +48,13 @@ public class Community<T> {
      */
     public Community(Set<T> comm_, Graph<T, FriendLink> graph_) {
 	ID = count_++;
-	_members = new ArrayList<T>();
-	_members.addAll(comm_);
+	_members = comm_;
 	// _traces = new ArrayList<List<Community<T>>>();
-	coreDectection(comm_, graph_);
-	_predecessors = new ArrayList<Community<T>>();
-	_successors = new ArrayList<Community<T>>();
+	_core = getCommunityCores(_members, graph_);
+	_predecessors = null;
+	_successors = null;
 	_maxPredPathLen = 0;
+	_predListTop = this;
     }
 
     /**
@@ -70,12 +66,12 @@ public class Community<T> {
      */
     public Community() {
 	ID = count_++;
-	_members = new ArrayList<T>();
-	// _traces = new ArrayList<List<Community<T>>>();
-	_predecessors = new ArrayList<Community<T>>();
-	_successors = new ArrayList<Community<T>>();
+	_members = new HashSet<T>();
+	_predecessors = null;
+	_successors = null;
 	_maxPredPathLen = 0;
 	_maxPredecessor = null;
+	_predListTop = this;
     }
 
     /**
@@ -87,28 +83,25 @@ public class Community<T> {
      * @author antonio
      */
     public void addPredecessor(Community<T> pred_) {
-	if (!_predecessors.contains(pred_)) {
-	    _predecessors.add(pred_);
-	    if ((pred_.getMaxPredPathLen() + 1) > _maxPredPathLen) {
-		_maxPredecessor = pred_;
-		_maxPredPathLen = pred_.getMaxPredPathLen() + 1;
-	    }
+	if (null == _predecessors) {
+	    _predecessors = new HashSet<Community<T>>();
+	}
+	if (_predecessors.add(pred_) && ((pred_.getMaxPredPathLen() + 1) > _maxPredPathLen)) {
+	    _maxPredecessor = pred_;
+	    _maxPredPathLen = pred_.getMaxPredPathLen() + 1;
+	    _predListTop = pred_.getPredListTop();
 	}
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
-     * @return void
-     * @author antonio
+     * @return Community<T>
+     * @author biggie
      */
-    public void addPredecessors(List<Community<T>> preds_) {
-	for (Community<T> comm : preds_) {
-	    if (!_predecessors.contains(comm))
-		_predecessors.add(comm);
-	}
+    public Community<T> getPredListTop() {
+	return _predListTop;
     }
 
     /**
@@ -119,24 +112,10 @@ public class Community<T> {
      * @author antonio
      */
     public void addSuccessor(Community<T> succ_) {
-	if (!_successors.contains(succ_))
-	    _successors.add(succ_);
-
-    }
-
-    /**
-     * 
-     * TODO Purpose
-     * 
-     * @params
-     * @return void
-     * @author antonio
-     */
-    public void addSuccessors(List<Community<T>> succs_) {
-	for (Community<T> succ : succs_) {
-	    if (!_successors.contains(succ))
-		_successors.add(succ);
+	if (null == _successors) {
+	    _successors = new HashSet<Community<T>>();
 	}
+	_successors.add(succ_);
 
     }
 
@@ -161,7 +140,7 @@ public class Community<T> {
      * @author antonio
      */
     public int getAge() {
-	return _age;
+	return _predListTop.getMaxPredPathLen() - getMaxPredPathLen() + 1;
     }
 
     /**
@@ -184,7 +163,7 @@ public class Community<T> {
      * @return Community
      * @author antonio
      */
-    public Community<T> getMaxSuccessor() {
+    public final Community<T> getMaxSuccessor() {
 	return _maxPredecessor;
     }
 
@@ -196,7 +175,7 @@ public class Community<T> {
      * @return List<Community>
      * @author antonio
      */
-    public List<Community<T>> getPredecessors() {
+    public final Set<Community<T>> getPredecessors() {
 	return _predecessors;
     }
 
@@ -208,7 +187,7 @@ public class Community<T> {
      * @return List<Community>
      * @author antonio
      */
-    public List<Community<T>> getSuccessors() {
+    public final Set<Community<T>> getSuccessors() {
 	return _successors;
     }
 
@@ -220,7 +199,7 @@ public class Community<T> {
      * @return List<Integer>
      * @author antonio
      */
-    public List<T> getCoreNodes() {
+    public final List<T> getCoreNodes() {
 	return _core;
     }
 
@@ -232,44 +211,19 @@ public class Community<T> {
      * @return List<Integer>
      * @author antonio
      */
-    public List<T> getAllNodes() {
+    public final Set<T> getAllNodes() {
 	return _members;
     }
 
+
     /**
-     * TODO: Revisar este metodo en el caso de que el grafo sea dirigido.
+     * Returns predecessor with longest span trace by default.
      * 
-     * @param part1_
-     *            Primer nodo
-     * @param part2_
-     *            Segundo nodo
-     * @param matrix_
-     *            Matriz de adyacencia de la red
-     * @return Devuelve true si part1_ y part_2 estann conectados (sin tener en
-     *         cuenta la direcci�n)
+     * @return Community<T>
+     * @author biggie
      */
-    public boolean existEdge(Integer part1_, Integer part2_, Edge[][] matrix_) {
-	boolean result = false;
-	int counter = 0;
-	while (!result && counter < matrix_.length) {
-	    Edge[] fila = matrix_[counter];
-	    counter++;
-
-	    for (Edge ed : fila) {
-		if (ed != null) {
-		    Integer from = (Integer) ed.getFrom();
-		    Integer to = (Integer) ed.getTo();
-
-		    if ((from == part1_) && (to == part2_)) {
-			result = true;
-		    } else if ((from == part2_) && (to == part1_)) {
-			result = true;
-		    }
-		}
-	    }
-	}
-
-	return result;
+    public Community<T> getPredecessor() {
+        return _maxPredecessor;
     }
 
     // /**
@@ -328,102 +282,106 @@ public class Community<T> {
 
     /**
      * 
-     * TODO Purpose
+     * Uses node degrees to calculate node centrality in a community. Returns a
+     * list of core nodes.
      * 
-     * @params
-     * @return boolean
+     * @param comNodSet_
+     *            Set of nodes in a given community
+     * @param graph_
+     *            The graph object where community was found. Used to check
+     *            degrees.
+     * @return List<T> core node list.
      * @author antonio
      */
-    @Override
-    public boolean equals(Object obj_) {
-	boolean isEq = false;
-	if (obj_ instanceof Community) {
-	    Community<T> com = (Community<T>) obj_;
-	    isEq = (_members.containsAll(com._members) && _core.containsAll(com._core));
+    private List<T> getCommunityCores(Set<T> comNodSet_, Graph<T, FriendLink> graph_) {
+	List<T> coreNodList = null;
+	List<T> comNodeList = new ArrayList<T>(comNodSet_);
+
+	if (isSameDegComm(comNodeList, graph_)) {
+	    coreNodList = comNodeList;
 	} else {
-	    isEq = super.equals(obj_);
+	    int[] centralDeg = calculateNodCentrality(comNodeList, graph_);
+
+	    coreNodList = new ArrayList<T>();
+	    for (int i = 0; i < comNodSet_.size(); i++) {
+		if (centralDeg[i] >= 0)
+		    coreNodList.add(comNodeList.get(i));
+	    }
 	}
-	return isEq;
+	return coreNodList;
     }
 
     /**
+     * Calculates centrality of nodes in a given community by comparing
+     * sequencially comparing their degrees. Centrality is calculated through a
+     * voting scheme, where lower-deg nodes vote higher-deg nodes up, highers
+     * vote lowers down. .
      * 
-     * TODO Purpose
-     * 
-     * @params
-     * @return void
-     * @author antonio
-     */
-    private void coreDectection(Set<T> comm_, Graph<T, FriendLink> graph_) {
-	boolean sameDegree = true;
-	Iterator<T> iterador = comm_.iterator();
-	int degree = 0;
-	boolean firstNode = true;
-
-	while (iterador.hasNext() && (sameDegree == true)) {
-	    T nodo = iterador.next();
-	    if (firstNode) {
-		degree = graph_.degree(nodo);
-		firstNode = false;
-	    } else
-		sameDegree &= (graph_.degree(nodo) == degree);
-	}
-
-	if (sameDegree) {
-	    _core = new ArrayList<T>();
-	    _core.addAll(comm_);
-	} else {
-	    int nodes = comm_.toArray().length;
-	    Vector<T> nodos = new Vector<T>();
-
-	    int[] centralDegree = new int[nodes];
-
-	    int i = 0;
-	    for (T nodo : comm_) {
-		centralDegree[i] = 0;
-		i++;
-		nodos.add(nodo);
-	    }
-
-	    for (i = 0; i < nodos.size(); i++) {
-		for (int j = (i + 1); j < nodos.size(); j++) {
-		    T node1 = nodos.elementAt(i);
-		    T node2 = nodos.elementAt(j);
-
-		    FriendLink edge1 = graph_.findEdge(node1, node2);
-		    FriendLink edge2 = graph_.findEdge(node2, node1);
-		    if ((edge1 != null) || (edge2 != null)) {
-			int grado1 = graph_.degree(node1);
-			int grado2 = graph_.degree(node2);
-
-			if (grado1 < grado2) {
-			    centralDegree[i] -= Math.abs((grado1 - grado2));
-			    centralDegree[j] += Math.abs((grado1 - grado2));
-			} else {
-			    centralDegree[i] += Math.abs((grado1 - grado2));
-			    centralDegree[j] -= Math.abs((grado1 - grado2));
-			}
-		    }
-		}
-	    }
-
-	    _core = new ArrayList<T>();
-	    for (i = 0; i < nodos.size(); i++) {
-		if (centralDegree[i] >= 0)
-		    _core.add(nodos.elementAt(i));
-	    }
-	}
-    }
-
-    /**
-     * Returns predecessor with longest span trace by default..
-     * 
-     * @params
-     * @return Community<T>
+     * @param comNodList_
+     *            List of nodes in a given community
+     * @param graph_
+     *            The graph object where community was found. Used to check
+     *            degrees.
+     * @return int[] Returns an array of nodes with their centrality calculated
      * @author biggie
      */
-    public Community<T> getPredecessor() {
-	// TODO Auto-generated method stub
-	return _maxPredecessor;
+    private int[] calculateNodCentrality(List<T> comNodList_, Graph<T, FriendLink> graph_) {
+	int[] centralDeg = new int[comNodList_.size()];
+	for (int i = 0; i < centralDeg.length; i++) {
+	    centralDeg[i] = 0;
+	}
+
+	for (int i = 0; i < comNodList_.size(); i++) {
+	    for (int j = (i + 1); j < comNodList_.size(); j++) {
+		T node1 = comNodList_.get(i);
+		T node2 = comNodList_.get(j);
+
+	    FriendLink edge1 = graph_.findEdge(node1, node2);
+		FriendLink edge2 = graph_.findEdge(node2, node1);
+		if ((edge1 != null) || (edge2 != null)) {
+		    int grado1 = graph_.degree(node1);
+		    int grado2 = graph_.degree(node2);
+
+		if (grado1 < grado2) {
+			centralDeg[i] = centralDeg[i] - Math.abs((grado1 - grado2));
+			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+		    } else {
+			centralDeg[i] = centralDeg[i] + Math.abs((grado1 - grado2));
+			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+		}
+	    }
+	}
+	}
+	return centralDeg;
+    }
+
+    /**
+     * Returns true if all nodes in the community have the same degree. False
+     * otherwise.
+     * 
+     * @param comNodList
+     *            Community to check
+     * @param graph_
+     *            The graph object where community was found. Used to check
+     *            degrees.
+     * @return boolean
+     * @author biggie
+     */
+    private boolean isSameDegComm(List<T> comNodList, Graph<T, FriendLink> graph_) {
+	boolean sameDegree = true;
+	boolean firstNode = true;
+	int degree = 0;
+
+	for (T node : comNodList) {
+	    if (!sameDegree) {
+		break;
+	    }
+	    if (firstNode) {
+		degree = graph_.degree(node);
+		firstNode = false;
+	    } else
+		sameDegree = (graph_.degree(node) == degree);
+	}
+	return sameDegree;
     }
 }
