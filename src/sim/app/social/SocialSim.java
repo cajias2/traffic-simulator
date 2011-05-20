@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import sim.agents.Agent;
-import sim.agents.social.MetricsAgent;
 import sim.app.SocialSimState;
 import sim.engine.Schedule;
 import sim.engine.SimState;
@@ -128,7 +127,7 @@ public class SocialSim extends SocialSimState {
 	schedule.reset(); // clear out the schedule
 
 	scheduleAgents();
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
+	// schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
 	// Schedule simKiller last.
 	if (null != _gatherer) {
 	    schedule.scheduleRepeating(Schedule.EPOCH, 1, _gatherer, 1);
