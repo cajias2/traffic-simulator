@@ -21,12 +21,13 @@ public class Community<T> {
     private final int ID;
     private final Set<T> _members;
     private List<T> _core;
-    private Set<Community<T>> _predecessors;
-    private Set<Community<T>> _successors;
-    private int _bckTimelineLen = 0;
-    private final int _totalTimeLinelen = -1;
-    private Community<T> _maxPredecessor;
-    private Community<T> _predListTop;
+    private Set<Community<T>> _predList;
+    private Set<Community<T>> _succList;
+    private int _bckwdTimelineLen = 0;
+    private int _fwdTimelineLen = -1;
+    private Community<T> _mainPred;
+    private Community<T> _mainTimelineFirst;
+    private Community<T> _mainSucc;
 
     /**
      * 
@@ -52,10 +53,10 @@ public class Community<T> {
 	_members = comm_;
 	// _traces = new ArrayList<List<Community<T>>>();
 	_core = getCommunityCores(_members, graph_);
-	_predecessors = null;
-	_successors = null;
-	_bckTimelineLen = 0;
-	_predListTop = this;
+	_predList = null;
+	_succList = null;
+	_bckwdTimelineLen = 0;
+	_mainTimelineFirst = this;
     }
 
     /**
@@ -68,11 +69,11 @@ public class Community<T> {
     public Community() {
 	ID = count_++;
 	_members = new HashSet<T>();
-	_predecessors = null;
-	_successors = null;
-	_bckTimelineLen = 0;
-	_maxPredecessor = null;
-	_predListTop = this;
+	_predList = null;
+	_succList = null;
+	_bckwdTimelineLen = 0;
+	_mainPred = null;
+	_mainTimelineFirst = this;
     }
 
     /**
@@ -84,16 +85,16 @@ public class Community<T> {
      * @author antonio
      */
     public void addPredecessor(Community<T> pred_) {
-	if (null == _predecessors) {
-	    _predecessors = new HashSet<Community<T>>();
+	if (null == _predList) {
+	    _predList = new HashSet<Community<T>>();
 	}
-	if (_predecessors.add(pred_) && ((pred_.getTimelineLen() + 1) > _bckTimelineLen)) {
-	    _maxPredecessor = pred_;
-	    _bckTimelineLen = pred_.getTimelineLen() + 1;
-	    if (null != pred_.getOldestPred()) {
-		_predListTop = pred_.getOldestPred();
+	if (_predList.add(pred_) && ((pred_.getBckwdTimelineLen() + 1) > _bckwdTimelineLen)) {
+	    _mainPred = pred_;
+	    _bckwdTimelineLen = pred_.getBckwdTimelineLen() + 1;
+	    if (null != pred_.getTimelineFirst()) {
+		_mainTimelineFirst = pred_.getTimelineFirst();
 	    } else {
-		_predListTop = pred_;
+		_mainTimelineFirst = pred_;
 	    }
 
 	}
@@ -106,8 +107,8 @@ public class Community<T> {
      * @return Community<T>
      * @author biggie
      */
-    public Community<T> getOldestPred() {
-	return _predListTop;
+    public Community<T> getTimelineFirst() {
+	return _mainTimelineFirst;
     }
 
     /**
@@ -118,10 +119,10 @@ public class Community<T> {
      * @author antonio
      */
     public void addSuccessor(Community<T> succ_) {
-	if (null == _successors) {
-	    _successors = new HashSet<Community<T>>();
+	if (null == _succList) {
+	    _succList = new HashSet<Community<T>>();
 	}
-	_successors.add(succ_);
+	_succList.add(succ_);
     }
 
     /**
@@ -145,7 +146,7 @@ public class Community<T> {
      * @author antonio
      */
     public int getAge() {
-	return _predListTop.getTimelineLen() - getTimelineLen() + 1;
+	return getBckwdTimelineLen() + 1;
     }
 
     /**
@@ -156,8 +157,8 @@ public class Community<T> {
      * @return int
      * @author antonio
      */
-    public int getTimelineLen() {
-	return _bckTimelineLen;
+    public int getBckwdTimelineLen() {
+	return _bckwdTimelineLen;
     }
 
     /**
@@ -169,7 +170,7 @@ public class Community<T> {
      * @author antonio
      */
     public final Set<Community<T>> getPredecessors() {
-	return _predecessors;
+	return _predList;
     }
 
     /**
@@ -181,7 +182,7 @@ public class Community<T> {
      * @author antonio
      */
     public final Set<Community<T>> getSuccessors() {
-	return _successors;
+	return _succList;
     }
 
     /**
@@ -210,55 +211,29 @@ public class Community<T> {
 
     /**
      * 
-     * TODO Purpose
+     * Total timeline length
      * 
      * @params
      * @return int
      * @author biggie
      */
     public int getTotalTimeLineLen() {
-	return _totalTimeLinelen;
+	if (_fwdTimelineLen < 0) {
+	    _fwdTimelineLen = findFwdTimelineLen();
+	}
+	return _bckwdTimelineLen + _fwdTimelineLen;
     }
 
-    // protected void setTotalTimeLineLen(int totalTimelineLen_) {
-    // _totalTimeLinelen = totalTimelineLen_;
-    // }
-    //
-    // public int findTotalTimeLineLen() {
-    // _totalTimeLinelen = _bckTimelineLen + getFWDtimelineLen(_successors);
-    // return _totalTimeLinelen;
-    // }
-    //
-    // /**
-    // * TODO Purpose
-    // *
-    // * @params
-    // * @return int
-    // * @author biggie
-    // */
-    // private int getFWDtimelineLen(Set<Community<T>> successors_) {
-    // int currMaxLen = 0;
-    // for(Community<T> next : successors_){
-    // if(null != next.getSuccessors() && currMaxLen < 1){
-    // currMaxLen = 1;
-    // }else{
-    // currMaxLen = 1 + getFWDtimelineLen(next.getSuccessors(), currMaxLen);
-    // }
-    // }
-    // return currMaxLen;
-    // }
-    //
-    // /**
-    // * TODO Purpose
-    // * @params
-    // * @return int
-    // * @author biggie
-    // */
-    // private int getFWDtimelineLen(Set<Community<T>> successors_, int
-    // currMaxLen_) {
-    // // TODO Auto-generated method stub
-    // return 0;
-    // }
+    /**
+     * Finds longest path down the timeline
+     * 
+     * @params
+     * @return int
+     * @author biggie
+     */
+    private int findFwdTimelineLen() {
+	return findFwdTimelineLen(0, _succList);
+    }
 
     /**
      * Returns predecessor with longest span trace by default.
@@ -266,8 +241,8 @@ public class Community<T> {
      * @return Community<T>
      * @author biggie
      */
-    public Community<T> getPredessor() {
-	return _maxPredecessor;
+    public Community<T> getMainPred() {
+	return _mainPred;
     }
 
     /**
@@ -287,6 +262,29 @@ public class Community<T> {
 	community += ")";
 
 	return community;
+    }
+
+    /**
+     * DFS down the timeline to find longest path.
+     * 
+     * @param currPath_
+     * @param succList_
+     * @return int longest path length
+     * @author biggie
+     */
+    private int findFwdTimelineLen(int currPath_, Set<Community<T>> succList_) {
+	int longestPathLen = currPath_;
+	if (null == succList_) {
+	    longestPathLen = longestPathLen + 1;
+	} else {
+	    for(Community<T> succ : succList_){
+		int pathLen = findFwdTimelineLen(longestPathLen, succ.getSuccessors());
+		if (longestPathLen < pathLen) {
+		    longestPathLen = pathLen;
+		}
+	    }
+	}
+	return longestPathLen;
     }
 
     /**

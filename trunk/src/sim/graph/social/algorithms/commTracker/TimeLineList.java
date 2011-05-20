@@ -106,7 +106,7 @@ public class TimeLineList<T> {
 	List<Community<T>> maxPath = new LinkedList<Community<T>>();
 	maxPath.add(comm_);
 
-	for (Community<T> curCom = comm_; curCom.getPredessor() != null; curCom = curCom.getPredessor()) {
+	for (Community<T> curCom = comm_; curCom.getMainPred() != null; curCom = curCom.getMainPred()) {
 	    maxPath.add(curCom);
 	}
 	return maxPath;
@@ -124,7 +124,7 @@ public class TimeLineList<T> {
 
 	double stability = 0;
 	Community<T> currCom = comm_;
-	for (Community<T> pred = currCom.getPredessor(); pred != null; pred = pred.getPredessor()) {
+	for (Community<T> pred = currCom.getMainPred(); pred != null; pred = pred.getMainPred()) {
 	    Set<T> currMem = currCom.getAllNodes();
 	    Set<T> predMembers = pred.getAllNodes();
 
@@ -136,8 +136,8 @@ public class TimeLineList<T> {
 	    currCom = pred;
 	}
 
-	if (comm_.getTimelineLen() > 0) {
-	    stability = (stability / comm_.getTimelineLen());
+	if (comm_.getBckwdTimelineLen() > 0) {
+	    stability = (stability / comm_.getBckwdTimelineLen());
 	}
 	return stability;
     }
@@ -390,8 +390,8 @@ public class TimeLineList<T> {
 		    int age = comm.getAge();
 		    Double stability = getMemberStability(comm);
 
-		    int length = comm.getTimelineLen();
-		    int totalLen = (comm.getOldestPred() == null) ? comm.getOldestPred().getTimelineLen() : length;
+		    int length = comm.getTotalTimeLineLen();
+		    int totalLen = (comm.getTimelineFirst() == null) ? comm.getTimelineFirst().getBckwdTimelineLen() : length;
 		    int pos = totalLen - length + 1;
 		    int evolTrace = length - pos;
 

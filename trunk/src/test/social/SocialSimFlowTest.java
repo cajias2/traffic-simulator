@@ -14,13 +14,10 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 
-import org.jgrapht.UndirectedGraph;
-
 import sim.app.social.SocialSim;
 import sim.field.network.Edge;
 import sim.graph.social.algorithms.BronKerboschKCliqueFinder;
 import sim.graph.social.algorithms.CPMCommunityFinder;
-import sim.graph.social.algorithms.OldBronKerboschKCliqueFinder;
 import sim.graph.social.algorithms.commTracker.TimeLineList;
 import sim.graph.social.link.FriendLink;
 import sim.mason.AgentNetwork;
@@ -63,9 +60,11 @@ public class SocialSimFlowTest {
 	    Graph<Integer, FriendLink> graph = AgentNetwork.adjListToJungGraph(eAr);
 	    graphEvol.add(graph);
 
-	    UndirectedGraph<Integer, FriendLink> testGraph = AgentNetwork.adjListToJGraphTList(eAr);
-	    OldBronKerboschKCliqueFinder<Integer, FriendLink> oldmaxClique = new OldBronKerboschKCliqueFinder<Integer, FriendLink>(
-		    testGraph);
+	    // UndirectedGraph<Integer, FriendLink> testGraph =
+	    // AgentNetwork.adjListToJGraphTList(eAr);
+	    // OldBronKerboschKCliqueFinder<Integer, FriendLink> oldmaxClique =
+	    // new OldBronKerboschKCliqueFinder<Integer, FriendLink>(
+	    // testGraph);
 
 	    Collection<Set<Integer>> kComs = findCommunities(graph);
 	    kEvol.add(kComs);
@@ -74,6 +73,7 @@ public class SocialSimFlowTest {
 		evolution.add(snapshot, community, graph);
 	    }
 	    snapshot++;
+	    eAr = null;
 
 	}
 
