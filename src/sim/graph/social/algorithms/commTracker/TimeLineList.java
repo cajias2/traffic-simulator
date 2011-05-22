@@ -13,12 +13,13 @@ import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
 public class TimeLineList<T> {
+
+    private static final String OUTPUT_PATH = System.getProperty("user.dir") + "/output";
+    private static final String OUT_METRICS_FILEPATH = OUTPUT_PATH + "/Metrics-";
+
     private final List<List<Community<T>>> _timeLine;
-    private final List<List<Community<T>>> _traces;
-    private final List<List<List<Double>>> _metrics;
 
     /**
-     * 
      * TODO Purpose
      * 
      * @param
@@ -26,12 +27,9 @@ public class TimeLineList<T> {
      */
     public TimeLineList(int size_) {
 	_timeLine = new ArrayList<List<Community<T>>>(size_);
-	_traces = new ArrayList<List<Community<T>>>();
-	_metrics = new ArrayList<List<List<Double>>>();
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -82,7 +80,6 @@ public class TimeLineList<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -94,7 +91,6 @@ public class TimeLineList<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -113,7 +109,6 @@ public class TimeLineList<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -128,11 +123,11 @@ public class TimeLineList<T> {
 	    Set<T> currMem = currCom.getAllNodes();
 	    Set<T> predMembers = pred.getAllNodes();
 
-	    int intersect = 0;
+	    double intersect = 0;
 	    if (currMem.retainAll(predMembers)) {
 		intersect = currMem.size();
 	    }
-	    stability += ((double) intersect / (predMembers.size() + currMem.size() - intersect));
+	    stability = stability + (intersect / (predMembers.size() + currMem.size() - intersect));
 	    currCom = pred;
 	}
 
@@ -143,7 +138,6 @@ public class TimeLineList<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -152,61 +146,21 @@ public class TimeLineList<T> {
      */
     public void writeMetrics() {
 
-	computeMetrics();
-
-	int numCommunities = Community.count();
-	int numSnapshots = _timeLine.size();
-	int numTraces = _traces.size();
-	int sumSize = 0, sumCores = 0;
-
-	for (List<Community<T>> snapshot : _timeLine) {
-	    if (null != snapshot) {
-		for (Community<T> comm : snapshot) {
-		    sumSize += comm.getSize();
-		    sumCores += comm.getCoreNodes().size();
-		}
-	    }
-	}
-
-	int maxLength = 0;
-	int sumLength = 0;
-
-	BufferedWriter _outWrt = null;
-
-	File outDir = new File(System.getProperty("user.dir") + "/output");
+	File outDir = new File(OUTPUT_PATH);
 	if (!outDir.exists())
 	    outDir.mkdir();
 
 	FileWriter outFileWrt;
 	try {
-	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + "/Metrics-" + System.currentTimeMillis() + ".txt");
+	    outFileWrt = new FileWriter(OUT_METRICS_FILEPATH + System.currentTimeMillis() + ".txt");
+	    BufferedWriter outWrt;
 	    System.out.println("Writing results");
-	    _outWrt = new BufferedWriter(outFileWrt);
+	    outWrt = new BufferedWriter(outFileWrt);
 
-	    _outWrt.write("Average community number per snapshot:\t" + (double) numCommunities / numSnapshots + "\n");
-	    _outWrt.write("Evolution trace number:\t" + numTraces + "\n");
-	    _outWrt.write("Average evolution trace length:\t" + (double) sumLength / numTraces + "\n");
-	    _outWrt.write("Max evolution trace length:\t" + (double) maxLength + "\n");
-	    _outWrt.write("Average community size:\t" + (double) sumSize / numCommunities + "\n");
-	    _outWrt.write("Core number per community:\t" + (double) sumCores / numCommunities + "\n");
+	    echoHeader(_timeLine, outWrt);
+	    computeMetrics(_timeLine, outWrt);
 
-	    _outWrt.write("\n");
-	    _outWrt.write("\n");
-	    _outWrt.write("Snap\tSize\tAge\t\tEvolTce\tStability\n");
-	    int snapshot = 1;
-
-	    for (List<List<Double>> snapshotValues : _metrics) {
-		for (List<Double> commValue : snapshotValues) {
-		    _outWrt.write(snapshot + "\t");
-		    for (Double value : commValue) {
-			_outWrt.write(value + "\t");
-		    }
-		    _outWrt.write("\n");
-		}
-		snapshot++;
-	    }
-
-	    _outWrt.close();
+	    outWrt.close();
 
 	} catch (IOException e) {
 	    e.printStackTrace();
@@ -214,7 +168,40 @@ public class TimeLineList<T> {
     }
 
     /**
-     * 
+     * @param outWrt
+     * @throws IOException
+     */
+    private void echoHeader(List<List<Community<T>>> timeLine_, BufferedWriter outWrt) throws IOException {
+
+	double numCommunities = Community.count();
+	double numSnapshots = timeLine_.size();
+	double numTraces = timeLine_.size();
+	double sumSize = 0;
+	double sumCores = 0;
+	double maxLength = 0;
+	double sumLength = 0;
+
+	for (List<Community<T>> snapshot : timeLine_) {
+	    if (null != snapshot) {
+		for (Community<T> comm : snapshot) {
+		    sumSize = sumSize + comm.getSize();
+		    sumCores = sumCores + comm.getCoreNodes().size();
+		    if(comm.getTotalTimeLineLen() > maxLength){
+			maxLength = comm.getTotalTimeLineLen();
+		    }
+		}
+	    }
+	}
+	outWrt.write("Average community number per snapshot:\t" + numCommunities / numSnapshots + "\n");
+	outWrt.write("Evolution trace number:\t" + numTraces + "\n");
+	outWrt.write("Average evolution trace length:\t" + sumLength / numTraces + "\n");
+	outWrt.write("Max evolution trace length:\t" + maxLength + "\n");
+	outWrt.write("Average community size:\t" + sumSize / numCommunities + "\n");
+	outWrt.write("Core number per community:\t" + sumCores / numCommunities + "\n");
+	outWrt.write("\n\n");
+    }
+
+    /**
      * TODO Purpose
      * 
      * @params
@@ -267,7 +254,6 @@ public class TimeLineList<T> {
      * (1) Have at least one core node that is currently a node.<br/>
      * AND <br/>
      * (2) Have a node somewhere in it's past that is now a core node. <br/>
-     * 
      * This method checks (2)
      * 
      * @param commA_
@@ -372,40 +358,47 @@ public class TimeLineList<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
      * @return void
      * @author antonio
+     * @param outWrt_
+     * @throws IOException
      */
-    private void computeMetrics() {
-
-	for (List<Community<T>> snapshot : _timeLine) {
+    private void computeMetrics(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_) throws IOException {
+	outWrt_.write("Snap\tSize\tAge\tEvolTce\tStability\n");
+	for (int i = 0; i < snapshotList_.size(); i++) {
+	    List<Community<T>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
-		List<List<Double>> commValues = new ArrayList<List<Double>>();
-
 		for (Community<T> comm : snapshot) {
-		    int size = comm.getSize();
-		    int age = comm.getAge();
-		    Double stability = getMemberStability(comm);
-
-		    int length = comm.getTotalTimeLineLen();
-		    int totalLen = (comm.getTimelineFirst() == null) ? comm.getTimelineFirst().getBckwdTimelineLen() : length;
-		    int pos = totalLen - length + 1;
-		    int evolTrace = length - pos;
-
-		    if (null != stability) {
-			List<Double> values = new ArrayList<Double>();
-			values.add((double) size);
-			values.add((double) age);
-			values.add((double) evolTrace);
-			values.add(stability);
-			commValues.add(values);
-		    }
+		    String outStr = i + "";
+		    outStr = outStr + "\t" + comm.getSize();
+		    outStr = outStr + "\t" + comm.getAge();
+		    outStr = outStr + "\t" + getEvolutionTrace(comm);
+		    outStr = outStr + "\t" + getMemberStability(comm);
+		    outStr = outStr + "\n";
+		    outWrt_.write(outStr);
+		    outWrt_.flush();
 		}
-		_metrics.add(commValues);
+	    } else {
+		outWrt_.write(i + "\n");
 	    }
 	}
+    }
+
+    /**
+     * @param comm
+     * @return
+     */
+    private int getEvolutionTrace(Community<T> comm) {
+	int length = comm.getTotalTimeLineLen();
+	int totalLen = length;
+	if (comm.getTimelineFirst() == null) {
+	    totalLen = comm.getTimelineFirst().getBckwdTimelineLen();
+	}
+	int pos = totalLen - length + 1;
+	int evolTrace = length - pos;
+	return evolTrace;
     }
 }
