@@ -218,22 +218,20 @@ public class Community<T> {
      * @author biggie
      */
     public int getTotalTimeLineLen() {
-	if (_fwdTimelineLen < 0) {
-	    _fwdTimelineLen = findFwdTimelineLen();
-	}
-	return _bckwdTimelineLen + _fwdTimelineLen;
+
+	return _bckwdTimelineLen + getFwdTimelineLen();
     }
 
     /**
-     * Finds longest path down the timeline
-     * 
-     * @params
-     * @return int
-     * @author biggie
+     * @return
      */
-    private int findFwdTimelineLen() {
-	return findFwdTimelineLen(0, _succList);
+    private int getFwdTimelineLen() {
+	if (_fwdTimelineLen < 0) {
+	    _fwdTimelineLen = findFwdTimelineLen(_succList);
+	}
+	return _fwdTimelineLen;
     }
+
 
     /**
      * Returns predecessor with longest span trace by default.
@@ -272,13 +270,14 @@ public class Community<T> {
      * @return int longest path length
      * @author biggie
      */
-    private int findFwdTimelineLen(int currPath_, Set<Community<T>> succList_) {
-	int longestPathLen = currPath_;
+    private int findFwdTimelineLen(Set<Community<T>> succList_) {
+	int longestPathLen = 0;
 	if (null == succList_) {
 	    longestPathLen = longestPathLen + 1;
 	} else {
 	    for(Community<T> succ : succList_){
-		int pathLen = findFwdTimelineLen(longestPathLen, succ.getSuccessors());
+		int pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
+						       // succ.getSuccessors());
 		if (longestPathLen < pathLen) {
 		    longestPathLen = pathLen;
 		}
