@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -115,12 +116,12 @@ public class TimeLineList<T> {
      * @return double
      * @author antonio
      */
-    public double getMemberStability(Community<T> comm_) {
+    public static <T> double getMemberStability(Community<T> comm_) {
 
 	double stability = 0;
 	Community<T> currCom = comm_;
 	for (Community<T> pred = currCom.getMainPred(); pred != null; pred = pred.getMainPred()) {
-	    Set<T> currMem = currCom.getAllNodes();
+	    Set<T> currMem = new HashSet<T>(currCom.getAllNodes());
 	    Set<T> predMembers = pred.getAllNodes();
 
 	    double intersect = 0;
@@ -154,12 +155,9 @@ public class TimeLineList<T> {
 	try {
 	    outFileWrt = new FileWriter(OUT_METRICS_FILEPATH + System.currentTimeMillis() + ".txt");
 	    BufferedWriter outWrt;
-	    System.out.println("Writing results");
 	    outWrt = new BufferedWriter(outFileWrt);
-
 	    echoHeader(_timeLine, outWrt);
 	    computeMetrics(_timeLine, outWrt);
-
 	    outWrt.close();
 
 	} catch (IOException e) {
@@ -171,33 +169,44 @@ public class TimeLineList<T> {
      * @param outWrt
      * @throws IOException
      */
-    private void echoHeader(List<List<Community<T>>> timeLine_, BufferedWriter outWrt) throws IOException {
+    private void echoHeader(List<List<Community<T>>> timeline_, BufferedWriter outWrt) throws IOException {
 
-	double numCommunities = Community.count();
-	double numSnapshots = timeLine_.size();
-	double numTraces = timeLine_.size();
+	double comPerSnap = Community.count() / timeline_.size();
+	int numTraces = 0;
+	double avgComSize;
+	double avgTraceLen;
+	double avgCoreComm;
 	double sumSize = 0;
 	double sumCores = 0;
 	double maxLength = 0;
 	double sumLength = 0;
 
-	for (List<Community<T>> snapshot : timeLine_) {
+	for (List<Community<T>> snapshot : timeline_) {
 	    if (null != snapshot) {
 		for (Community<T> comm : snapshot) {
+		    if (comm.isTimelineFirst()) {
+			numTraces++;
+			sumLength = sumLength + comm.getTotalTimeLineLen();
+			if (comm.getTotalTimeLineLen() > maxLength) {
+			    maxLength = comm.getTotalTimeLineLen();
+			}
+		    }
+
 		    sumSize = sumSize + comm.getSize();
 		    sumCores = sumCores + comm.getCoreNodes().size();
-		    if(comm.getTotalTimeLineLen() > maxLength){
-			maxLength = comm.getTotalTimeLineLen();
-		    }
 		}
 	    }
 	}
-	outWrt.write("Average community number per snapshot:\t" + numCommunities / numSnapshots + "\n");
+	avgTraceLen = sumLength / numTraces;
+	avgComSize = sumSize / Community.count();
+	avgCoreComm = sumCores / Community.count();
+
+	outWrt.write("Average community number per snapshot:\t" + comPerSnap + "\n");
 	outWrt.write("Evolution trace number:\t" + numTraces + "\n");
-	outWrt.write("Average evolution trace length:\t" + sumLength / numTraces + "\n");
+	outWrt.write("Average evolution trace length:\t" + avgTraceLen + "\n");
 	outWrt.write("Max evolution trace length:\t" + maxLength + "\n");
-	outWrt.write("Average community size:\t" + sumSize / numCommunities + "\n");
-	outWrt.write("Core number per community:\t" + sumCores / numCommunities + "\n");
+	outWrt.write("Average community size:\t" + avgComSize + "\n");
+	outWrt.write("Core number per community:\t" + avgCoreComm + "\n");
 	outWrt.write("\n\n");
     }
 
@@ -366,7 +375,8 @@ public class TimeLineList<T> {
      * @param outWrt_
      * @throws IOException
      */
-    private void computeMetrics(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_) throws IOException {
+    private static <T> void computeMetrics(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
+	    throws IOException {
 	outWrt_.write("Snap\tSize\tAge\tEvolTce\tStability\n");
 	for (int i = 0; i < snapshotList_.size(); i++) {
 	    List<Community<T>> snapshot = snapshotList_.get(i);
@@ -375,7 +385,7 @@ public class TimeLineList<T> {
 		    String outStr = i + "";
 		    outStr = outStr + "\t" + comm.getSize();
 		    outStr = outStr + "\t" + comm.getAge();
-		    outStr = outStr + "\t" + getEvolutionTrace(comm);
+		    outStr = outStr + "\t" + comm.getFwdTimelineLen();
 		    outStr = outStr + "\t" + getMemberStability(comm);
 		    outStr = outStr + "\n";
 		    outWrt_.write(outStr);
@@ -387,18 +397,4 @@ public class TimeLineList<T> {
 	}
     }
 
-    /**
-     * @param comm
-     * @return
-     */
-    private int getEvolutionTrace(Community<T> comm) {
-	int length = comm.getTotalTimeLineLen();
-	int totalLen = length;
-	if (comm.getTimelineFirst() == null) {
-	    totalLen = comm.getTimelineFirst().getBckwdTimelineLen();
-	}
-	int pos = totalLen - length + 1;
-	int evolTrace = length - pos;
-	return evolTrace;
-    }
 }

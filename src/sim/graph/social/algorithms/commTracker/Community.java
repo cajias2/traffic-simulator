@@ -27,7 +27,6 @@ public class Community<T> {
     private int _fwdTimelineLen = -1;
     private Community<T> _mainPred;
     private Community<T> _mainTimelineFirst;
-    private Community<T> _mainSucc;
 
     /**
      * 
@@ -51,12 +50,14 @@ public class Community<T> {
     public Community(Set<T> comm_, Graph<T, FriendLink> graph_) {
 	ID = count_++;
 	_members = comm_;
-	// _traces = new ArrayList<List<Community<T>>>();
 	_core = getCommunityCores(_members, graph_);
 	_predList = null;
 	_succList = null;
 	_bckwdTimelineLen = 0;
 	_mainTimelineFirst = this;
+	if (null == _members) {
+	    System.err.println("Here");
+	}
     }
 
     /**
@@ -68,7 +69,7 @@ public class Community<T> {
      */
     public Community() {
 	ID = count_++;
-	_members = new HashSet<T>();
+	_members = null;
 	_predList = null;
 	_succList = null;
 	_bckwdTimelineLen = 0;
@@ -149,6 +150,10 @@ public class Community<T> {
 	return getBckwdTimelineLen() + 1;
     }
 
+    public int getEvolTrc() {
+	return _fwdTimelineLen;
+    }
+
     /**
      * 
      * TODO Purpose
@@ -225,7 +230,7 @@ public class Community<T> {
     /**
      * @return
      */
-    private int getFwdTimelineLen() {
+    int getFwdTimelineLen() {
 	if (_fwdTimelineLen < 0) {
 	    _fwdTimelineLen = findFwdTimelineLen(_succList);
 	}
@@ -248,18 +253,8 @@ public class Community<T> {
      */
     @Override
     public String toString() {
-	String community = "_" + ID + "( ";
 
-	for (T node : _core) {
-	    community += node + " ";
-	}
-	community += "| ";
-	for (T node : _members) {
-	    community += node + " ";
-	}
-	community += ")";
-
-	return community;
+	return "_" + ID + "(" + _core + "| " + _members + ")";
     }
 
     /**
@@ -389,6 +384,17 @@ public class Community<T> {
 		sameDegree = (graph_.degree(node) == degree);
 	}
 	return sameDegree;
+    }
+
+    /**
+     * Is this community the first of its timeline trace?
+     * 
+     * @params
+     * @return boolean
+     * @author biggie
+     */
+    public boolean isTimelineFirst() {
+	return null == _predList || _predList.isEmpty();
     }
 
 }
