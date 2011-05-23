@@ -109,7 +109,6 @@ public class TrafficSim extends CitySimState {
 
 	    int carOrder = 0;
 
-
 	    public void step(SimState state) {
 		if (SIM_TIME <= schedule.getSteps()) {
 		    for (Vehicle v : Vehicle.getActiveVhcl()) {
@@ -230,13 +229,13 @@ public class TrafficSim extends CitySimState {
      * TODO
      */
     private void printOutput() {
-	File outDir = new File(System.getProperty("user.dir") + "/output");
+	File outDir = new File(System.getProperty("user.dir") + System.getProperty("file.separator") + "output");
 	if (!outDir.exists())
 	    outDir.mkdir();
-	File outXmlDir = new File(outDir.getAbsoluteFile() + "/" + "sim.xml");
+	File outXmlDir = new File(outDir.getAbsoluteFile() + System.getProperty("file.separator") + "sim.xml");
 	if (!outXmlDir.exists())
 	    outXmlDir.mkdir();
-	File outTxtDir = new File(outDir.getAbsoluteFile() + "/" + "txt");
+	File outTxtDir = new File(outDir.getAbsoluteFile() + System.getProperty("file.separator") + "txt");
 	if (!outTxtDir.exists())
 	    outTxtDir.mkdir();
 
@@ -291,10 +290,9 @@ public class TrafficSim extends CitySimState {
 
     /**
      * @author biggie
-     * @name   printXml
-     * Purpose TODO
+     * @name printXml Purpose TODO
      * 
-     * @param 
+     * @param
      * @return void
      */
     private void printXml(String docName, Document document, String path_) {
@@ -306,19 +304,19 @@ public class TrafficSim extends CitySimState {
 	} catch (TransformerConfigurationException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
-	}	
+	}
 	DOMSource source = new DOMSource(document);
 	try {
-	// Create file
-	    FileWriter fstream = new FileWriter(path_ + "/" + docName + ".sim.xml");
-	BufferedWriter out = new BufferedWriter(fstream);
-	StreamResult result = new StreamResult(out);
-	transformer.transform(source, result);
-	out.close();
+	    // Create file
+	    FileWriter fstream = new FileWriter(path_ + System.getProperty("file.separator") + docName + ".sim.xml");
+	    BufferedWriter out = new BufferedWriter(fstream);
+	    StreamResult result = new StreamResult(out);
+	    transformer.transform(source, result);
+	    out.close();
 	} catch (TransformerException e) {
-	e.printStackTrace();
+	    e.printStackTrace();
 	} catch (Exception e) {// Catch exception if any
-	System.err.println("Error: " + e.getMessage());
+	    System.err.println("Error: " + e.getMessage());
 	}
     }
 

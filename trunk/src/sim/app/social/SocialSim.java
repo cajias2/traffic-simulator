@@ -2,7 +2,6 @@ package sim.app.social;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,15 +11,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import sim.agents.Agent;
+import sim.agents.social.GraphGatherer;
 import sim.app.SocialSimState;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
-import sim.field.network.Edge;
+import sim.graph.social.link.FriendLink;
 import sim.mason.AgentNetwork;
 import sim.util.Double2D;
 import sim.utils.xml.social.SocialInputParseService;
+import edu.uci.ics.jung.graph.Graph;
 
 @SuppressWarnings("serial")
 public class SocialSim extends SocialSimState {
@@ -28,7 +29,7 @@ public class SocialSim extends SocialSimState {
     private static Logger _log;
     private static String _simXml;
     private static Random _rand = new Random(System.currentTimeMillis());
-    private static GraphGatherer _gatherer = null;
+    private static GraphGatherer<Agent, FriendLink> _gatherer = null;
     private int AGENT_COUNT;
     private Map<Class<Agent>, Double> _agentMap;
     public static final double DIAMETER = 8;
@@ -52,6 +53,7 @@ public class SocialSim extends SocialSimState {
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
 	String simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
+
 	initializeThis(simXml);
     }
 
@@ -84,7 +86,8 @@ public class SocialSim extends SocialSimState {
     /**
      * 
      * TODO Purpose
-     * @params 
+     * 
+     * @params
      * @return void
      * @author biggie
      */
@@ -99,7 +102,6 @@ public class SocialSim extends SocialSimState {
 	network = new AgentNetwork();
 	fieldEnvironment = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
     }
-
 
     /**
      * @author biggie
@@ -125,10 +127,7 @@ public class SocialSim extends SocialSimState {
     public void start() {
 	super.start();
 	schedule.reset(); // clear out the schedule
-
 	scheduleAgents();
-	// schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
-	// Schedule simKiller last.
 	if (null != _gatherer) {
 	    schedule.scheduleRepeating(Schedule.EPOCH, 1, _gatherer, 1);
 	}
@@ -174,9 +173,9 @@ public class SocialSim extends SocialSimState {
      * @param
      * @return List<Graph<Agent,FriendLink>> A list of the graph evoltuion o
      */
-    public List<Edge[][]> runSim(String[] args_, int snapshotSize_) {
+    public List<Graph<Agent, FriendLink>> runSim(String[] args_, int snapshotSize_) {
 	_simXml = SocialInputParseService.parseCmdLnArgs(args_, _log);
-	_gatherer = new GraphGatherer(snapshotSize_);
+	_gatherer = new GraphGatherer<Agent, FriendLink>(snapshotSize_);
 	doLoop(SocialSim.class, args_);
 	return _gatherer.getGraphEvol();
     }
@@ -195,7 +194,6 @@ public class SocialSim extends SocialSimState {
 	doLoop(SocialSim.class, args);
     }
 
-
     /**
      * @author biggie
      * @name instantiateAgentObj Purpose TODO
@@ -211,42 +209,6 @@ public class SocialSim extends SocialSimState {
 	Constructor<Agent> cons = clazz_.getConstructor(argClass);
 	Object obj = cons.newInstance(argObj);
 	return (Agent) obj;
-    }
-
-    /**
-     * Kills the simulation after <code>SIM_TIME</code> steps
-     * 
-     * @author biggie
-     * @param <V>
-     */
-    private class GraphGatherer implements Steppable {
-	private final int SNAPSHOT;
-	List<Edge[][]> _graphEvol = new ArrayList<Edge[][]>();
-
-	public GraphGatherer(int snapshotSize_) {
-	    SNAPSHOT = snapshotSize_;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see sim.engine.Steppable#step(sim.engine.SimState)
-	 */
-	@Override
-	public void step(SimState state_) {
-	    SocialSim socSim = (SocialSim) state_;
-	    if (0 == socSim.schedule.getSteps() % SNAPSHOT) {
-		_graphEvol.add(socSim.network.getAdjacencyMatrix());
-	    }
-	}
-
-	/**
-	 * @return the graphEvol
-	 * @author biggie
-	 */
-	public List<Edge[][]> getGraphEvol() {
-	    return _graphEvol;
-	}
     }
 
     /**

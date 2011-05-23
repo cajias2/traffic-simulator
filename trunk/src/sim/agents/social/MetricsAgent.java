@@ -34,13 +34,14 @@ public class MetricsAgent implements Steppable {
     private BufferedWriter _outWrt = null;
 
     public MetricsAgent() {
-	File outDir = new File(System.getProperty("user.dir") + "/output");
+	File outDir = new File(System.getProperty("user.dir") + System.getProperty("file.separator") + "output");
 	if (!outDir.exists())
 	    outDir.mkdir();
 
 	FileWriter outFileWrt;
 	try {
-	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + "/" + System.currentTimeMillis() + ".txt");
+	    outFileWrt = new FileWriter(outDir.getAbsolutePath() + System.getProperty("file.separator")
+		    + System.currentTimeMillis() + ".txt");
 	    _outWrt = new BufferedWriter(outFileWrt);
 	    System.out.println("OUTPUT:\tTimeStep\t avgPL\t avgCI\t avgDeg\t Edges\n");
 
