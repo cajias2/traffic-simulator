@@ -406,11 +406,9 @@ public class TimeLineList<T> {
 	    List<Community<T>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
 		for (Community<T> comm : snapshot) {
-		    if (null == comm.getSuccessors()) {
-			String sizeOverTime = comm.getMemberStability() + "\t" + comm.getTotalTimeLineLen() + "\n";
-			outWrt_.write(sizeOverTime);
-			outWrt_.flush();
-		    }
+		    String sizeOverTime = comm.getMemberStability() + "\t" + comm.getTotalTimeLineLen() + "\n";
+		    outWrt_.write(sizeOverTime);
+		    outWrt_.flush();
 		}
 	    }
 	}
