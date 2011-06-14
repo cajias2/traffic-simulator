@@ -124,11 +124,9 @@ public class TimeLineList<T> {
 	    Set<T> currMem = new HashSet<T>(currCom.getAllNodes());
 	    Set<T> predMembers = pred.getAllNodes();
 
-	    double intersect = 0;
-	    if (currMem.retainAll(predMembers)) {
-		intersect = currMem.size();
-	    }
-	    stability = stability + (intersect / (predMembers.size() + currMem.size() - intersect));
+	    currMem.retainAll(predMembers);
+	    double intersect = currMem.size();
+	    stability = stability + (intersect / (predMembers.size() + currCom.getAllNodes().size() - intersect));
 	    currCom = pred;
 	}
 
