@@ -9,7 +9,6 @@ import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
- * 
  * TODO Purpose
  * 
  * @author antonio
@@ -30,7 +29,6 @@ public class Community<T> {
     private Double _memberStability;
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -42,7 +40,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @param
@@ -63,7 +60,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * Test.
      * 
      * @param
@@ -80,7 +76,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -129,7 +124,8 @@ public class Community<T> {
     }
 
     /**
-     * @param memberStability the memberStability to set
+     * @param memberStability
+     *            the memberStability to set
      */
     public void setMemberStability(Double memberStability) {
 	this._memberStability = memberStability;
@@ -139,28 +135,27 @@ public class Community<T> {
      * @return the memberStability
      */
     public Double getMemberStability() {
-	
-	if(Double.isNaN(_memberStability) && null != _succList){
-		    Set<T> succUnion = new HashSet<T>();
 
-		    for (Community<T> com : _succList) {
-			succUnion.addAll(com.getAllNodes());
-		    }
+	if (Double.isNaN(_memberStability) && null != _succList) {
+	    Set<T> succUnion = new HashSet<T>();
 
-		    Set<T> intersectMembers = new HashSet<T>(_members);
-		    Set<T> unionMembers = new HashSet<T>(_members);
+	    for (Community<T> com : _succList) {
+		succUnion.addAll(com.getAllNodes());
+	    }
 
-		    intersectMembers.retainAll(succUnion);
-		    unionMembers.addAll(succUnion);
-		    _memberStability = (double) (intersectMembers.size() / unionMembers.size());
+	    Set<T> intersectMembers = new HashSet<T>(_members);
+	    Set<T> unionMembers = new HashSet<T>(_members);
 
-		}
+	    intersectMembers.retainAll(succUnion);
+	    unionMembers.addAll(succUnion);
+	    _memberStability = ((intersectMembers.size() + 0.0) / (unionMembers.size() + 0.0));
+
+	}
 
 	return _memberStability;
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -174,8 +169,8 @@ public class Community<T> {
     public int getID() {
 	return ID;
     }
+
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -191,7 +186,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -203,7 +197,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -215,7 +208,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -227,7 +219,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -239,7 +230,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -251,7 +241,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * Total timeline length
      * 
      * @params
@@ -272,7 +261,6 @@ public class Community<T> {
 	}
 	return _fwdTimelineLen;
     }
-
 
     /**
      * Returns predecessor with longest span trace by default.
@@ -306,9 +294,9 @@ public class Community<T> {
 	if (null == succList_) {
 	    longestPathLen = longestPathLen + 1;
 	} else {
-	    for(Community<T> succ : succList_){
+	    for (Community<T> succ : succList_) {
 		int pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
-						       // succ.getSuccessors());
+							   // succ.getSuccessors());
 		if (longestPathLen < pathLen) {
 		    longestPathLen = pathLen;
 		}
@@ -318,7 +306,6 @@ public class Community<T> {
     }
 
     /**
-     * 
      * Uses node degrees to calculate node centrality in a community. Returns a
      * list of core nodes.
      * 
