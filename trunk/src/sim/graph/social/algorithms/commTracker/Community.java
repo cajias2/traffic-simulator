@@ -27,6 +27,7 @@ public class Community<T> {
     private int _fwdTimelineLen = -1;
     private Community<T> _mainPred;
     private Community<T> _mainTimelineFirst;
+    private Double _memberStability;
 
     /**
      * 
@@ -55,6 +56,7 @@ public class Community<T> {
 	_succList = null;
 	_bckwdTimelineLen = 0;
 	_mainTimelineFirst = this;
+	_memberStability = Double.NaN;
 	if (null == _members) {
 	    System.err.println("Here");
 	}
@@ -127,6 +129,37 @@ public class Community<T> {
     }
 
     /**
+     * @param memberStability the memberStability to set
+     */
+    public void setMemberStability(Double memberStability) {
+	this._memberStability = memberStability;
+    }
+
+    /**
+     * @return the memberStability
+     */
+    public Double getMemberStability() {
+	
+	if(Double.isNaN(_memberStability) && null != _succList){
+		    Set<T> succUnion = new HashSet<T>();
+
+		    for (Community<T> com : _succList) {
+			succUnion.addAll(com.getAllNodes());
+		    }
+
+		    Set<T> intersectMembers = new HashSet<T>(_members);
+		    Set<T> unionMembers = new HashSet<T>(_members);
+
+		    intersectMembers.retainAll(succUnion);
+		    unionMembers.addAll(succUnion);
+		    _memberStability = (double) (intersectMembers.size() / unionMembers.size());
+
+		}
+
+	return _memberStability;
+    }
+
+    /**
      * 
      * TODO Purpose
      * 
@@ -138,6 +171,9 @@ public class Community<T> {
 	return _members.size();
     }
 
+    public int getID() {
+	return ID;
+    }
     /**
      * 
      * TODO Purpose
@@ -395,6 +431,17 @@ public class Community<T> {
      */
     public boolean isTimelineFirst() {
 	return null == _predList || _predList.isEmpty();
+    }
+
+    /**
+     * Is this community the last of its timeline trace?
+     * 
+     * @params
+     * @return boolean
+     * @author biggie
+     */
+    public boolean isTimelineLast() {
+	return null == _succList;
     }
 
 }

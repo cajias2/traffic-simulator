@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -113,33 +113,6 @@ public class TimeLineList<T> {
      * TODO Purpose
      * 
      * @params
-     * @return double
-     * @author antonio
-     */
-    public static <T> double getMemberStability(Community<T> comm_) {
-
-	double stability = 0;
-	Community<T> currCom = comm_;
-	for (Community<T> pred = currCom.getMainPred(); pred != null; pred = pred.getMainPred()) {
-	    Set<T> currMem = new HashSet<T>(currCom.getAllNodes());
-	    Set<T> predMembers = pred.getAllNodes();
-
-	    currMem.retainAll(predMembers);
-	    double intersect = currMem.size();
-	    stability = stability + (intersect / (predMembers.size() + currCom.getAllNodes().size() - intersect));
-	    currCom = pred;
-	}
-
-	if (comm_.getBckwdTimelineLen() > 0) {
-	    stability = (stability / comm_.getBckwdTimelineLen());
-	}
-	return stability;
-    }
-
-    /**
-     * TODO Purpose
-     * 
-     * @params
      * @return void
      * @author antonio
      */
@@ -149,15 +122,20 @@ public class TimeLineList<T> {
 	if (!outDir.exists())
 	    outDir.mkdir();
 
-	FileWriter outFileWrt;
 	try {
-	    outFileWrt = new FileWriter(OUT_METRICS_FILEPATH + System.currentTimeMillis() + ".txt");
-	    BufferedWriter outWrt;
-	    outWrt = new BufferedWriter(outFileWrt);
+	    String fileNameBase = OUT_METRICS_FILEPATH + System.currentTimeMillis();
+
+	    BufferedWriter outWrt = new BufferedWriter(new FileWriter(fileNameBase + ".txt"));
+	    BufferedWriter sizeWrt = new BufferedWriter(new FileWriter(fileNameBase + "_SizeAge" + ".txt"));
+	    BufferedWriter stabWrt = new BufferedWriter(new FileWriter(fileNameBase + "_StabSpan" + ".txt"));
+
 	    echoHeader(_timeLine, outWrt);
 	    computeMetrics(_timeLine, outWrt);
 	    outWrt.close();
-
+	    printSizeAgePerCom(_timeLine, sizeWrt);
+	    sizeWrt.close();
+	    printStabSpanPerCom(_timeLine, stabWrt);
+	    stabWrt.close();
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
@@ -380,19 +358,86 @@ public class TimeLineList<T> {
 	    List<Community<T>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
 		for (Community<T> comm : snapshot) {
-		    String outStr = i + "";
-		    outStr = outStr + "\t" + comm.getSize();
-		    outStr = outStr + "\t" + comm.getAge();
-		    outStr = outStr + "\t" + comm.getFwdTimelineLen();
-		    outStr = outStr + "\t" + getMemberStability(comm);
-		    outStr = outStr + "\n";
-		    outWrt_.write(outStr);
-		    outWrt_.flush();
+		    if (!comm.isTimelineLast()) {
+			String outStr = i + "";
+			outStr = outStr + "\t" + comm.getSize();
+			outStr = outStr + "\t" + comm.getAge();
+			outStr = outStr + "\t" + comm.getFwdTimelineLen();
+			outStr = outStr + "\t" + comm.getMemberStability();
+			outStr = outStr + "\n";
+			outWrt_.write(outStr);
+			outWrt_.flush();
+		    }
 		}
-	    } else {
-		outWrt_.write(i + "\n");
 	    }
 	}
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @params
+     * @return void
+     * @author antonio
+     * @param outWrt_
+     * @throws IOException
+     */
+    private static <T> void printSizeAgePerCom(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
+	    throws IOException {
+	outWrt_.write("Community\tSize\tAge\n");
+	for (int i = 0; i < snapshotList_.size(); i++) {
+	    List<Community<T>> snapshot = snapshotList_.get(i);
+	    if (null != snapshot) {
+		for (Community<T> comm : snapshot) {
+		    if (null == comm.getSuccessors()) {
+			String sizeOverTime = comm.getSize() + "\t" + comm.getTotalTimeLineLen() + "\n"; // commSizeOverTime(comm);
+			outWrt_.write(sizeOverTime);
+			outWrt_.flush();
+		    }
+		}
+	    }
+	}
+    }
+
+    private static <T> void printStabSpanPerCom(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
+	    throws IOException {
+	outWrt_.write("Community\tStability\tSpan\n");
+	for (int i = 0; i < snapshotList_.size(); i++) {
+	    List<Community<T>> snapshot = snapshotList_.get(i);
+	    if (null != snapshot) {
+		for (Community<T> comm : snapshot) {
+		    if (null == comm.getSuccessors()) {
+			String sizeOverTime = comm.getMemberStability() + "\t" + comm.getTotalTimeLineLen() + "\n";
+			outWrt_.write(sizeOverTime);
+			outWrt_.flush();
+		    }
+		}
+	    }
+	}
+    }
+
+    /**
+     * Gets the last one.. traverses back throu main timeline, and reverts list
+     * before returning
+     * 
+     * @param <T>
+     * @param comm_
+     * @return
+     */
+    private static <T> String commSizeOverTime(Community<T> comm_) {
+
+	String tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t";
+	String sizeOverTime = "Comunity_" + comm_.getID() + "\t";
+	List<Integer> values = new LinkedList<Integer>();
+
+	for (Community<T> curComm = comm_; curComm != null; curComm = curComm.getMainPred()) {
+	    values.add(curComm.getSize());
+	}
+	Collections.reverse(values);
+	for (Integer val : values) {
+	    sizeOverTime = sizeOverTime + "\t" + val;
+	}
+	return sizeOverTime + tabs + "\n";
     }
 
 }

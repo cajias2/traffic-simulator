@@ -35,7 +35,7 @@ import edu.uci.ics.jung.visualization.renderers.BasicHypergraphRenderer;
  */
 public class SocialSimFlowTest {
     private static final int CAPTURE_WINDOW = 1;
-    private static final int K_CLIQUE_SIZE = 4;
+    private static final int K_CLIQUE_SIZE = 5;
     private static final long SEED = 320320486;
 
     /**
