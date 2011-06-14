@@ -291,9 +291,7 @@ public class Community<T> {
      */
     private int findFwdTimelineLen(Set<Community<T>> succList_) {
 	int longestPathLen = 0;
-	if (null == succList_) {
-	    longestPathLen = longestPathLen + 1;
-	} else {
+	if (null != succList_) {
 	    for (Community<T> succ : succList_) {
 		int pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
 							   // succ.getSuccessors());
