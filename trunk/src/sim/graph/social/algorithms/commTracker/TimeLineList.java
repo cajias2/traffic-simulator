@@ -126,16 +126,17 @@ public class TimeLineList<T> {
 	    String fileNameBase = OUT_METRICS_FILEPATH + System.currentTimeMillis();
 
 	    BufferedWriter outWrt = new BufferedWriter(new FileWriter(fileNameBase + ".txt"));
-	    BufferedWriter sizeWrt = new BufferedWriter(new FileWriter(fileNameBase + "_SizeAge" + ".txt"));
-	    BufferedWriter stabWrt = new BufferedWriter(new FileWriter(fileNameBase + "_StabSpan" + ".txt"));
+	    BufferedWriter sizeWrt = new BufferedWriter(new FileWriter(fileNameBase + "_PerCom" + ".txt"));
+	    // BufferedWriter stabWrt = new BufferedWriter(new
+	    // FileWriter(fileNameBase + "_StabSpan" + ".txt"));
 
 	    echoHeader(_timeLine, outWrt);
 	    computeMetrics(_timeLine, outWrt);
 	    outWrt.close();
 	    printSizeAgePerCom(_timeLine, sizeWrt);
 	    sizeWrt.close();
-	    printStabSpanPerCom(_timeLine, stabWrt);
-	    stabWrt.close();
+	    // printStabSpanPerCom(_timeLine, stabWrt);
+	    // stabWrt.close();
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
@@ -384,14 +385,14 @@ public class TimeLineList<T> {
      */
     private static <T> void printSizeAgePerCom(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
 	    throws IOException {
-	outWrt_.write("Community\tSize\tAge\n");
+	outWrt_.write("Community\tSize\tAge\tStab\n");
 	for (int i = 0; i < snapshotList_.size(); i++) {
 	    List<Community<T>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
 		for (Community<T> comm : snapshot) {
 		    if (comm.isTimelineLast()) {
 			String sizeOverTime = comm.getID() + "\t" + comm.getSize() + "\t" + comm.getTotalTimeLineLen()
-				+ "\n";
+				+ "\t" + comm.getAvgMemberStability() + "\n";
 			outWrt_.write(sizeOverTime);
 			outWrt_.flush();
 		    }
