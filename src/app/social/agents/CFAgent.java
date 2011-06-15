@@ -15,13 +15,14 @@ import sim.engine.SimState;
  */
 public class CFAgent extends Agent {
 
+    private static final long serialVersionUID = -3006954150041761388L;
     private static final int INIT_Y_VAR = 10;
     private static final int INIT_Y_MEDIAN = 50;
     private static final double PEER_BIAS = 0.2;
     private static final double B0_TIE_RETAINING_COEFF = 0.5;
     private static final double B1_HOMOPHILY_COEFF = 0.0125;
 
-    private final static int DIM = 7;
+    private final static int DIM = 25;
     private double _personality;// Y_{t_0}
     /**
      * Reset in afterMethod.

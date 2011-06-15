@@ -437,7 +437,6 @@ public class Community<T> {
 	for (Community<T> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
 	    totalMemberStab = totalMemberStab + currCom.getMemberStability();
 	}
-	// TODO Auto-generated method stub
 	return totalMemberStab / getAge();
     }
 
