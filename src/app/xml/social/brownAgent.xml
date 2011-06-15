@@ -1,5 +1,5 @@
 <?sim.xml version="1.0" encoding="UTF-8"?>
-<simulation type="test.social" simDuration="1000" width="50" length="50" agents="150"
+<simulation type="test.social" simDuration="200" width="50" length="50" agents="150"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">
 	<agents>

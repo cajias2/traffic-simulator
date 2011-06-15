@@ -389,8 +389,9 @@ public class TimeLineList<T> {
 	    List<Community<T>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
 		for (Community<T> comm : snapshot) {
-		    if (null == comm.getSuccessors()) {
-			String sizeOverTime = comm.getSize() + "\t" + comm.getTotalTimeLineLen() + "\n"; // commSizeOverTime(comm);
+		    if (comm.isTimelineLast()) {
+			String sizeOverTime = comm.getID() + "\t" + comm.getSize() + "\t" + comm.getTotalTimeLineLen()
+				+ "\n";
 			outWrt_.write(sizeOverTime);
 			outWrt_.flush();
 		    }
@@ -399,6 +400,12 @@ public class TimeLineList<T> {
 	}
     }
 
+    /**
+     * @param <T>
+     * @param snapshotList_
+     * @param outWrt_
+     * @throws IOException
+     */
     private static <T> void printStabSpanPerCom(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
 	    throws IOException {
 	outWrt_.write("Community\tStability\tSpan\n");
@@ -406,9 +413,12 @@ public class TimeLineList<T> {
 	    List<Community<T>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
 		for (Community<T> comm : snapshot) {
-		    String sizeOverTime = comm.getMemberStability() + "\t" + comm.getFwdTimelineLen() + "\n";
-		    outWrt_.write(sizeOverTime);
-		    outWrt_.flush();
+		    if (comm.isTimelineLast()) {
+			String sizeOverTime = comm.getID() + "\t" + comm.getAvgMemberStability() + "\t" + comm.getAge()
+				+ "\n";
+			outWrt_.write(sizeOverTime);
+			outWrt_.flush();
+		    }
 		}
 	    }
 	}

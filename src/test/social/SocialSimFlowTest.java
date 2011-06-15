@@ -34,9 +34,9 @@ import edu.uci.ics.jung.visualization.renderers.BasicHypergraphRenderer;
  * @author biggie
  */
 public class SocialSimFlowTest {
-    private static final int CAPTURE_WINDOW = 1;
-    private static final int K_CLIQUE_SIZE = 5;
     private static final long SEED = 320320486;
+    private static final String K_FLAG = "-k";
+    private static final String INTERVAL_FLAG = "-i";
 
     /**
      * TODO Purpose
@@ -46,11 +46,21 @@ public class SocialSimFlowTest {
      * @author biggie
      */
     public static void main(String[] args) {
+	int kSize = 4;
+	int snapshotInterval = 1;
+	for(int i = 0; i< args.length; i++){
+	    if (K_FLAG.equals(args[i])) {
+		kSize = Integer.parseInt(args[++i]);
+	    } else if (INTERVAL_FLAG.equals(args[i])) {
+		snapshotInterval = Integer.parseInt(args[++i]);
+	    }
+	}
+
 	SocialSim sim = new SocialSim(SEED);
-	List<Graph<Agent, FriendLink>> graphList = sim.runSim(args, CAPTURE_WINDOW);
+	List<Graph<Agent, FriendLink>> graphList = sim.runSim(args, snapshotInterval);
 
 	System.out.print("Finding Communities");
-	TimeLineList<Agent> evolution = findCommunities(graphList);
+	TimeLineList<Agent> evolution = findCommunities(graphList, kSize);
 	System.out.println("\nWriting results");
 	evolution.writeMetrics();
 	System.out.println("Done.");
@@ -65,13 +75,13 @@ public class SocialSimFlowTest {
      * @return TimeLineList<Agent>
      * @author biggie
      */
-    private static TimeLineList<Agent> findCommunities(List<Graph<Agent, FriendLink>> graphList) {
-	TimeLineList<Agent> evolution = new TimeLineList<Agent>(graphList.size());
+    private static TimeLineList<Agent> findCommunities(List<Graph<Agent, FriendLink>> graphList_, int kSize_) {
+	TimeLineList<Agent> evolution = new TimeLineList<Agent>(graphList_.size());
 	int snapshot = 1;
-	for (Graph<Agent, FriendLink> graph : graphList) {
+	for (Graph<Agent, FriendLink> graph : graphList_) {
 	    if (null != graph) {
 		System.out.print(".");
-		Collection<Set<Agent>> kComs = findCommunities(graph, K_CLIQUE_SIZE);
+		Collection<Set<Agent>> kComs = findCommunities(graph, kSize_);
 
 		for (Set<Agent> community : kComs) {
 		    evolution.add(snapshot, community, graph);

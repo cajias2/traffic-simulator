@@ -429,4 +429,16 @@ public class Community<T> {
 	return null == _succList;
     }
 
+    /**
+     * @return
+     */
+    public Double getAvgMemberStability() {
+	Double totalMemberStab = 0.0;
+	for (Community<T> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
+	    totalMemberStab = totalMemberStab + currCom.getMemberStability();
+	}
+	// TODO Auto-generated method stub
+	return totalMemberStab / getAge();
+    }
+
 }
