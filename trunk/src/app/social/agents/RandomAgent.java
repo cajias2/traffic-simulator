@@ -13,7 +13,7 @@ import sim.engine.SimState;
 public class RandomAgent extends Agent {
 
     private static int COUNT = 0;
-    private final static int DIM = 3;
+    private final static int DIM = 10;
 
     /**
      * 
