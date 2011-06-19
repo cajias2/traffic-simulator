@@ -24,6 +24,7 @@ public class Community<T> {
     private Set<Community<T>> _succList;
     private int _bckwdTimelineLen = 0;
     private int _fwdTimelineLen = -1;
+    private int _evolTrace = -1;
     private Community<T> _mainPred;
     private Community<T> _mainTimelineFirst;
     private Double _memberStability;
@@ -156,7 +157,7 @@ public class Community<T> {
     }
 
     /**
-     * TODO Purpose
+     * Number of members in the community
      * 
      * @params
      * @return int
@@ -171,7 +172,8 @@ public class Community<T> {
     }
 
     /**
-     * TODO Purpose
+     * Age of the community. How many snapshots the community has existed for.
+     * Definition 3--see {@link http://arxiv.org/abs/0804.4356v1}
      * 
      * @params
      * @return int
@@ -181,23 +183,19 @@ public class Community<T> {
 	return getBckwdTimelineLen() + 1;
     }
 
+    /**
+     * Evolution trace.
+     * The number of
+     * Definition 1--see {@link http://arxiv.org/abs/0804.4356v1}
+     * 
+     * @return
+     */
     public int getEvolTrc() {
 	return _fwdTimelineLen;
     }
 
     /**
-     * TODO Purpose
-     * 
-     * @params
-     * @return int
-     * @author antonio
-     */
-    public int getBckwdTimelineLen() {
-	return _bckwdTimelineLen;
-    }
-
-    /**
-     * TODO Purpose
+     * Returns a list of all predecessors.
      * 
      * @params
      * @return List<Community>
@@ -208,7 +206,7 @@ public class Community<T> {
     }
 
     /**
-     * TODO Purpose
+     * Returns a list of all successors
      * 
      * @params
      * @return List<Community>
@@ -219,7 +217,8 @@ public class Community<T> {
     }
 
     /**
-     * TODO Purpose
+     * Returns the core nodes of the community.
+     * See sectio 3 {@link http://arxiv.org/abs/0804.4356v1}
      * 
      * @params
      * @return List<Integer>
@@ -230,7 +229,7 @@ public class Community<T> {
     }
 
     /**
-     * TODO Purpose
+     * Get Member nodes.
      * 
      * @params
      * @return List<Integer>
@@ -255,11 +254,33 @@ public class Community<T> {
     /**
      * @return
      */
-    int getFwdTimelineLen() {
+    public int getFwdTimelineLen() {
 	if (_fwdTimelineLen < 0) {
 	    _fwdTimelineLen = findFwdTimelineLen(_succList);
 	}
 	return _fwdTimelineLen;
+    }
+
+    public int getEvolTrace() {
+	if (_evolTrace < 0) {
+	    _evolTrace = findEvolTrace(_succList);
+	}
+	return _evolTrace;
+    }
+
+    /**
+     * @param succList_
+     * @return
+     */
+    private int findEvolTrace(Set<Community<T>> succList_) {
+	int evolutionTrace = 0;
+	if (null != succList_) {
+	    for (Community<T> succ : succList_) {
+		int pathLen = 1 + succ.getEvolTrace();
+		evolutionTrace = evolutionTrace + succ.getEvolTrace() + 1;
+	    }
+	}
+	return evolutionTrace;
     }
 
     /**
@@ -273,138 +294,12 @@ public class Community<T> {
     }
 
     /**
-     * 
+     * Overwrite toString
      */
     @Override
     public String toString() {
 
 	return "_" + ID + "(" + _core + "| " + _members + ")";
-    }
-
-    /**
-     * DFS down the timeline to find longest path.
-     * 
-     * @param currPath_
-     * @param succList_
-     * @return int longest path length
-     * @author biggie
-     */
-    private int findFwdTimelineLen(Set<Community<T>> succList_) {
-	int longestPathLen = 0;
-	if (null != succList_) {
-	    for (Community<T> succ : succList_) {
-		int pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
-							   // succ.getSuccessors());
-		if (longestPathLen < pathLen) {
-		    longestPathLen = pathLen;
-		}
-	    }
-	}
-	return longestPathLen;
-    }
-
-    /**
-     * Uses node degrees to calculate node centrality in a community. Returns a
-     * list of core nodes.
-     * 
-     * @param comNodSet_
-     *            Set of nodes in a given community
-     * @param graph_
-     *            The graph object where community was found. Used to check
-     *            degrees.
-     * @return List<T> core node list.
-     * @author antonio
-     */
-    private List<T> getCommunityCores(Set<T> comNodSet_, Graph<T, FriendLink> graph_) {
-	List<T> coreNodList = null;
-	List<T> comNodeList = new ArrayList<T>(comNodSet_);
-
-	if (isSameDegComm(comNodeList, graph_)) {
-	    coreNodList = comNodeList;
-	} else {
-	    int[] centralDeg = calculateNodCentrality(comNodeList, graph_);
-
-	    coreNodList = new ArrayList<T>();
-	    for (int i = 0; i < comNodSet_.size(); i++) {
-		if (centralDeg[i] >= 0)
-		    coreNodList.add(comNodeList.get(i));
-	    }
-	}
-	return coreNodList;
-    }
-
-    /**
-     * Calculates centrality of nodes in a given community by comparing
-     * sequencially comparing their degrees. Centrality is calculated through a
-     * voting scheme, where lower-deg nodes vote higher-deg nodes up, highers
-     * vote lowers down. .
-     * 
-     * @param comNodList_
-     *            List of nodes in a given community
-     * @param graph_
-     *            The graph object where community was found. Used to check
-     *            degrees.
-     * @return int[] Returns an array of nodes with their centrality calculated
-     * @author biggie
-     */
-    private int[] calculateNodCentrality(List<T> comNodList_, Graph<T, FriendLink> graph_) {
-	int[] centralDeg = new int[comNodList_.size()];
-	for (int i = 0; i < centralDeg.length; i++) {
-	    centralDeg[i] = 0;
-	}
-
-	for (int i = 0; i < comNodList_.size(); i++) {
-	    for (int j = (i + 1); j < comNodList_.size(); j++) {
-		T node1 = comNodList_.get(i);
-		T node2 = comNodList_.get(j);
-
-		FriendLink edge1 = graph_.findEdge(node1, node2);
-		FriendLink edge2 = graph_.findEdge(node2, node1);
-		if ((edge1 != null) || (edge2 != null)) {
-		    int grado1 = graph_.degree(node1);
-		    int grado2 = graph_.degree(node2);
-
-		    if (grado1 < grado2) {
-			centralDeg[i] = centralDeg[i] - Math.abs((grado1 - grado2));
-			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
-		    } else {
-			centralDeg[i] = centralDeg[i] + Math.abs((grado1 - grado2));
-			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
-		    }
-		}
-	    }
-	}
-	return centralDeg;
-    }
-
-    /**
-     * Returns true if all nodes in the community have the same degree. False
-     * otherwise.
-     * 
-     * @param comNodList
-     *            Community to check
-     * @param graph_
-     *            The graph object where community was found. Used to check
-     *            degrees.
-     * @return boolean
-     * @author biggie
-     */
-    private boolean isSameDegComm(List<T> comNodList, Graph<T, FriendLink> graph_) {
-	boolean sameDegree = true;
-	boolean firstNode = true;
-	int degree = 0;
-
-	for (T node : comNodList) {
-	    if (!sameDegree) {
-		break;
-	    }
-	    if (firstNode) {
-		degree = graph_.degree(node);
-		firstNode = false;
-	    } else
-		sameDegree = (graph_.degree(node) == degree);
-	}
-	return sameDegree;
     }
 
     /**
@@ -433,11 +328,150 @@ public class Community<T> {
      * @return
      */
     public Double getAvgMemberStability() {
-	Double totalMemberStab = 0.0;
-	for (Community<T> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
-	    totalMemberStab = totalMemberStab + currCom.getMemberStability();
-	}
-	return totalMemberStab / getAge();
+        Double totalMemberStab = 0.0;
+        for (Community<T> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
+            totalMemberStab = totalMemberStab + currCom.getMemberStability();
+        }
+        return totalMemberStab / getAge();
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @params
+     * @return int
+     * @author antonio
+     */
+    private int getBckwdTimelineLen() {
+        return _bckwdTimelineLen;
+    }
+
+    /**
+     * DFS down the timeline to find longest path.
+     * 
+     * @param currPath_
+     * @param succList_
+     * @return int longest path length
+     * @author biggie
+     */
+    private int findFwdTimelineLen(Set<Community<T>> succList_) {
+        int longestPathLen = 0;
+        if (null != succList_) {
+            for (Community<T> succ : succList_) {
+        	int pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
+        						   // succ.getSuccessors());
+        	if (longestPathLen < pathLen) {
+        	    longestPathLen = pathLen;
+        	}
+            }
+        }
+        return longestPathLen;
+    }
+
+    /**
+     * Uses node degrees to calculate node centrality in a community. Returns a
+     * list of core nodes. <br/>
+     * See section 5 {@link http://arxiv.org/abs/0804.4356v1}
+     * 
+     * @param comNodSet_
+     *            Set of nodes in a given community
+     * @param graph_
+     *            The graph object where community was found. Used to check
+     *            degrees.
+     * @return List<T> core node list.
+     * @author antonio
+     */
+    private List<T> getCommunityCores(Set<T> comNodSet_, Graph<T, FriendLink> graph_) {
+        List<T> coreNodList = null;
+        List<T> comNodeList = new ArrayList<T>(comNodSet_);
+    
+        if (isSameDegComm(comNodeList, graph_)) {
+            coreNodList = comNodeList;
+        } else {
+            int[] centralDeg = calculateNodCentrality(comNodeList, graph_);
+    
+            coreNodList = new ArrayList<T>();
+            for (int i = 0; i < comNodSet_.size(); i++) {
+        	if (centralDeg[i] >= 0)
+        	    coreNodList.add(comNodeList.get(i));
+            }
+        }
+        return coreNodList;
+    }
+
+    /**
+     * Calculates centrality of nodes in a given community by comparing
+     * sequencially comparing their degrees. Centrality is calculated through a
+     * voting scheme, where lower-deg nodes vote higher-deg nodes up, highers
+     * vote lowers down. <br/>
+     * See section 5 {@link http://arxiv.org/abs/0804.4356v1}
+     * 
+     * @param comNodList_
+     *            List of nodes in a given community
+     * @param graph_
+     *            The graph object where community was found. Used to check
+     *            degrees.
+     * @return int[] Returns an array of nodes with their centrality calculated
+     * @author biggie
+     */
+    private int[] calculateNodCentrality(List<T> comNodList_, Graph<T, FriendLink> graph_) {
+        int[] centralDeg = new int[comNodList_.size()];
+        for (int i = 0; i < centralDeg.length; i++) {
+            centralDeg[i] = 0;
+        }
+    
+        for (int i = 0; i < comNodList_.size(); i++) {
+            for (int j = (i + 1); j < comNodList_.size(); j++) {
+        	T node1 = comNodList_.get(i);
+        	T node2 = comNodList_.get(j);
+    
+        	FriendLink edge1 = graph_.findEdge(node1, node2);
+        	FriendLink edge2 = graph_.findEdge(node2, node1);
+        	if ((edge1 != null) || (edge2 != null)) {
+        	    int grado1 = graph_.degree(node1);
+        	    int grado2 = graph_.degree(node2);
+    
+        	    if (grado1 < grado2) {
+        		centralDeg[i] = centralDeg[i] - Math.abs((grado1 - grado2));
+        		centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+        	    } else {
+        		centralDeg[i] = centralDeg[i] + Math.abs((grado1 - grado2));
+        		centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+        	    }
+        	}
+            }
+        }
+        return centralDeg;
+    }
+
+    /**
+     * Returns true if all nodes in the community have the same degree. False
+     * otherwise.
+     * 
+     * @param comNodList
+     *            Community to check
+     * @param graph_
+     *            The graph object where community was found. Used to check
+     *            degrees.
+     * @return boolean
+     * @author biggie
+     */
+    private boolean isSameDegComm(List<T> comNodList, Graph<T, FriendLink> graph_) {
+        boolean sameDegree = true;
+        boolean firstNode = true;
+        int degree = 0;
+    
+        for (T node : comNodList) {
+            if (!sameDegree) {
+        	break;
+            }
+            if (firstNode) {
+        	degree = graph_.degree(node);
+        	firstNode = false;
+            } else
+        	sameDegree = (graph_.degree(node) == degree);
+        }
+        return sameDegree;
     }
 
 }

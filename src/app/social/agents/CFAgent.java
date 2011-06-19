@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
+import sim.util.Double2D;
 
 /**
  * @author biggie
@@ -22,7 +23,7 @@ public class CFAgent extends Agent {
     private static final double B0_TIE_RETAINING_COEFF = 0.5;
     private static final double B1_HOMOPHILY_COEFF = 0.0125;
 
-    private final static int DIM = 25;
+    private final static int DIM = 100;
     private double _personality;// Y_{t_0}
     /**
      * Reset in afterMethod.
@@ -149,6 +150,12 @@ public class CFAgent extends Agent {
     private void updatePersonality() {
 	_personality = _personality + (_rand.nextGaussian()) * 5;
 
+    }
+
+    @Override
+    protected Double2D move(SimState state_) {
+	SocialSim socSim = (SocialSim) state_;
+	return socSim.fieldEnvironment.getObjectLocation(this);
     }
 
 }
