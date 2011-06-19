@@ -6,12 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import sim.agents.Agent;
 import sim.agents.social.GraphGatherer;
+import sim.agents.social.MetricsAgent;
 import sim.app.SocialSimState;
 import sim.engine.Schedule;
 import sim.engine.SimState;
@@ -28,7 +28,6 @@ public class SocialSim extends SocialSimState {
 
     private static Logger _log;
     private static String _simXml;
-    private static Random _rand = new Random(System.currentTimeMillis());
     private static GraphGatherer<Agent, FriendLink> _gatherer = null;
     private int AGENT_COUNT;
     private Map<Class<Agent>, Double> _agentMap;
@@ -132,6 +131,8 @@ public class SocialSim extends SocialSimState {
 	    schedule.scheduleRepeating(Schedule.EPOCH, 1, _gatherer, 1);
 	}
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, new MetricsAgent(), 1);
+
     }
 
     /**
@@ -142,7 +143,7 @@ public class SocialSim extends SocialSimState {
      */
     private void scheduleAgents() {
 	for (int i = 0; i < AGENT_COUNT; i++) {
-	    double ticket = _rand.nextDouble() * 100;
+	    double ticket = random.nextDouble() * 100;
 	    double winner = 0.0;
 	    Agent ag;
 

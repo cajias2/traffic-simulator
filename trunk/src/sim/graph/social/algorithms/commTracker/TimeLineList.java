@@ -364,6 +364,7 @@ public class TimeLineList<T> {
 			outStr = outStr + "\t" + comm.getSize();
 			outStr = outStr + "\t" + comm.getAge();
 			outStr = outStr + "\t" + comm.getFwdTimelineLen();
+			outStr = outStr + "\t" + comm.getEvolTrace();
 			outStr = outStr + "\t" + comm.getMemberStability();
 			outStr = outStr + "\n";
 			outWrt_.write(outStr);
