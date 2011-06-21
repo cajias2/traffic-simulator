@@ -276,7 +276,6 @@ public class Community<T> {
 	int evolutionTrace = 0;
 	if (null != succList_) {
 	    for (Community<T> succ : succList_) {
-		int pathLen = 1 + succ.getEvolTrace();
 		evolutionTrace = evolutionTrace + succ.getEvolTrace() + 1;
 	    }
 	}
