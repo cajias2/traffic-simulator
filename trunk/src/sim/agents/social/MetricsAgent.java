@@ -17,8 +17,8 @@ import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.graph.social.algorithms.BronKerboschKCliqueFinder;
-import sim.graph.social.algorithms.CPMCommunityFinder;
+import sim.graph.algorithms.BronKerboschKCliqueFinder;
+import sim.graph.algorithms.CPMCommunityFinder;
 import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
