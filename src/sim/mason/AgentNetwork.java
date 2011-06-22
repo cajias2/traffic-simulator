@@ -8,9 +8,6 @@ import static edu.uci.ics.jung.algorithms.metrics.Metrics.clusteringCoefficients
 import java.util.Collection;
 import java.util.Map;
 
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.graph.SimpleGraph;
-
 import sim.agents.Agent;
 import sim.field.network.Edge;
 import sim.field.network.Network;
@@ -18,6 +15,7 @@ import sim.graph.social.link.FriendLink;
 import sim.util.Bag;
 import app.social.links.SimpleFriendLink;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
@@ -178,28 +176,6 @@ public class AgentNetwork extends Network {
     	return -1;
     }
 
-    /**
-     * TODO Purpose
-     * 
-     * @param
-     * @return UndirectedGraph<Agent,FriendLink>
-     * @author biggie
-     */
-    public static UndirectedGraph<Integer, FriendLink> adjListToJGraphTList(Edge[][] adjList_) {
-	UndirectedGraph<Integer, FriendLink> graph = new SimpleGraph<Integer, FriendLink>(SimpleFriendLink.class);
-
-	for (int i = 0; i < adjList_.length; i++) {
-	    graph.addVertex(i);
-	}
-	for (int i = 0; i < adjList_.length; i++) {
-	    for (int j = i + 1; j < adjList_[i].length; j++) {
-		if (null != adjList_[i][j]) {
-		    graph.addEdge(i, j);
-		}
-	    }
-	}
-	return graph;
-    }
 
     /**
      * TODO Purpose
