@@ -22,9 +22,9 @@ public class Community<T> {
     private List<T> _core;
     private Set<Community<T>> _predList;
     private Set<Community<T>> _succList;
-    private int _bckwdTimelineLen = 0;
-    private int _fwdTimelineLen = -1;
-    private int _evolTrace = -1;
+    private long _bckwdTimelineLen = 0;
+    private long _fwdTimelineLen = -1;
+    private long _evolTrace = -1;
     private Community<T> _mainPred;
     private Community<T> _mainTimelineFirst;
     private Double _memberStability;
@@ -177,7 +177,7 @@ public class Community<T> {
      * @return int
      * @author antonio
      */
-    public int getAge() {
+    public long getAge() {
 	return getBckwdTimelineLen() + 1;
     }
 
@@ -188,7 +188,7 @@ public class Community<T> {
      * 
      * @return
      */
-    public int getEvolTrc() {
+    public long getEvolTrc() {
 	return _fwdTimelineLen;
     }
 
@@ -244,7 +244,7 @@ public class Community<T> {
      * @return int
      * @author biggie
      */
-    public int getTotalTimeLineLen() {
+    public long getTotalTimeLineLen() {
 
 	return _bckwdTimelineLen + getFwdTimelineLen();
     }
@@ -252,14 +252,22 @@ public class Community<T> {
     /**
      * @return
      */
-    public int getFwdTimelineLen() {
+    public long getFwdTimelineLen() {
 	if (_fwdTimelineLen < 0) {
 	    _fwdTimelineLen = findFwdTimelineLen(_succList);
 	}
 	return _fwdTimelineLen;
     }
 
-    public int getEvolTrace() {
+    /**
+     * 
+     * TODO Purpose
+     * 
+     * @params
+     * @return long
+     * @author biggie
+     */
+    public long getEvolTrace() {
 	if (_evolTrace < 0) {
 	    _evolTrace = findEvolTrace(_succList);
 	}
@@ -270,8 +278,8 @@ public class Community<T> {
      * @param succList_
      * @return
      */
-    private int findEvolTrace(Set<Community<T>> succList_) {
-	int evolutionTrace = 0;
+    private long findEvolTrace(Set<Community<T>> succList_) {
+	long evolutionTrace = 0;
 	if (null != succList_) {
 	    for (Community<T> succ : succList_) {
 		evolutionTrace = evolutionTrace + succ.getEvolTrace() + 1;
@@ -339,7 +347,7 @@ public class Community<T> {
      * @return int
      * @author antonio
      */
-    private int getBckwdTimelineLen() {
+    private long getBckwdTimelineLen() {
         return _bckwdTimelineLen;
     }
 
@@ -351,11 +359,11 @@ public class Community<T> {
      * @return int longest path length
      * @author biggie
      */
-    private int findFwdTimelineLen(Set<Community<T>> succList_) {
-        int longestPathLen = 0;
+    private long findFwdTimelineLen(Set<Community<T>> succList_) {
+	long longestPathLen = 0;
         if (null != succList_) {
             for (Community<T> succ : succList_) {
-        	int pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
+		long pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
         						   // succ.getSuccessors());
         	if (longestPathLen < pathLen) {
         	    longestPathLen = pathLen;
