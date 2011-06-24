@@ -13,7 +13,7 @@ public class RandomAgent extends Agent {
 
     private static final long serialVersionUID = -519454272167626554L;
     private static int COUNT = 0;
-    private final static int DIM = 200;
+    private final static int DIM = 10000;
 
     /**
      * @author biggie RandomAgent
