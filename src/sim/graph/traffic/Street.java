@@ -43,10 +43,6 @@ public class Street extends Road {
 	return MAX_VELOCITY;
     }
 
-    @Override
-    public void display() {
-	super.display();
-    }
 
     @Override
     protected int getStrokeWeight() {

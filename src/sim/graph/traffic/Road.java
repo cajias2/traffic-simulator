@@ -474,7 +474,8 @@ public abstract class Road {
 	if (l_.ptLineDist(pt) <= DISTANCE_THRESHOLD) {
 	    seg = (int) (l_.getP1().distance(pt) / LAYER_SEG.getVal());
 	    // Hack in cases that the point is right on the border
-	    if (currLocation_.getX() == l_.getX2() && currLocation_.getY() == l_.getY2()) {
+	    if (0 == Double.compare(currLocation_.getX(), l_.getX2())
+		    && 0 == Double.compare(currLocation_.getY(), l_.getY2())) {
 		seg--;
 	    }
 	} else

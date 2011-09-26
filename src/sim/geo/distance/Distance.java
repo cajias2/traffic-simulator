@@ -18,9 +18,9 @@ public abstract class Distance {
 
 	boolean eq = false;
 	if (x_ instanceof Meters) {
-	    eq = this.toMeters() == x_.getVal();
+	    eq = 0 == Double.compare(toMeters(), x_.getVal());
 	} else {
-	    eq = this.toMeters() == x_.toMeters();
+	    eq = 0 == Double.compare(toMeters(), x_.toMeters());
 	}
 	return eq;
 
@@ -32,6 +32,7 @@ public abstract class Distance {
 
     public abstract double toMeters();
 
+    @Override
     public abstract String toString();
 
 }
