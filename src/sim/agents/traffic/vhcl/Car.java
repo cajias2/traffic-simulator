@@ -57,9 +57,4 @@ public class Car extends Vehicle {
 	return SIZE;
     }
 
-    @Override
-    public void display() {
-	super.display();
-    }
-
 }
