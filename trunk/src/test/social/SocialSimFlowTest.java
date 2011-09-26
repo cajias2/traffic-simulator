@@ -97,7 +97,7 @@ public class SocialSimFlowTest {
 	int snapshot = 1;
 	for (Graph<Agent, FriendLink> graph : graphList_) {
 	    if (null != graph) {
-		System.out.print(".");
+		System.out.print('.');
 		Collection<Set<Agent>> kComs = findCommunities(graph, kSize_);
 
 		for (Set<Agent> community : kComs) {

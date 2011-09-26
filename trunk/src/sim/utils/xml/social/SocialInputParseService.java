@@ -138,7 +138,7 @@ public class SocialInputParseService {
 		if (NODE_AGENT.equals(agentList.item(i).getNodeName())) {
 		    Node agent = agentList.item(i);
 		    double pcnt = 0;
-		    Class<Agent> className = (Class<Agent>) Class.forName(agent.getAttributes()
+		    Class<Agent> className = (Class) Class.forName(agent.getAttributes()
 			    .getNamedItem(ATTR_AG_CLASS).getNodeValue());
 		    pcnt = Double.parseDouble(agent.getAttributes().getNamedItem(ATT_AG_PCT).getNodeValue());
 		    classMap.put(className, pcnt);

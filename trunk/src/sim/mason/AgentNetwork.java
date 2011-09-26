@@ -15,7 +15,6 @@ import sim.graph.social.link.FriendLink;
 import sim.util.Bag;
 import app.social.links.SimpleFriendLink;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
