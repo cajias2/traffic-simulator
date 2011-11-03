@@ -1,0 +1,158 @@
+<?sim.xml version="1.0" encoding="UTF-8"?>
+<simulation maxCars="100" simDuration="1000" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TrafficSimultion.xsd">
+
+    <streets>
+        <street name="a" orientation="EW" dir="2way">
+        	<point x="10" y="10"/>
+        	<point x="600" y="10"/>
+        </street>
+        <street name="b" orientation="EW" dir="2way">
+        	<point x="10" y="20"/>
+        	<point x="600" y="20"/>
+        </street>
+        <street name="c" orientation="EW" dir="2way">
+        	<point x="10" y="30"/>
+        	<point x="600" y="30"/>
+        </street>
+        <street name="d" orientation="EW" dir="2way">
+        	<point x="10" y="40"/>
+        	<point x="600" y="40"/>
+        </street>        
+
+        <street name="e" orientation="EW" dir="2way">
+        	<point x="10" y="50"/>
+        	<point x="600" y="50"/>
+        </street>
+        <street name="f" orientation="EW" dir="2way">
+        	<point x="10" y="60"/>
+        	<point x="600" y="60"/>
+        </street>
+        <street name="g" orientation="EW" dir="2way">
+        	<point x="10" y="70"/>
+        	<point x="600" y="70"/>
+        </street>
+        <street name="h" orientation="EW" dir="2way">
+        	<point x="10" y="80"/>
+        	<point x="600" y="80"/>
+        </street>        
+        
+
+        <street name="1" orientation="NS" dir="2way">
+        	<point x="15" y="5"/>
+        	<point x="10" y="600"/>
+        </street>
+        <street name="2" orientation="NS" dir="2way">
+        	<point x="20" y="5"/>
+        	<point x="20" y="600"/>
+        </street>
+        <street name="3" orientation="NS" dir="2way">
+        	<point x="30" y="5"/>
+        	<point x="30" y="600"/>
+        </street>
+        <street name="4" orientation="NS" dir="2way">
+        	<point x="40" y="5"/>
+        	<point x="40" y="600"/>
+        </street>                    
+
+        <street name="5" orientation="NS" dir="2way">
+        	<point x="50" y="5"/>
+        	<point x="50" y="600"/>
+        </street>
+        <street name="6" orientation="NS" dir="2way">
+        	<point x="60" y="5"/>
+        	<point x="60" y="600"/>
+        </street>
+        <street name="7" orientation="NS" dir="2way">
+        	<point x="70" y="5"/>
+        	<point x="70" y="600"/>
+        </street>
+        <street name="8" orientation="NS" dir="2way">
+        	<point x="80" y="5"/>
+        	<point x="80" y="600"/>
+        </street>                             
+                 
+    </streets>
+
+	<trayectory>
+		<origin>
+			<streetNode name="a" percent="20" />
+			<streetNode name="b" percent="20" />
+			<streetNode name="c" percent="20" />
+			<streetNode name="c" percent="40" />
+		</origin>
+		<destination>
+			<streetNode name="1" percent="25" />
+			<streetNode name="2" percent="25" />
+			<streetNode name="3" percent="25" />
+			<streetNode name="4" percent="25" />
+		</destination>
+	</trayectory>
+	
+    <trafficLights>       
+        <tl from="a" to="1" duration="100" split="0.5"/>  
+        <tl from="a" to="2" duration="100" split="0.5"/>  
+        <tl from="a" to="3" duration="100" split="0.5"/>  
+        <tl from="a" to="4" duration="100" split="0.5"/>  
+        <tl from="a" to="6" duration="100" split="0.5"/>  
+        <tl from="a" to="7" duration="100" split="0.5"/>  
+        <tl from="a" to="8" duration="100" split="0.5"/>  
+        
+        <tl from="b" to="1" duration="100" split="0.5"/>  
+        <tl from="b" to="2" duration="100" split="0.5"/>  
+        <tl from="b" to="3" duration="100" split="0.5"/>  
+        <tl from="b" to="4" duration="100" split="0.5"/>  
+        <tl from="b" to="6" duration="100" split="0.5"/>  
+        <tl from="b" to="7" duration="100" split="0.5"/>  
+        <tl from="b" to="8" duration="100" split="0.5"/>  
+
+        <tl from="c" to="1" duration="100" split="0.5"/>  
+        <tl from="c" to="2" duration="100" split="0.5"/>  
+        <tl from="c" to="3" duration="100" split="0.5"/>  
+        <tl from="c" to="4" duration="100" split="0.5"/>  
+        <tl from="c" to="6" duration="100" split="0.5"/>  
+        <tl from="c" to="7" duration="100" split="0.5"/>  
+        <tl from="c" to="8" duration="100" split="0.5"/>  
+        
+        <tl from="d" to="1" duration="100" split="0.5"/>  
+        <tl from="d" to="2" duration="100" split="0.5"/>  
+        <tl from="d" to="3" duration="100" split="0.5"/>  
+        <tl from="d" to="4" duration="100" split="0.5"/>  
+        <tl from="d" to="6" duration="100" split="0.5"/>  
+        <tl from="d" to="7" duration="100" split="0.5"/>  
+        <tl from="d" to="8" duration="100" split="0.5"/>  
+
+        <tl from="e" to="1" duration="100" split="0.5"/>  
+        <tl from="e" to="2" duration="100" split="0.5"/>  
+        <tl from="e" to="3" duration="100" split="0.5"/>  
+        <tl from="e" to="4" duration="100" split="0.5"/>  
+        <tl from="e" to="6" duration="100" split="0.5"/>  
+        <tl from="e" to="7" duration="100" split="0.5"/>  
+        <tl from="e" to="8" duration="100" split="0.5"/>  
+
+        <tl from="f" to="1" duration="100" split="0.5"/>  
+        <tl from="f" to="2" duration="100" split="0.5"/>  
+        <tl from="f" to="3" duration="100" split="0.5"/>  
+        <tl from="f" to="4" duration="100" split="0.5"/>  
+        <tl from="f" to="6" duration="100" split="0.5"/>  
+        <tl from="f" to="7" duration="100" split="0.5"/>  
+        <tl from="f" to="8" duration="100" split="0.5"/>  
+
+        <tl from="g" to="1" duration="100" split="0.5"/>  
+        <tl from="g" to="2" duration="100" split="0.5"/>  
+        <tl from="g" to="3" duration="100" split="0.5"/>  
+        <tl from="g" to="4" duration="100" split="0.5"/>  
+        <tl from="g" to="6" duration="100" split="0.5"/>  
+        <tl from="g" to="7" duration="100" split="0.5"/>  
+        <tl from="g" to="8" duration="100" split="0.5"/>  
+
+        <tl from="h" to="1" duration="100" split="0.5"/>  
+        <tl from="h" to="2" duration="100" split="0.5"/>  
+        <tl from="h" to="3" duration="100" split="0.5"/>  
+        <tl from="h" to="4" duration="100" split="0.5"/>  
+        <tl from="h" to="6" duration="100" split="0.5"/>  
+        <tl from="h" to="7" duration="100" split="0.5"/>  
+        <tl from="h" to="8" duration="100" split="0.5"/>  
+            
+          
+    </trafficLights>
+</simulation>

@@ -1,0 +1,139 @@
+<?sim.xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:element name="simulation">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="streets" minOccurs='0' maxOccurs='unbounded' />
+				<xs:element ref="trayectory" minOccurs='0' maxOccurs='unbounded' />
+				<xs:element ref="trafficLights" minOccurs='0' maxOccurs='unbounded' />
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="optional"
+				default="Simulation" />			
+			<xs:attribute name="maxCars" type="xs:decimal" use="required" />
+			<xs:attribute name="simDuration" type="xs:decimal" use="required" />
+		</xs:complexType>
+	</xs:element>
+
+	<!-- 
+		Streets
+	 -->
+	<xs:element name="streets">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="street" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="street">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="point" minOccurs="2" maxOccurs="unbounded"/>
+			</xs:sequence>		
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="orientation" type="orType" use="required" />
+			<xs:attribute name="dir" type="dirType" use="required"/>			
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="point">
+		<xs:complexType>
+			<xs:attribute name="x" type="xs:double" use="required"/>
+			<xs:attribute name="y" type="xs:double" use="required"/>
+		</xs:complexType>
+	</xs:element>	
+		 
+	<!-- 
+		Traffic Lights
+	 -->		 
+	<xs:element name="trafficLights">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="tl" minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+
+	<xs:element name="tl">
+		<xs:complexType>	
+			<xs:attribute name="from" type="xs:string" use="required" />
+			<xs:attribute name="to" type="xs:string" use="required" />		
+			<xs:attribute name="duration" type="xs:integer"" use="required" default="0"/>
+			<xs:attribute name="split" type="xs:integer" use="required" default="0"/>
+			<xs:attribute name="class" type="xs:string" use="optional"/>		
+		</xs:complexType>
+	</xs:element>	
+
+	<!--
+		Trayectory 
+	 -->
+	 	<xs:element name="trayectory">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="origin" minOccurs="1" maxOccurs="1" />
+				<xs:element ref="destination" minOccurs="1" maxOccurs="1" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+
+	<xs:element name="origin">
+		<xs:complexType>	
+			<xs:sequence>
+				<xs:element ref="streetNode" minOccurs="0" maxOccurs="unbounded" />
+				<xs:element ref="intersection" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>				
+		</xs:complexType>
+	</xs:element>	
+	
+	<xs:element name="destination">
+		<xs:complexType>	
+			<xs:sequence>
+				<xs:element ref="streetNode" minOccurs="0" maxOccurs="unbounded" />
+				<xs:element ref="intersection" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>				
+		</xs:complexType>
+	</xs:element>		
+	
+	<xs:element name="streetNode">
+		<xs:complexType>	
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="percent" type="xs:decimal" use="required" />		
+		</xs:complexType>
+	</xs:element>		
+
+	<xs:element name="intersection">
+		<xs:complexType>	
+			<xs:attribute name="from" type="xs:string" use="required" />
+			<xs:attribute name="to" type="xs:string" use="required" />			
+			<xs:attribute name="percent" type="xs:decimal" use="required" />		
+		</xs:complexType>
+	</xs:element>		
+	
+	<!--
+		Other Types 
+	 -->
+
+	
+	<xs:simpleType name="orType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NS"/>
+			<xs:enumeration value="EW"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="dirType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="1way"/>
+			<xs:enumeration value="2way"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+
+
+
+</xs:schema>
