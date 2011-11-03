@@ -1,0 +1,46 @@
+<?sim.xml version="1.0" encoding="UTF-8" standalone="no"?>
+<output route="c(c_TO_cX1)_4(dX4_TO_4)">
+<vhcl end="817" start="15">
+<section end="28" name="c(c_TO_cX1)" speed="0.5" start="20"/>
+<section end="36" name="c(cX1_TO_cX2)" speed="0.8333333333333334" start="30"/>
+<section end="76" name="2(cX2_TO_dX2)" speed="0.25" start="36"/>
+<section end="127" name="d(dX2_TO_dX3)" speed="0.19607843137254902" start="76"/>
+<section end="138" name="d(dX3_TO_dX4)" speed="0.9090909090909091" start="127"/>
+<section end="815" name="4(dX4_TO_4)" speed="0.9982174688057041" start="254"/>
+</vhcl>
+<vhcl end="817" start="19">
+<section end="33" name="c(c_TO_cX1)" speed="0.4444444444444444" start="24"/>
+<section end="39" name="c(cX1_TO_cX2)" speed="0.8333333333333334" start="33"/>
+<section end="76" name="2(cX2_TO_dX2)" speed="0.2702702702702703" start="39"/>
+<section end="127" name="d(dX2_TO_dX3)" speed="0.19607843137254902" start="76"/>
+<section end="138" name="d(dX3_TO_dX4)" speed="0.9090909090909091" start="127"/>
+<section end="815" name="4(dX4_TO_4)" speed="0.9982174688057041" start="254"/>
+</vhcl>
+<vhcl end="1001" start="584">
+<section end="680" name="c(c_TO_cX1)" speed="0.08163265306122448" start="631"/>
+<section end="692" name="c(cX1_TO_cX2)" speed="0.8333333333333334" start="686"/>
+<section end="794" name="2(cX2_TO_dX2)" speed="0.19607843137254902" start="743"/>
+<section end="896" name="d(dX2_TO_dX3)" speed="0.19607843137254902" start="845"/>
+<section end="918" name="d(dX3_TO_dX4)" speed="0.9090909090909091" start="907"/>
+<section end="1000" name="4(dX4_TO_4)" speed="1.0" start="959"/>
+</vhcl>
+<vhcl end="1001" start="696">
+<section end="704" name="c(c_TO_cX1)" speed="0.8" start="699"/>
+<section end="716" name="c(cX1_TO_cX2)" speed="0.8333333333333334" start="710"/>
+<section end="794" name="2(cX2_TO_dX2)" speed="0.2564102564102564" start="755"/>
+<section end="896" name="d(dX2_TO_dX3)" speed="0.19607843137254902" start="845"/>
+<section end="918" name="d(dX3_TO_dX4)" speed="0.9090909090909091" start="907"/>
+<section end="1000" name="4(dX4_TO_4)" speed="1.0" start="959"/>
+</vhcl>
+<vhcl end="1001" start="734">
+<section end="742" name="c(c_TO_cX1)" speed="0.8" start="737"/>
+<section end="754" name="c(cX1_TO_cX2)" speed="0.8333333333333334" start="748"/>
+<section end="794" name="2(cX2_TO_dX2)" speed="0.5" start="774"/>
+<section end="896" name="d(dX2_TO_dX3)" speed="0.19607843137254902" start="845"/>
+<section end="918" name="d(dX3_TO_dX4)" speed="0.9090909090909091" start="907"/>
+<section end="1000" name="4(dX4_TO_4)" speed="1.0" start="959"/>
+</vhcl>
+<vhcl end="1001" start="992">
+<section end="1000" name="c(c_TO_cX1)" speed="0.0" start="995"/>
+</vhcl>
+</output>
