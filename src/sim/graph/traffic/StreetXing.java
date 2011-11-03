@@ -4,13 +4,13 @@ package sim.graph.traffic;
  * @author Raul Cajias
  */
 import java.awt.Font;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 import sim.agents.traffic.TLAgent;
+import sim.util.Double2D;
 import sim.utils.Orientation;
 
 public class StreetXing {
@@ -21,7 +21,7 @@ public class StreetXing {
     private static int _xingCount = 0;
     private double _startOdds = 0;
     private double _endOdds = 0;
-    private Point2D _location;
+    private Double2D _location;
     private final List<Road> _roads;
     private Collection<Road> _subRoads = new ArrayList<Road>();
 
@@ -53,7 +53,7 @@ public class StreetXing {
      * @param p_
      * @param road_
      */
-    public StreetXing(Point2D p_, Road road_) {
+    public StreetXing(Double2D p_, Road road_) {
 	this(road_, null);
 	_location = p_;
 
@@ -96,7 +96,7 @@ public class StreetXing {
     /**
      * @return the _location
      */
-    public Point2D getLocation() {
+    public Double2D getLocation() {
 	return _location;
     }
 

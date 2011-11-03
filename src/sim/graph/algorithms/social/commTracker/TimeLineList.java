@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
 public class TimeLineList<T> {
@@ -37,7 +36,7 @@ public class TimeLineList<T> {
      * @return void
      * @author antonio
      */
-    public void add(int idx_, Set<T> comm_, Graph<T, FriendLink> graph_) {
+    public void add(int idx_, Set<T> comm_, Graph<T, Number> graph_) {
 
 	// Fill gaps in the timeline if there are any.
 	if (idx_ + 1 > _timeLine.size()) {

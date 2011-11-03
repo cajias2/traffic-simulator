@@ -9,9 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import app.social.links.SimpleFriendLink;
-
-import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.algorithms.cluster.EdgeBetweennessClusterer;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -24,7 +21,8 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
  */
 public class CPMCommunityFinder<V> {
 
-    private final Graph<Set<V>, FriendLink> _cliqueGraph;
+    private static final int DEFAULT_EDGE_VAL = 1;
+    private final Graph<Set<V>, Number> _cliqueGraph;
 
     /**
      * TODO Purpose
@@ -33,7 +31,7 @@ public class CPMCommunityFinder<V> {
      * @author biggie
      */
     public CPMCommunityFinder(Collection<Set<V>> kCliques_) {
-	_cliqueGraph = new UndirectedSparseGraph<Set<V>, FriendLink>();
+	_cliqueGraph = new UndirectedSparseGraph<Set<V>, Number>();
 	initializeCliqueGraph(kCliques_);
     }
 
@@ -53,7 +51,7 @@ public class CPMCommunityFinder<V> {
 
 		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB, k_)) {
 		    try {
-			_cliqueGraph.addEdge(new SimpleFriendLink(), kCliqueA, kCliqueB);
+			_cliqueGraph.addEdge(new Integer(DEFAULT_EDGE_VAL), kCliqueA, kCliqueB);
 		    } catch (OutOfMemoryError e) {
 			System.err.println(e.getMessage());
 		    }
@@ -61,7 +59,7 @@ public class CPMCommunityFinder<V> {
 	    }
 	}
 
-	EdgeBetweennessClusterer<Set<V>, FriendLink> ebc = new EdgeBetweennessClusterer<Set<V>, FriendLink>(0);
+	EdgeBetweennessClusterer<Set<V>, Number> ebc = new EdgeBetweennessClusterer<Set<V>, Number>(0);
 
 	return unifyConnectedComponents(ebc.transform(_cliqueGraph));
     }

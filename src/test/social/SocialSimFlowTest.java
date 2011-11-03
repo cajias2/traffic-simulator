@@ -19,7 +19,6 @@ import sim.graph.algorithms.BronKerboschKCliqueFinder;
 import sim.graph.algorithms.CPMCommunityFinder;
 import sim.graph.algorithms.social.commTracker.Community;
 import sim.graph.algorithms.social.commTracker.TimeLineList;
-import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.HypergraphLayout;
 import edu.uci.ics.jung.graph.Graph;
@@ -75,7 +74,7 @@ public class SocialSimFlowTest {
 	for (int i = 0; i < totalSimRuns; i++) {
 	    System.out.println("******\n* Run: " + i + "\n******\n");
 	    SocialSim sim = new SocialSim(SEED);
-	    List<Graph<Agent, FriendLink>> graphList = sim.runSim(args, snapshotInterval);
+	    List<Graph<Agent, Number>> graphList = sim.runSim(args, snapshotInterval);
 
 	    System.out.print("Finding Communities");
 	    TimeLineList<Agent> evolution = findCommunities(graphList, kSize);
@@ -92,10 +91,10 @@ public class SocialSimFlowTest {
      * @return TimeLineList<Agent>
      * @author biggie
      */
-    private static TimeLineList<Agent> findCommunities(List<Graph<Agent, FriendLink>> graphList_, int kSize_) {
+    private static TimeLineList<Agent> findCommunities(List<Graph<Agent, Number>> graphList_, int kSize_) {
 	TimeLineList<Agent> evolution = new TimeLineList<Agent>(graphList_.size());
 	int snapshot = 1;
-	for (Graph<Agent, FriendLink> graph : graphList_) {
+	for (Graph<Agent, Number> graph : graphList_) {
 	    if (null != graph) {
 		System.out.print('.');
 		Collection<Set<Agent>> kComs = findCommunities(graph, kSize_);

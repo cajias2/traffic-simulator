@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -46,7 +45,7 @@ public class Community<T> {
      * @param
      * @author antonio
      */
-    public Community(Set<T> comm_, Graph<T, FriendLink> graph_) {
+    public Community(Set<T> comm_, Graph<T, Number> graph_) {
 	ID = count_++;
 	_members = comm_;
 	_core = getCommunityCores(_members, graph_);
@@ -386,7 +385,7 @@ public class Community<T> {
      * @return List<T> core node list.
      * @author antonio
      */
-    private List<T> getCommunityCores(Set<T> comNodSet_, Graph<T, FriendLink> graph_) {
+    private List<T> getCommunityCores(Set<T> comNodSet_, Graph<T, Number> graph_) {
         List<T> coreNodList = null;
         List<T> comNodeList = new ArrayList<T>(comNodSet_);
     
@@ -419,7 +418,7 @@ public class Community<T> {
      * @return int[] Returns an array of nodes with their centrality calculated
      * @author biggie
      */
-    private int[] calculateNodCentrality(List<T> comNodList_, Graph<T, FriendLink> graph_) {
+    private int[] calculateNodCentrality(List<T> comNodList_, Graph<T, Number> graph_) {
         int[] centralDeg = new int[comNodList_.size()];
         for (int i = 0; i < centralDeg.length; i++) {
             centralDeg[i] = 0;
@@ -430,8 +429,8 @@ public class Community<T> {
         	T node1 = comNodList_.get(i);
         	T node2 = comNodList_.get(j);
     
-        	FriendLink edge1 = graph_.findEdge(node1, node2);
-        	FriendLink edge2 = graph_.findEdge(node2, node1);
+		Number edge1 = graph_.findEdge(node1, node2);
+		Number edge2 = graph_.findEdge(node2, node1);
         	if ((edge1 != null) || (edge2 != null)) {
         	    int grado1 = graph_.degree(node1);
         	    int grado2 = graph_.degree(node2);
@@ -461,7 +460,7 @@ public class Community<T> {
      * @return boolean
      * @author biggie
      */
-    private boolean isSameDegComm(List<T> comNodList, Graph<T, FriendLink> graph_) {
+    private boolean isSameDegComm(List<T> comNodList, Graph<T, Number> graph_) {
         boolean sameDegree = true;
         boolean firstNode = true;
         int degree = 0;

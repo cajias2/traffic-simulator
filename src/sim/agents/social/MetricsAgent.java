@@ -19,7 +19,6 @@ import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.graph.algorithms.BronKerboschKCliqueFinder;
 import sim.graph.algorithms.CPMCommunityFinder;
-import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -84,8 +83,8 @@ public class MetricsAgent implements Steppable {
      * @param
      * @return Collection<Set<V>>
      */
-    private Collection<Set<Agent>> findKCommunities(Graph<Agent, FriendLink> graph_, int k_) {
-	BronKerboschKCliqueFinder<Agent, FriendLink> clique = new BronKerboschKCliqueFinder<Agent, FriendLink>(graph_);
+    private Collection<Set<Agent>> findKCommunities(Graph<Agent, Number> graph_, int k_) {
+	BronKerboschKCliqueFinder<Agent, Number> clique = new BronKerboschKCliqueFinder<Agent, Number>(graph_);
 	Collection<Set<Agent>> kcliques = clique.getAllMaxKCliques(k_);
 	CPMCommunityFinder<Agent> cpm = new CPMCommunityFinder<Agent>(kcliques);
 	return cpm.findCommunities(k_);
