@@ -27,6 +27,7 @@ import sim.agents.traffic.TLAgent;
 import sim.graph.traffic.Road;
 import sim.graph.traffic.Street;
 import sim.graph.traffic.StreetXing;
+import sim.util.Double2D;
 import sim.utils.Orientation;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -299,7 +300,7 @@ public class XmlInputTrafficParseService {
 		    xingMap.put(rdB, new LinkedList<StreetXing>());
 		}
 		if (!xingExists(xingMap.get(rdB), rdA)) {
-		    Point2D intersect = rdA.findIntersection(rdB);
+		    Double2D intersect = rdA.findIntersection(rdB);
 		    if (null != intersect) {
 			StreetXing xing = new StreetXing(rdA, rdB);
 			xingMap.get(rdA).add(xing);

@@ -327,7 +327,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
 	    }
 	    if (currentRoad().getTf() != null)// hasTrafficLight())
 	    {
-		Point2D tfLoc = currentXing().getLocation();
+		Double2D tfLoc = currentXing().getLocation();
 		Meters distance = new Meters(getLocation().distance(tfLoc));
 		if (distance.toMeters() <= Road.LAYER_SEG.toMeters()) {
 		    TrafficLightState tfState = currentRoad().getTf();
@@ -386,8 +386,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      */
     private void logRoadInfo(Road rd_) {
 	String rdId = rd_.ID;
-	Point2D 
-	Double distance = rd_.getP1().distance(_currLocation);
+	Double distance = new Double(rd_.getP1().distance(_currLocation));
 	_currSpeed = distance / _rdStart;
 	Element sectionEl = _outDoc.createElement(VHCL_SECTION_NODE);
 	sectionEl.setAttribute(SECTION_ATTR_NAME, rdId);
@@ -428,7 +427,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      * @return true if closer to the destination than the Distance threshold
      */
     private boolean atEndOfRoad() {
-	Point2D dest = _city.getDest(currentRoad()).getLocation();
+	Double2D dest = _city.getDest(currentRoad()).getLocation();
 	return (_currLocation.distance(dest) <= Road.DISTANCE_THRESHOLD);
     }
 
@@ -436,7 +435,7 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      * @return true if closer to the destination than the Distance threshold
      */
     private boolean atLastSeg() {
-	Point2D dest = _city.getDest(currentRoad()).getLocation();
+	Double2D dest = _city.getDest(currentRoad()).getLocation();
 
 	return (_currLocation.distance(dest) <= Road.LAYER_SEG.toMeters());
     }
@@ -448,13 +447,14 @@ public abstract class Vehicle extends DisplayableAgent implements Steppable {
      */
     private void moveVehicle() {
 	if (!atEndOfRoad()) {
-	    Point2D newLoc = currentRoad().getNewLocation(_currLocation, 1);
+	    Point2D currLocPt = new Point2D.Double(_currLocation.x, _currLocation.y);
+	    Double2D newLoc = currentRoad().getNewLocation(_currLocation, 1.0);
 	    if (_currLocation != newLoc) {
 		_currLocation = newLoc;
 		if (currentRoad().getLineList().size() > _roadLineIdx + 1) {
 		    Line2D nextLine = currentRoad().getLineList().get(_roadLineIdx + 1);
-		    int compA = Double.compare(_currRoadLine.ptLineDist(_currLocation), Road.DISTANCE_THRESHOLD);
-		    int compB = Double.compare(nextLine.ptLineDist(_currLocation), Road.DISTANCE_THRESHOLD);
+		    int compA = Double.compare(_currRoadLine.ptLineDist(currLocPt), Road.DISTANCE_THRESHOLD);
+		    int compB = Double.compare(nextLine.ptLineDist(currLocPt), Road.DISTANCE_THRESHOLD);
 		    if (compA >= compB) {
 			updateRoadSeg();
 		    }

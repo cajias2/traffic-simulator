@@ -10,8 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.util.Iterator;
 
-import app.social.links.SimpleFriendLink;
-
 import sim.app.networktest.NetworkTest;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
@@ -209,7 +207,7 @@ public class Agent implements Steppable {
      * @return void
      */
     protected void befriend(Agent ag_) {
-	_net.addEdge(this, ag_, new SimpleFriendLink());
+	_net.addEdge(this, ag_, new Integer(1));
     }
 
     /**

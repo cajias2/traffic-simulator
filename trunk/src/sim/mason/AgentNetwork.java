@@ -11,9 +11,7 @@ import java.util.Map;
 import sim.agents.Agent;
 import sim.field.network.Edge;
 import sim.field.network.Network;
-import sim.graph.social.link.FriendLink;
 import sim.util.Bag;
-import app.social.links.SimpleFriendLink;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
@@ -26,11 +24,11 @@ public class AgentNetwork extends Network {
 
 
     private static final long serialVersionUID = 3753409368682500764L;
-    private final Graph<Agent, FriendLink> _graph;
+    private final Graph<Agent, Number> _graph;
 
     public AgentNetwork() {
 	super();
-	_graph = new UndirectedSparseGraph<Agent, FriendLink>();
+	_graph = new UndirectedSparseGraph<Agent, Number>();
     }
 
 
@@ -45,7 +43,7 @@ public class AgentNetwork extends Network {
     @Override
     protected void addJungEdge(Object from_, Object to_, Object info_) {
 	Pair<Agent> pair = new Pair<Agent>((Agent) from_, (Agent) to_);
-	_graph.addEdge((FriendLink) info_, pair);
+	_graph.addEdge((Number) info_, pair);
     }
 
     /**
@@ -100,7 +98,7 @@ public class AgentNetwork extends Network {
      * 
      * @return
      */
-    public Collection<FriendLink> getJungEdges() {
+    public Collection<Number> getJungEdges() {
 	return _graph.getEdges();
     }
 
@@ -142,16 +140,16 @@ public class AgentNetwork extends Network {
 	return avgDeg / (_graph.getVertexCount() + 0.0);
     }
 
-    public final Graph<Agent, FriendLink> getJGraph() {
+    public final Graph<Agent, Number> getJGraph() {
 	return _graph;
     }
 
-    public Graph<Agent, FriendLink> getGraphSnapshot() {
-	Graph<Agent, FriendLink> ss = new UndirectedSparseGraph<Agent, FriendLink>();
+    public Graph<Agent, Number> getGraphSnapshot() {
+	Graph<Agent, Number> ss = new UndirectedSparseGraph<Agent, Number>();
 	for (Agent v : _graph.getVertices()) {
 	    ss.addVertex(v);
 	}
-	for (FriendLink e : _graph.getEdges()) {
+	for (Number e : _graph.getEdges()) {
 	    ss.addEdge(e, _graph.getEndpoints(e).getFirst(), _graph.getEndpoints(e).getSecond());
 	}
 	return ss;
@@ -180,18 +178,18 @@ public class AgentNetwork extends Network {
      * TODO Purpose
      * 
      * @param
-     * @return Graph<Integer,FriendLink>
+     * @return Graph<Integer,Number>
      * @author biggie
      */
-    public static Graph<Integer, FriendLink> adjListToJungGraph(Edge[][] adjList_) {
-	Graph<Integer, FriendLink> graph = new UndirectedSparseGraph<Integer, FriendLink>();
+    public static Graph<Integer, Number> adjListToJungGraph(Edge[][] adjList_) {
+	Graph<Integer, Number> graph = new UndirectedSparseGraph<Integer, Number>();
 	for (int i = 0; i < adjList_.length; i++) {
 	    graph.addVertex(i);
 	}
 	for (int i = 0; i < adjList_.length; i++) {
 	    for (int j = i + 1; j < adjList_[i].length; j++) {
 		if (null != adjList_[i][j]) {
-		    graph.addEdge(new SimpleFriendLink(), i, j);
+		    graph.addEdge(new Integer(1), i, j);
 		}
 	    }
 	}

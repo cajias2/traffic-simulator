@@ -132,11 +132,25 @@ public abstract class Road {
      * @param dir_
      * @return
      */
-    public Point2D getNewLocation(Point2D curLoc_, double len_) {
+    public Double2D getNewLocation(Double2D curLoc_, Double len_) {
 	Line2D line = getLine(curLoc_);
-	return getNewLocation(curLoc_, line, len_);
+	Point2D newLoc2D = getNewLocation(curLoc_, line, len_);
+	Double2D newLoc = new Double2D(newLoc2D.getX(), newLoc2D.getY());
+	return newLoc;
     }
 
+    /**
+     * 
+     * Wrapper methods that changes Double2D to Point2D where all the point/line
+     * logic has already been implemented.
+     * 
+     * @params
+     * @return Point2D
+     * @author biggie
+     */
+    private Point2D getNewLocation(Double2D currLoc_, Line2D l_, double len_) {
+	return getNewLocation(new Point2D.Double(currLoc_.x, currLoc_.y), l_, len_);
+    }
     /**
      * Given a line, find a secant line that intersects it at length len_
      * 
@@ -145,7 +159,7 @@ public abstract class Road {
      * @param dir_
      * @return
      */
-    public Point2D getNewLocation(Point2D curLoc_, Line2D l_, double len_) {
+    private Point2D getNewLocation(Point2D curLoc_, Line2D l_, double len_) {
 	// Select direction to move in.
 	int[] dir = { 1, 1 };
 	if (l_.getX1() > l_.getX2())
@@ -293,10 +307,24 @@ public abstract class Road {
 
     }
 
+    /**
+     * Returns the starting point of the current line.
+     * 
+     * @params
+     * @return Double2D
+     * @author biggie
+     */
     public Double2D startLoc() {
 	return new Double2D(_lineList.get(0).getP1());
     }
 
+    /**
+     * Returns the ending point of the current line.
+     * 
+     * @params
+     * @return Point2D
+     * @author biggie
+     */
     public Point2D endLoc() {
 	return _lineList.get(_lineList.size() - 1).getP2();
     }
@@ -341,7 +369,7 @@ public abstract class Road {
      * @param b_
      * @return
      */
-    public Point2D findIntersection(Road b_) {
+    public Double2D findIntersection(Road b_) {
 	Point2D intersectPoint = null;
 	for (Line2D bLine : b_.getLineList()) {
 
@@ -351,7 +379,7 @@ public abstract class Road {
 		}
 	    }
 	}
-	return intersectPoint;
+	return new Double2D(intersectPoint.getX(), intersectPoint.getY());
     }
 
     /**
@@ -421,17 +449,28 @@ public abstract class Road {
 	}
     }
 
+
+    /**
+     * 
+     * TODO Purpose
+     * 
+     * @params
+     * @return Line2D
+     * @author biggie
+     */
+    private Line2D getLine(Double2D curLoc_){
+	return getLine(new Point2D.Double(curLoc_.x, curLoc_.y));
+    }
     /**
      * Return the line segment to which this point belongs to.
      * 
      * @param curLoc
      * @return
      */
-    private Line2D getLine(Point2D curLoc) {
+    private Line2D getLine(Point2D curLoc_) {
 	Line2D currLine = null;
-
 	for (Line2D line : _lineList) {
-	    if (line.ptLineDist(curLoc) < DISTANCE_THRESHOLD) {
+	    if (line.ptLineDist(curLoc_) < DISTANCE_THRESHOLD) {
 		currLine = line;
 		break;
 	    }
@@ -567,7 +606,14 @@ public abstract class Road {
      *            End of section
      * @return Point list.
      */
-    public List<Point2D> getSubPointList(Point2D p1_, Point2D p2_) {
+    public List<Point2D> getSubPointList(Double2D p1_, Double2D p2_) {
+	return getSubPointList(new Point2D.Double(p1_.x, p1_.y), new Point2D.Double(p2_.x, p2_.y));
+    }
+
+    /**
+     * Handles point arithmetic with Java.awt
+     */
+    private List<Point2D> getSubPointList(Point2D p1_, Point2D p2_) {
 	Line2D l1 = getLine(p1_);
 	Line2D l2 = getLine(p2_);
 
@@ -595,16 +641,17 @@ public abstract class Road {
      * @return The coordinates of the road origin.
      */
     public Double2D getP1() {
-	Double2D pt = new Double2D();
-	pt.
-	return _lineList.get(0).getP1();
+	Point2D p1Pt = _lineList.get(0).getP1();
+	Double2D p1 = new Double2D(p1Pt.getX(), p1Pt.getY());
+	return p1;
     }
 
     /**
      * @return The coordibates of the road end.
      */
-    public Point2D getP2() {
-	return _lineList.get(_lineList.size() - 1).getP2();
+    public Double2D getP2() {
+	Point2D p2Pt = _lineList.get(_lineList.size() - 1).getP2();
+	return new Double2D(p2Pt.getX(), p2Pt.getY());
     }
 
     /**

@@ -11,7 +11,6 @@ import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.graph.social.link.FriendLink;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.io.GraphMLWriter;
@@ -64,7 +63,7 @@ public class GraphGatherer<V, E> implements Steppable {
      * @return void
      * @author biggie
      */
-    private void writeGraph(Graph<Agent, FriendLink> jGraph_) {
+    private void writeGraph(Graph<Agent, Number> jGraph_) {
 	FileWriter outFileWrt;
 	GraphMLWriter<V, E> gWriter = new GraphMLWriter<V, E>();
 	try {
