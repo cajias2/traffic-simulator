@@ -12,6 +12,8 @@ import sim.engine.SimState;
  */
 public class PersonalityAgent extends Agent {
 
+    private static final long serialVersionUID = -2342955570432688000L;
+
     private final double _personality;
 
     private final double _accepThresh;
@@ -62,7 +64,7 @@ public class PersonalityAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (!_net.hasEdge(this, ag_)) {
+	if (_net.findEdge(this, ag_) == null) {
 	    if (isNewFriend(ag_)) {
 		befriend(ag_);
 	    }

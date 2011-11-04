@@ -13,6 +13,8 @@ import sim.util.Double2D;
 
 /**
  * @author biggie
+ * @param <V>
+ * @param <E>
  */
 public class CFAgent extends Agent {
 
@@ -76,7 +78,7 @@ public class CFAgent extends Agent {
      */
     @Override
     protected void afterStep(SocialSim state_) {
-	_friends = state_.network.getJGraph().getNeighbors(this);
+	_friends = state_.network.getNeighbors(this);
 	updatePersonality();
     }
 
@@ -96,7 +98,7 @@ public class CFAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (!_net.hasEdge(this, ag_)) {
+	if (_net.findEdge(this, ag_) == null) {
 	    if (isNewFriend(ag_)) {
 		befriend(ag_);
 	    }
@@ -154,8 +156,8 @@ public class CFAgent extends Agent {
 
     @Override
     protected Double2D move(SimState state_) {
-	SocialSim socSim = (SocialSim) state_;
-	return socSim.fieldEnvironment.getObjectLocation(this);
+	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
+	return socSim.env.getObjectLocation(this);
     }
 
 }

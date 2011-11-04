@@ -16,11 +16,11 @@ import org.w3c.dom.Element;
 
 import processing.core.PApplet;
 import sim.agents.DisplayableAgent;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Meters;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
-import sim.geo.distance.Distance;
-import sim.geo.distance.Meters;
 import sim.graph.traffic.Road;
 import sim.graph.traffic.StreetXing;
 import sim.util.Double2D;

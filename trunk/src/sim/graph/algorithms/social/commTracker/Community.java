@@ -11,21 +11,22 @@ import edu.uci.ics.jung.graph.Graph;
  * TODO Purpose
  * 
  * @author antonio
- * @param <T>
+ * @param <V>
+ * @param <E>
  * @date May 17, 2011
  */
-public class Community<T> {
+public class Community<V, E> {
     private static int count_ = 0;
     private final int ID;
-    private final Set<T> _members;
-    private List<T> _core;
-    private Set<Community<T>> _predList;
-    private Set<Community<T>> _succList;
+    private final Set<V> _members;
+    private List<V> _core;
+    private Set<Community<V, E>> _predList;
+    private Set<Community<V, E>> _succList;
     private long _bckwdTimelineLen = 0;
     private long _fwdTimelineLen = -1;
     private long _evolTrace = -1;
-    private Community<T> _mainPred;
-    private Community<T> _mainTimelineFirst;
+    private Community<V, E> _mainPred;
+    private Community<V, E> _mainTimelineFirst;
     private Double _memberStability;
 
     /**
@@ -45,7 +46,7 @@ public class Community<T> {
      * @param
      * @author antonio
      */
-    public Community(Set<T> comm_, Graph<T, Number> graph_) {
+    public Community(Set<V> comm_, Graph<V, E> graph_) {
 	ID = count_++;
 	_members = comm_;
 	_core = getCommunityCores(_members, graph_);
@@ -82,9 +83,9 @@ public class Community<T> {
      * @return void
      * @author antonio
      */
-    public void addPredecessor(Community<T> pred_) {
+    public void addPredecessor(Community<V, E> pred_) {
 	if (null == _predList) {
-	    _predList = new HashSet<Community<T>>();
+	    _predList = new HashSet<Community<V, E>>();
 	}
 	if (_predList.add(pred_) && ((pred_.getBckwdTimelineLen() + 1) > _bckwdTimelineLen)) {
 	    _mainPred = pred_;
@@ -102,10 +103,10 @@ public class Community<T> {
      * TODO Purpose
      * 
      * @params
-     * @return Community<T>
+     * @return Community<V, E>
      * @author biggie
      */
-    public Community<T> getTimelineFirst() {
+    public Community<V, E> getTimelineFirst() {
 	return _mainTimelineFirst;
     }
 
@@ -116,9 +117,9 @@ public class Community<T> {
      * @return void
      * @author antonio
      */
-    public void addSuccessor(Community<T> succ_) {
+    public void addSuccessor(Community<V, E> succ_) {
 	if (null == _succList) {
-	    _succList = new HashSet<Community<T>>();
+	    _succList = new HashSet<Community<V, E>>();
 	}
 	_succList.add(succ_);
     }
@@ -137,14 +138,14 @@ public class Community<T> {
     public Double getMemberStability() {
 
 	if (Double.isNaN(_memberStability) && null != _succList) {
-	    Set<T> succUnion = new HashSet<T>();
+	    Set<V> succUnion = new HashSet<V>();
 
-	    for (Community<T> com : _succList) {
+	    for (Community<V, E> com : _succList) {
 		succUnion.addAll(com.getAllNodes());
 	    }
 
-	    Set<T> intersectMembers = new HashSet<T>(_members);
-	    Set<T> unionMembers = new HashSet<T>(_members);
+	    Set<V> intersectMembers = new HashSet<V>(_members);
+	    Set<V> unionMembers = new HashSet<V>(_members);
 	    intersectMembers.retainAll(succUnion);
 	    unionMembers.addAll(succUnion);
 	    _memberStability = ((intersectMembers.size() + 0.0) / (unionMembers.size() + 0.0));
@@ -198,7 +199,7 @@ public class Community<T> {
      * @return List<Community>
      * @author antonio
      */
-    public final Set<Community<T>> getPredecessors() {
+    public final Set<Community<V, E>> getPredecessors() {
 	return _predList;
     }
 
@@ -209,7 +210,7 @@ public class Community<T> {
      * @return List<Community>
      * @author antonio
      */
-    public final Set<Community<T>> getSuccessors() {
+    public final Set<Community<V, E>> getSuccessors() {
 	return _succList;
     }
 
@@ -221,7 +222,7 @@ public class Community<T> {
      * @return List<Integer>
      * @author antonio
      */
-    public final List<T> getCoreNodes() {
+    public final List<V> getCoreNodes() {
 	return _core;
     }
 
@@ -232,7 +233,7 @@ public class Community<T> {
      * @return List<Integer>
      * @author antonio
      */
-    public final Set<T> getAllNodes() {
+    public final Set<V> getAllNodes() {
 	return _members;
     }
 
@@ -277,10 +278,10 @@ public class Community<T> {
      * @param succList_
      * @return
      */
-    private long findEvolTrace(Set<Community<T>> succList_) {
+    private long findEvolTrace(Set<Community<V, E>> succList_) {
 	long evolutionTrace = 0;
 	if (null != succList_) {
-	    for (Community<T> succ : succList_) {
+	    for (Community<V, E> succ : succList_) {
 		evolutionTrace = evolutionTrace + succ.getEvolTrace() + 1;
 	    }
 	}
@@ -290,10 +291,10 @@ public class Community<T> {
     /**
      * Returns predecessor with longest span trace by default.
      * 
-     * @return Community<T>
+     * @return Community<V, E>
      * @author biggie
      */
-    public Community<T> getMainPred() {
+    public Community<V, E> getMainPred() {
 	return _mainPred;
     }
 
@@ -333,7 +334,7 @@ public class Community<T> {
      */
     public Double getAvgMemberStability() {
         Double totalMemberStab = 0.0;
-        for (Community<T> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
+	for (Community<V, E> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
             totalMemberStab = totalMemberStab + currCom.getMemberStability();
         }
         return totalMemberStab / getAge();
@@ -358,10 +359,10 @@ public class Community<T> {
      * @return int longest path length
      * @author biggie
      */
-    private long findFwdTimelineLen(Set<Community<T>> succList_) {
+    private long findFwdTimelineLen(Set<Community<V, E>> succList_) {
 	long longestPathLen = 0;
         if (null != succList_) {
-            for (Community<T> succ : succList_) {
+	    for (Community<V, E> succ : succList_) {
 		long pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
         						   // succ.getSuccessors());
         	if (longestPathLen < pathLen) {
@@ -382,19 +383,19 @@ public class Community<T> {
      * @param graph_
      *            The graph object where community was found. Used to check
      *            degrees.
-     * @return List<T> core node list.
+     * @return List<V> core node list.
      * @author antonio
      */
-    private List<T> getCommunityCores(Set<T> comNodSet_, Graph<T, Number> graph_) {
-        List<T> coreNodList = null;
-        List<T> comNodeList = new ArrayList<T>(comNodSet_);
+    private List<V> getCommunityCores(Set<V> comNodSet_, Graph<V, E> graph_) {
+	List<V> coreNodList = null;
+	List<V> comNodeList = new ArrayList<V>(comNodSet_);
     
         if (isSameDegComm(comNodeList, graph_)) {
             coreNodList = comNodeList;
         } else {
             int[] centralDeg = calculateNodCentrality(comNodeList, graph_);
     
-            coreNodList = new ArrayList<T>();
+	    coreNodList = new ArrayList<V>();
             for (int i = 0; i < comNodSet_.size(); i++) {
         	if (centralDeg[i] >= 0)
         	    coreNodList.add(comNodeList.get(i));
@@ -418,7 +419,7 @@ public class Community<T> {
      * @return int[] Returns an array of nodes with their centrality calculated
      * @author biggie
      */
-    private int[] calculateNodCentrality(List<T> comNodList_, Graph<T, Number> graph_) {
+    private int[] calculateNodCentrality(List<V> comNodList_, Graph<V, E> graph_) {
         int[] centralDeg = new int[comNodList_.size()];
         for (int i = 0; i < centralDeg.length; i++) {
             centralDeg[i] = 0;
@@ -426,11 +427,11 @@ public class Community<T> {
     
         for (int i = 0; i < comNodList_.size(); i++) {
             for (int j = (i + 1); j < comNodList_.size(); j++) {
-        	T node1 = comNodList_.get(i);
-        	T node2 = comNodList_.get(j);
+		V node1 = comNodList_.get(i);
+		V node2 = comNodList_.get(j);
     
-		Number edge1 = graph_.findEdge(node1, node2);
-		Number edge2 = graph_.findEdge(node2, node1);
+		E edge1 = graph_.findEdge(node1, node2);
+		E edge2 = graph_.findEdge(node2, node1);
         	if ((edge1 != null) || (edge2 != null)) {
         	    int grado1 = graph_.degree(node1);
         	    int grado2 = graph_.degree(node2);
@@ -460,12 +461,12 @@ public class Community<T> {
      * @return boolean
      * @author biggie
      */
-    private boolean isSameDegComm(List<T> comNodList, Graph<T, Number> graph_) {
+    private boolean isSameDegComm(List<V> comNodList, Graph<V, E> graph_) {
         boolean sameDegree = true;
         boolean firstNode = true;
         int degree = 0;
     
-        for (T node : comNodList) {
+	for (V node : comNodList) {
             if (!sameDegree) {
         	break;
             }

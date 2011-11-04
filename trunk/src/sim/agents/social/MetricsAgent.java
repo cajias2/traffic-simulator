@@ -10,16 +10,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Set;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.graph.algorithms.BronKerboschKCliqueFinder;
-import sim.graph.algorithms.CPMCommunityFinder;
-import edu.uci.ics.jung.graph.Graph;
+import sim.graph.algorithms.metrics.LowOrderGraphMetrics;
 
 /**
  * @author biggie
@@ -52,14 +48,14 @@ public class MetricsAgent implements Steppable {
      */
     public void step(SimState state_) {
 	if (null != _outWrt) {
-	    SocialSim socSim = (SocialSim) state_;	    
-	    int nodeCount = socSim.network.getJGraph().getVertexCount();
+	    SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
+	    int nodeCount = socSim.network.getVertexCount();
 
 	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
 	    double ts = socSim.schedule.time() + 1;
-	    double avgCi = socSim.network.avgClusterCoeff();
-	    double avgDeg = socSim.network.avgDeg();
-	    double edgepnct = socSim.network.getJGraph().getEdgeCount() / maxEdges;
+	    double avgCi = LowOrderGraphMetrics.avgClusterCoeff(socSim.network);
+	    double avgDeg = LowOrderGraphMetrics.avgDeg(socSim.network);
+	    double edgepnct = socSim.network.getEdgeCount() / maxEdges;
 	    /*
 	     * Print a log line
 	     */
@@ -73,20 +69,5 @@ public class MetricsAgent implements Steppable {
 		System.err.println("Error: " + e.getMessage());
 	    }
 	}
-    }
-
-
-    /**
-     * @author biggie
-     * @name findKCliques Purpose TODO
-     * 
-     * @param
-     * @return Collection<Set<V>>
-     */
-    private Collection<Set<Agent>> findKCommunities(Graph<Agent, Number> graph_, int k_) {
-	BronKerboschKCliqueFinder<Agent, Number> clique = new BronKerboschKCliqueFinder<Agent, Number>(graph_);
-	Collection<Set<Agent>> kcliques = clique.getAllMaxKCliques(k_);
-	CPMCommunityFinder<Agent> cpm = new CPMCommunityFinder<Agent>(kcliques);
-	return cpm.findCommunities(k_);
     }
 }
