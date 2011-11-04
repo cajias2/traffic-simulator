@@ -3,7 +3,6 @@
  */
 package sim.agents;
 
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -30,10 +29,8 @@ public class Agent implements Steppable {
     private int steps = 0;
     private Double2D desiredLocation = null;
     protected MersenneTwisterFast _rand = null;
-    protected AgentNetwork _net;
+    protected AgentNetwork<Agent, String> _net;
     private static int _agentCount = 0;
-
-
 
     protected int _id;
     protected int _actionDim = 0;
@@ -50,24 +47,24 @@ public class Agent implements Steppable {
      * 
      */
     public void step(final SimState state_) {
-	
+
 	SocialSim socSim = (SocialSim) state_;
 	beforeStep(socSim);
-	Double2D currLoc = socSim.fieldEnvironment.getObjectLocation(this);
-	Bag objs = socSim.fieldEnvironment.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y),
+	Double2D currLoc = socSim.env.getObjectLocation(this);
+	Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y),
 		_actionDim);
 
 	Iterator<Agent> iter = objs.iterator();
 	while (iter.hasNext()) {
 	    Agent ag = iter.next();
 	    // make sure not the same obj, and an edge does not already exist.
-	    if (this != ag){
+	    if (this != ag) {
 		interactWithAgent(ag);
 	    }
 	}
 
 	Double2D newLoc = move(state_);
-	socSim.fieldEnvironment.setObjectLocation(this, newLoc);
+	socSim.env.setObjectLocation(this, newLoc);
 	afterStep(socSim);
     }
 
@@ -131,7 +128,7 @@ public class Agent implements Steppable {
      */
     protected Double2D move(SimState state_) {
 	SocialSim socSim = (SocialSim) state_;
-	Double2D currLoc = socSim.fieldEnvironment.getObjectLocation(this);
+	Double2D currLoc = socSim.env.getObjectLocation(this);
 	steps--;
 	if (desiredLocation == null || steps <= 0) {
 	    desiredLocation = new Double2D((state_.random.nextDouble() - 0.5)
@@ -207,13 +204,18 @@ public class Agent implements Steppable {
      * @return void
      */
     protected void befriend(Agent ag_) {
-	_net.addEdge(this, ag_, new Integer(1));
+	_net.addEdge(this + "_" + ag_, this, ag_);
     }
 
     /**
      * @param ag_
      */
     protected void unfriend(Agent ag_) {
-	_net.removeEdge(this, ag_);
+	_net.removeEdge(_net.findEdge(this, ag_));
+    }
+
+    @Override
+    public boolean equals(Object o_) {
+	return (o_ instanceof Agent && getID() == ((Agent) o_).getID());
     }
 }

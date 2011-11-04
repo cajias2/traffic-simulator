@@ -56,7 +56,7 @@ public class BrownianAgent extends Agent {
     @Override
     protected Double2D move(SimState state_) {
 	SocialSim socSim = (SocialSim) state_;
-	Double2D currLoc = socSim.fieldEnvironment.getObjectLocation(this);
+	Double2D currLoc = socSim.env.getObjectLocation(this);
 	return brownianMotion(T, N, currLoc, _rand);
     }
 
@@ -78,7 +78,7 @@ public class BrownianAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (!_net.hasEdge(this, ag_)) {
+	if (_net.findEdge(this, ag_) == null) {
 	    if (isNewFriend(ag_)) {
 		befriend(ag_);
 	    }

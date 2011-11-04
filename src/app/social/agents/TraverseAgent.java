@@ -31,7 +31,7 @@ public class TraverseAgent extends Agent {
     @Override
     protected Double2D move(SimState state_) {
 	SocialSim socSim = (SocialSim) state_;
-	Double2D currLoc = socSim.fieldEnvironment.getObjectLocation(this);
+	Double2D currLoc = socSim.env.getObjectLocation(this);
 	boolean resetx = false;
 	boolean resety = false;
 

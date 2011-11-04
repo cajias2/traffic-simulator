@@ -18,12 +18,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import sim.agents.Agent;
-
 /**
  * @author biggie
+ * @param <V>
  */
-public class SocialInputParseService {
+public class SocialInputParseService<V> {
     /**
      * 
      */
@@ -123,11 +122,11 @@ public class SocialInputParseService {
      * @throws ClassNotFoundException
      * @throws DOMException
      */
-    public Map<Class<Agent>, Double> parseAgents() {
+    public Map<Class<V>, Double> parseAgents() {
 	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	DocumentBuilder db;
 	Document doc;
-	Map<Class<Agent>, Double> classMap = new HashMap<Class<Agent>, Double>();
+	Map<Class<V>, Double> classMap = new HashMap<Class<V>, Double>();
 
 	try {
 	    db = dbf.newDocumentBuilder();
@@ -138,7 +137,7 @@ public class SocialInputParseService {
 		if (NODE_AGENT.equals(agentList.item(i).getNodeName())) {
 		    Node agent = agentList.item(i);
 		    double pcnt = 0;
-		    Class<Agent> className = (Class) Class.forName(agent.getAttributes()
+		    Class<V> className = (Class) Class.forName(agent.getAttributes()
 			    .getNamedItem(ATTR_AG_CLASS).getNodeValue());
 		    pcnt = Double.parseDouble(agent.getAttributes().getNamedItem(ATT_AG_PCT).getNodeValue());
 		    classMap.put(className, pcnt);

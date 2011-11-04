@@ -1,11 +1,8 @@
 <?sim.xml version="1.0" encoding="UTF-8"?>
-<simulation type="test.social" simDuration="300" width="1000" length="1000" agents="1000"
+<simulation type="test.social" simDuration="300" width="1000" length="1000" agents="5000"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">
 	<agents>
 		<agent classpath="app.social.agents.CFAgent" pct="100" />
 	</agents>
-	<links>
-		<link classpath="test.social.links.SimpleFriendLink" />
-	</links>
 </simulation>

@@ -22,7 +22,7 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 public class CPMCommunityFinder<V> {
 
     private static final int DEFAULT_EDGE_VAL = 1;
-    private final Graph<Set<V>, Number> _cliqueGraph;
+    private final Graph<Set<V>, String> _cliqueGraph;
 
     /**
      * TODO Purpose
@@ -31,7 +31,7 @@ public class CPMCommunityFinder<V> {
      * @author biggie
      */
     public CPMCommunityFinder(Collection<Set<V>> kCliques_) {
-	_cliqueGraph = new UndirectedSparseGraph<Set<V>, Number>();
+	_cliqueGraph = new UndirectedSparseGraph<Set<V>, String>();
 	initializeCliqueGraph(kCliques_);
     }
 
@@ -51,7 +51,7 @@ public class CPMCommunityFinder<V> {
 
 		if (kCliqueA != kCliqueB && adjecent(kCliqueA, kCliqueB, k_)) {
 		    try {
-			_cliqueGraph.addEdge(new Integer(DEFAULT_EDGE_VAL), kCliqueA, kCliqueB);
+			_cliqueGraph.addEdge(kCliqueA + "" + kCliqueB, kCliqueA, kCliqueB);
 		    } catch (OutOfMemoryError e) {
 			System.err.println(e.getMessage());
 		    }
@@ -59,7 +59,7 @@ public class CPMCommunityFinder<V> {
 	    }
 	}
 
-	EdgeBetweennessClusterer<Set<V>, Number> ebc = new EdgeBetweennessClusterer<Set<V>, Number>(0);
+	EdgeBetweennessClusterer<Set<V>, String> ebc = new EdgeBetweennessClusterer<Set<V>, String>(0);
 
 	return unifyConnectedComponents(ebc.transform(_cliqueGraph));
     }

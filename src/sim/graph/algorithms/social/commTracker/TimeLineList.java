@@ -12,12 +12,12 @@ import java.util.Set;
 
 import edu.uci.ics.jung.graph.Graph;
 
-public class TimeLineList<T> {
+public class TimeLineList<V, E> {
 
     private static final String OUTPUT_PATH = System.getProperty("user.dir") + "/output";
     private static final String OUT_METRICS_FILEPATH = OUTPUT_PATH + "/Metrics-";
 
-    private final List<List<Community<T>>> _timeLine;
+    private final List<List<Community<V, E>>> _timeLine;
 
     /**
      * TODO Purpose
@@ -26,7 +26,7 @@ public class TimeLineList<T> {
      * @author antonio
      */
     public TimeLineList(int size_) {
-	_timeLine = new ArrayList<List<Community<T>>>(size_);
+	_timeLine = new ArrayList<List<Community<V, E>>>(size_);
     }
 
     /**
@@ -36,18 +36,18 @@ public class TimeLineList<T> {
      * @return void
      * @author antonio
      */
-    public void add(int idx_, Set<T> comm_, Graph<T, Number> graph_) {
+    public void add(int idx_, Set<V> comm_, Graph<V, E> graph_) {
 
 	// Fill gaps in the timeline if there are any.
 	if (idx_ + 1 > _timeLine.size()) {
 	    for (int i = _timeLine.size(); i < idx_; i++) {
 		_timeLine.add(null);
 	    }
-	    _timeLine.add(new ArrayList<Community<T>>());
+	    _timeLine.add(new ArrayList<Community<V, E>>());
 	}
 	// Add value
 	if (null != comm_ && !comm_.isEmpty()) {
-	    Community<T> newComm = new Community<T>(comm_, graph_);
+	    Community<V, E> newComm = new Community<V, E>(comm_, graph_);
 	    _timeLine.get(idx_).add(newComm);
 	    buildCommTrace(newComm);
 	}
@@ -61,17 +61,17 @@ public class TimeLineList<T> {
      * @return
      * @author ANTONIO
      */
-    public void set(int time_, Community<T> comm_) {
+    public void set(int time_, Community<V, E> comm_) {
 
 	if (_timeLine.isEmpty() || (time_ == _timeLine.size() + 1)) {
-	    List<Community<T>> aux = new ArrayList<Community<T>>();
+	    List<Community<V, E>> aux = new ArrayList<Community<V, E>>();
 	    _timeLine.add(aux);
 	}
 
 	if (time_ >= 1) {
 	    if (time_ > _timeLine.size() + 1) {
 		for (int i = _timeLine.size(); i < time_; i++) {
-		    List<Community<T>> aux = new ArrayList<Community<T>>();
+		    List<Community<V, E>> aux = new ArrayList<Community<V, E>>();
 		    _timeLine.add(aux);
 		}
 	    }
@@ -83,10 +83,10 @@ public class TimeLineList<T> {
      * TODO Purpose
      * 
      * @params
-     * @return List<Community<T>>
+     * @return List<Community<V, E>>
      * @author antonio
      */
-    public List<Community<T>> getSnapshot(int pos_) {
+    public List<Community<V, E>> getSnapshot(int pos_) {
 	return _timeLine.get(pos_);
     }
 
@@ -94,15 +94,15 @@ public class TimeLineList<T> {
      * TODO Purpose
      * 
      * @params
-     * @return List<Community<T>>
+     * @return List<Community<V, E>>
      * @author antonio
      */
-    public List<Community<T>> getMaxPredPath(Community<T> comm_) {
+    public List<Community<V, E>> getMaxPredPath(Community<V, E> comm_) {
 
-	List<Community<T>> maxPath = new LinkedList<Community<T>>();
+	List<Community<V, E>> maxPath = new LinkedList<Community<V, E>>();
 	maxPath.add(comm_);
 
-	for (Community<T> curCom = comm_; curCom.getMainPred() != null; curCom = curCom.getMainPred()) {
+	for (Community<V, E> curCom = comm_; curCom.getMainPred() != null; curCom = curCom.getMainPred()) {
 	    maxPath.add(curCom);
 	}
 	return maxPath;
@@ -145,7 +145,7 @@ public class TimeLineList<T> {
      * @param outWrt
      * @throws IOException
      */
-    private void echoHeader(List<List<Community<T>>> timeline_, BufferedWriter outWrt) throws IOException {
+    private void echoHeader(List<List<Community<V, E>>> timeline_, BufferedWriter outWrt) throws IOException {
 
 	double comPerSnap = Community.count() / timeline_.size();
 	int numTraces = 0;
@@ -157,9 +157,9 @@ public class TimeLineList<T> {
 	double maxLength = 0;
 	double sumLength = 0;
 
-	for (List<Community<T>> snapshot : timeline_) {
+	for (List<Community<V, E>> snapshot : timeline_) {
 	    if (null != snapshot) {
-		for (Community<T> comm : snapshot) {
+		for (Community<V, E> comm : snapshot) {
 		    if (comm.isTimelineFirst()) {
 			numTraces++;
 			sumLength = sumLength + comm.getTotalTimeLineLen();
@@ -193,14 +193,14 @@ public class TimeLineList<T> {
      * @return void
      * @author antonio
      */
-    private void buildCommTrace(Community<T> comm_) {
-	List<Community<T>> previousSnapshot = null;
+    private void buildCommTrace(Community<V, E> comm_) {
+	List<Community<V, E>> previousSnapshot = null;
 
 	if (!_timeLine.isEmpty()) {
 	    if (_timeLine.size() > 1) {
 		previousSnapshot = _timeLine.get(_timeLine.size() - 2);
 	    }
-	    List<Community<T>> predecessors = null;
+	    List<Community<V, E>> predecessors = null;
 	    if (null != previousSnapshot) {
 		predecessors = findPredCandidates(comm_, previousSnapshot);
 	    }
@@ -221,9 +221,9 @@ public class TimeLineList<T> {
      * @return void
      * @author biggie
      */
-    private void buildCommTrace(Community<T> currCom_, List<Community<T>> parentComs_) {
-	for (Community<T> pred : parentComs_) {
-	    Set<Community<T>> ancestors = pred.getPredecessors();
+    private void buildCommTrace(Community<V, E> currCom_, List<Community<V, E>> parentComs_) {
+	for (Community<V, E> pred : parentComs_) {
+	    Set<Community<V, E>> ancestors = pred.getPredecessors();
 
 	    if (null == ancestors) {
 		createComLink(currCom_, pred);
@@ -246,13 +246,13 @@ public class TimeLineList<T> {
      * @return boolean true if (2).
      * @author biggie
      */
-    private boolean isPredecessor(Community<T> commA_, Community<T> commB_) {
+    private boolean isPredecessor(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
 
 	if (null == commB_.getPredecessors()) {
 	    isPred = hasCores(commB_, commA_);
 	} else {
-	    for (Community<T> bPred : commB_.getPredecessors()) {
+	    for (Community<V, E> bPred : commB_.getPredecessors()) {
 		isPred = isPredAtAll(commA_, bPred);
 		if (isPred) {
 		    break;
@@ -270,10 +270,10 @@ public class TimeLineList<T> {
      * @return boolean true is found. false otherwise
      * @author biggie
      */
-    private boolean hasCores(Community<T> commA_, Community<T> commB_) {
+    private boolean hasCores(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
-	List<T> aCorNods = commA_.getCoreNodes();
-	for (T corNod : aCorNods) {
+	List<V> aCorNods = commA_.getCoreNodes();
+	for (V corNod : aCorNods) {
 	    if (commB_.getAllNodes().contains(corNod)) {
 		isPred = true;
 		break;
@@ -292,12 +292,12 @@ public class TimeLineList<T> {
      * @return boolean true if a predecessor was found.
      * @author biggie
      */
-    private boolean isPredAtAll(Community<T> commA_, Community<T> commB_) {
+    private boolean isPredAtAll(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
 	if (hasCores(commA_, commB_)) {
 	    isPred = true;
 	} else if (null != commB_.getPredecessors()) {
-	    for (Community<T> bPred : commB_.getPredecessors()) {
+	    for (Community<V, E> bPred : commB_.getPredecessors()) {
 		isPredAtAll(commA_, bPred);
 	    }
 	}
@@ -308,17 +308,17 @@ public class TimeLineList<T> {
      * TODO Purpose
      * 
      * @params
-     * @return List<Community<T>>
+     * @return List<Community<V, E>>
      * @author biggie
      */
-    private List<Community<T>> findPredCandidates(Community<T> currCom_, List<Community<T>> previousSnapshot) {
+    private List<Community<V, E>> findPredCandidates(Community<V, E> currCom_, List<Community<V, E>> previousSnapshot) {
 
-	List<Community<T>> predecessors = new ArrayList<Community<T>>();
-	Set<T> newNodes = currCom_.getAllNodes();
+	List<Community<V, E>> predecessors = new ArrayList<Community<V, E>>();
+	Set<V> newNodes = currCom_.getAllNodes();
 
-	for (Community<T> read : previousSnapshot) {
-	    List<T> readCores = read.getCoreNodes();
-	    for (T node : readCores) {
+	for (Community<V, E> read : previousSnapshot) {
+	    List<V> readCores = read.getCoreNodes();
+	    for (V node : readCores) {
 		if (newNodes.contains(node) && null != predecessors && !predecessors.contains(read)) {
 		    predecessors.add(read);
 		}
@@ -337,7 +337,7 @@ public class TimeLineList<T> {
      * @return void
      * @author biggie
      */
-    private void createComLink(Community<T> currCom_, Community<T> prevCom_) {
+    private void createComLink(Community<V, E> currCom_, Community<V, E> prevCom_) {
 	currCom_.addPredecessor(prevCom_);
 	prevCom_.addSuccessor(currCom_);
     }
@@ -351,13 +351,13 @@ public class TimeLineList<T> {
      * @param outWrt_
      * @throws IOException
      */
-    private static <T> void computeMetrics(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
+    private static <V, E> void computeMetrics(List<List<Community<V, E>>> snapshotList_, BufferedWriter outWrt_)
 	    throws IOException {
 	outWrt_.write("Snap\tSize\tAge\tEvolTce\tStability\n");
 	for (int i = 0; i < snapshotList_.size(); i++) {
-	    List<Community<T>> snapshot = snapshotList_.get(i);
+	    List<Community<V, E>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
-		for (Community<T> comm : snapshot) {
+		for (Community<V, E> comm : snapshot) {
 		    if (!comm.isTimelineLast()) {
 			String outStr = i + "";
 			outStr = outStr + "\t" + comm.getSize();
@@ -382,13 +382,13 @@ public class TimeLineList<T> {
      * @param outWrt_
      * @throws IOException
      */
-    private static <T> void printSizeAgePerCom(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
+    private static <V, E> void printSizeAgePerCom(List<List<Community<V, E>>> snapshotList_, BufferedWriter outWrt_)
 	    throws IOException {
 	outWrt_.write("Community\tSize\tAge\tStab\n");
 	for (int i = 0; i < snapshotList_.size(); i++) {
-	    List<Community<T>> snapshot = snapshotList_.get(i);
+	    List<Community<V, E>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
-		for (Community<T> comm : snapshot) {
+		for (Community<V, E> comm : snapshot) {
 		    if (comm.isTimelineLast()) {
 			String sizeOverTime = comm.getID() + "\t" + comm.getSize() + "\t" + comm.getTotalTimeLineLen()
 				+ "\t" + comm.getAvgMemberStability() + "\n";
@@ -401,18 +401,18 @@ public class TimeLineList<T> {
     }
 
     /**
-     * @param <T>
+     * @param <V>
      * @param snapshotList_
      * @param outWrt_
      * @throws IOException
      */
-    private static <T> void printStabSpanPerCom(List<List<Community<T>>> snapshotList_, BufferedWriter outWrt_)
+    private static <V, E> void printStabSpanPerCom(List<List<Community<V, E>>> snapshotList_, BufferedWriter outWrt_)
 	    throws IOException {
 	outWrt_.write("Community\tStability\tSpan\n");
 	for (int i = 0; i < snapshotList_.size(); i++) {
-	    List<Community<T>> snapshot = snapshotList_.get(i);
+	    List<Community<V, E>> snapshot = snapshotList_.get(i);
 	    if (null != snapshot) {
-		for (Community<T> comm : snapshot) {
+		for (Community<V, E> comm : snapshot) {
 		    if (comm.isTimelineLast()) {
 			String sizeOverTime = comm.getID() + "\t" + comm.getAvgMemberStability() + "\t" + comm.getAge()
 				+ "\n";
@@ -428,17 +428,17 @@ public class TimeLineList<T> {
      * Gets the last one.. traverses back throu main timeline, and reverts list
      * before returning
      * 
-     * @param <T>
+     * @param <V>
      * @param comm_
      * @return
      */
-    private static <T> String commSizeOverTime(Community<T> comm_) {
+    private static <V, E> String commSizeOverTime(Community<V, E> comm_) {
 
 	String tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t";
 	String sizeOverTime = "Comunity_" + comm_.getID() + "\t";
 	List<Integer> values = new LinkedList<Integer>();
 
-	for (Community<T> curComm = comm_; curComm != null; curComm = curComm.getMainPred()) {
+	for (Community<V, E> curComm = comm_; curComm != null; curComm = curComm.getMainPred()) {
 	    values.add(curComm.getSize());
 	}
 	Collections.reverse(values);

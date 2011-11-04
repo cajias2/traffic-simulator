@@ -7,12 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.Hypergraph;
 import edu.uci.ics.jung.io.GraphMLWriter;
 
 /**
@@ -45,8 +43,8 @@ public class GraphGatherer<V, E> implements Steppable {
     public void step(SimState state_) {
 	SocialSim socSim = (SocialSim) state_;
 	if (0 == socSim.schedule.getSteps() % SNAPSHOT) {
-	    if (null != socSim.network && null != socSim.network.getJGraph()) {
-		writeGraph(socSim.network.getJGraph());
+	    if (null != socSim.network && null != socSim.network) {
+		writeGraph((Graph<V, E>) socSim.network);
 		_graphEvol.add((Graph<V, E>) socSim.network.getGraphSnapshot());
 	    } else {
 		writeGraph(null);
@@ -63,7 +61,7 @@ public class GraphGatherer<V, E> implements Steppable {
      * @return void
      * @author biggie
      */
-    private void writeGraph(Graph<Agent, Number> jGraph_) {
+    private void writeGraph(Graph<V, E> g_) {
 	FileWriter outFileWrt;
 	GraphMLWriter<V, E> gWriter = new GraphMLWriter<V, E>();
 	try {
@@ -71,7 +69,7 @@ public class GraphGatherer<V, E> implements Steppable {
 		    + ".xml");
 	    BufferedWriter outWrt;
 	    outWrt = new BufferedWriter(outFileWrt);
-	    gWriter.save((Hypergraph<V, E>) jGraph_, outWrt);
+	    gWriter.save(g_, outWrt);
 	    outWrt.close();
 	} catch (IOException e) {
 
@@ -83,43 +81,6 @@ public class GraphGatherer<V, E> implements Steppable {
      * @author biggie
      */
     public List<Graph<V, E>> getGraphEvol() {
-	// List<Graph<V, E>> gLst = new LinkedList<Graph<V, E>>();
-	// GraphMLReader<Graph<V, E>, V, E> graphReader = null;
-	//
-	// try {
-	// graphReader = new GraphMLReader<Graph<V,E>, GraphGatherer.V,
-	// GraphGatherer.E>(vertex_factory, edge_factory)
-	// } catch (ParserConfigurationException e1) {
-	// // TODO Auto-generated catch block
-	// e1.printStackTrace();
-	// } catch (SAXException e1) {
-	// // TODO Auto-generated catch block
-	// e1.printStackTrace();
-	// }
-	//
-	// File tmDir = new File(OUT_FOLDR);
-	// //Sort by timestamp
-	// File[] files = tmDir.listFiles();
-	// Arrays.sort(files, new Comparator<File>() {
-	// public int compare(File f1, File f2) {
-	// return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-	// }
-	// });
-	//
-	// for(File f : files){
-	// try {
-	// Graph<V,E> graph = new UndirectedSparseGraph<V, E>();
-	// graphReader.load(f.getAbsolutePath(), graph);
-	// gLst.add(graph);
-	// } catch (FileNotFoundException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-
 	return _graphEvol;
     }
 }

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import processing.core.PApplet;
-import sim.geo.distance.Distance;
-import sim.geo.distance.Kilometers;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Kilometers;
 
 public class Street extends Road {
     private static int _streetCount = 0;

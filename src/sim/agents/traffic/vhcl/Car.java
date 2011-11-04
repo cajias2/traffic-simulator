@@ -9,9 +9,9 @@ import java.util.logging.Logger;
 import org.w3c.dom.Document;
 
 import processing.core.PApplet;
-import sim.geo.distance.Distance;
-import sim.geo.distance.Kilometers;
-import sim.geo.distance.Meters;
+import sim.app.geo.distance.Distance;
+import sim.app.geo.distance.Kilometers;
+import sim.app.geo.distance.Meters;
 import sim.graph.traffic.Road;
 import sim.graph.traffic.StreetXing;
 import edu.uci.ics.jung.graph.Graph;
