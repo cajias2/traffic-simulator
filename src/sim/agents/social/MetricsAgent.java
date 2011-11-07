@@ -15,7 +15,7 @@ import sim.agents.Agent;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.graph.algorithms.metrics.LowOrderGraphMetrics;
+import sim.graph.algorithms.metrics.SimpleMetrics;
 
 /**
  * @author biggie
@@ -53,8 +53,8 @@ public class MetricsAgent implements Steppable {
 
 	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
 	    double ts = socSim.schedule.time() + 1;
-	    double avgCi = LowOrderGraphMetrics.avgClusterCoeff(socSim.network);
-	    double avgDeg = LowOrderGraphMetrics.avgDeg(socSim.network);
+	    double avgCi = SimpleMetrics.avgClusterCoeff(socSim.network);
+	    double avgDeg = SimpleMetrics.avgDeg(socSim.network);
 	    double edgepnct = socSim.network.getEdgeCount() / maxEdges;
 	    /*
 	     * Print a log line

@@ -13,11 +13,11 @@ import sim.app.networktest.NetworkTest;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.mason.AgentNetwork;
 import sim.portrayal.DrawInfo2D;
 import sim.util.Bag;
 import sim.util.Double2D;
 import ec.util.MersenneTwisterFast;
+import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
@@ -29,14 +29,14 @@ public class Agent implements Steppable {
     private int steps = 0;
     private Double2D desiredLocation = null;
     protected MersenneTwisterFast _rand = null;
-    protected AgentNetwork<Agent, String> _net;
+    protected Graph<Agent, String> _net;
     private static int _agentCount = 0;
 
     protected int _id;
     protected int _actionDim = 0;
 
     public Agent(final SimState state_) {
-	SocialSim socSim = (SocialSim) state_;
+	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
 	_net = socSim.network;
 	_rand = socSim.random;
 	_id = _agentCount;
@@ -48,12 +48,14 @@ public class Agent implements Steppable {
      */
     public void step(final SimState state_) {
 
-	SocialSim socSim = (SocialSim) state_;
+	@SuppressWarnings("unchecked")
+	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
 	beforeStep(socSim);
 	Double2D currLoc = socSim.env.getObjectLocation(this);
 	Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y),
 		_actionDim);
 
+	@SuppressWarnings("unchecked")
 	Iterator<Agent> iter = objs.iterator();
 	while (iter.hasNext()) {
 	    Agent ag = iter.next();
@@ -70,7 +72,7 @@ public class Agent implements Steppable {
 
     /**
      * @author biggie
-     * @name interactWithAgent Purpose TODO
+     * @name interactWithAgent
      * 
      * @param
      * @return void
@@ -86,7 +88,7 @@ public class Agent implements Steppable {
      *            The state of the simulation
      * @return void
      */
-    protected void afterStep(SocialSim state_) {
+    protected void afterStep(SocialSim<Agent, String> state_) {
     }
 
     /**
@@ -97,12 +99,12 @@ public class Agent implements Steppable {
      *            The state of the simulation
      * @return void
      */
-    protected void beforeStep(SocialSim state_) {
+    protected void beforeStep(SocialSim<Agent, String> state_) {
     }
 
     /**
      * @author biggie
-     * @name setRandomEngine Purpose TODO
+     * @name setRandomEngine
      * 
      * @param
      * @return void
@@ -121,13 +123,14 @@ public class Agent implements Steppable {
     /**
      * 
      * @author biggie
-     * @name move Purpose TODO
+     * @name move
      * 
      * @param
      * @return Double2D
      */
     protected Double2D move(SimState state_) {
-	SocialSim socSim = (SocialSim) state_;
+	@SuppressWarnings("unchecked")
+	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
 	Double2D currLoc = socSim.env.getObjectLocation(this);
 	steps--;
 	if (desiredLocation == null || steps <= 0) {
@@ -198,7 +201,7 @@ public class Agent implements Steppable {
     /**
      * 
      * @author biggie
-     * @name befriend Purpose TODO
+     * @name befriend
      * 
      * @param
      * @return void

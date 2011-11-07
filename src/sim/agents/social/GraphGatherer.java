@@ -10,6 +10,7 @@ import java.util.List;
 import sim.app.social.SocialSim;
 import sim.engine.SimState;
 import sim.engine.Steppable;
+import sim.graph.utils.GraphUtils;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.io.GraphMLWriter;
 
@@ -41,11 +42,12 @@ public class GraphGatherer<V, E> implements Steppable {
 	 */
     @Override
     public void step(SimState state_) {
-	SocialSim socSim = (SocialSim) state_;
+	@SuppressWarnings("unchecked")
+	SocialSim<V, E> socSim = (SocialSim<V, E>) state_;
 	if (0 == socSim.schedule.getSteps() % SNAPSHOT) {
 	    if (null != socSim.network && null != socSim.network) {
-		writeGraph((Graph<V, E>) socSim.network);
-		_graphEvol.add((Graph<V, E>) socSim.network.getGraphSnapshot());
+		writeGraph(socSim.network);
+		_graphEvol.add(GraphUtils.cloneGraph(socSim.network));
 	    } else {
 		writeGraph(null);
 		_graphEvol.add(null);

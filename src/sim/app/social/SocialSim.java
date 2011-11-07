@@ -15,10 +15,10 @@ import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
-import sim.mason.AgentNetwork;
 import sim.util.Double2D;
 import sim.utils.xml.social.SocialInputParseService;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 @SuppressWarnings("serial")
 public class SocialSim<V, E> extends SocialSimState {
@@ -35,7 +35,7 @@ public class SocialSim<V, E> extends SocialSimState {
     public static int YMIN = 0;
     public static int YMAX;
 
-    public AgentNetwork<V, E> network = null;
+    public Graph<V, E> network = null;
     public Continuous2D env;
 
     /**
@@ -95,7 +95,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	SIM_TIME = parseSrv.getSimDuration();
 	XMAX = parseSrv.getWidth();
 	YMAX = parseSrv.getLen();
-	network = new AgentNetwork<V, E>();
+	network = new UndirectedSparseGraph<V, E>();
 	env = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
     }
 
