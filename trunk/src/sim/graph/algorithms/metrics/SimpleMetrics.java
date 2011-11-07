@@ -13,7 +13,7 @@ import edu.uci.ics.jung.graph.Graph;
  * @author biggie 
  * @date Nov 3, 2011
  */
-public class LowOrderGraphMetrics {
+public class SimpleMetrics {
 
     /**
      * 
