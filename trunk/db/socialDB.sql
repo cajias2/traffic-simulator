@@ -2,133 +2,88 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
-CREATE SCHEMA IF NOT EXISTS `socialSimBD` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci ;
-USE `socialSimBD` ;
+DROP SCHEMA IF EXISTS `socSimDB` ;
+CREATE SCHEMA IF NOT EXISTS `socSimDB` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci ;
+USE `socSimDB` ;
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`simulations`
+-- Table `simulations`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`simulations` (
+DROP TABLE IF EXISTS `simulations` ;
+
+CREATE  TABLE IF NOT EXISTS `simulations` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`nodes`
+-- Table `nodes`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`nodes` (
+DROP TABLE IF EXISTS `nodes` ;
+
+CREATE  TABLE IF NOT EXISTS `nodes` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  PRIMARY KEY (`id`) ,
-  INDEX `sim_id` () ,
-  CONSTRAINT `sim_id`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`simulations` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`graphs`
+-- Table `graphs`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`graphs` (
+DROP TABLE IF EXISTS `graphs` ;
+
+CREATE  TABLE IF NOT EXISTS `graphs` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `step` VARCHAR(45) NOT NULL ,
-  PRIMARY KEY (`id`, `step`) ,
-  INDEX `sim_id` () ,
-  INDEX `from_node` () ,
-  INDEX `to_node` () ,
-  CONSTRAINT `sim_id`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`simulations` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `from_node`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`nodes` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `to_node`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`nodes` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`, `step`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`metrics`
+-- Table `metrics`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`metrics` (
+DROP TABLE IF EXISTS `metrics` ;
+
+CREATE  TABLE IF NOT EXISTS `metrics` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `avg_ci` FLOAT NULL ,
   `cpl` FLOAT NULL ,
-  INDEX `graph_id` () ,
-  PRIMARY KEY (`id`) ,
-  CONSTRAINT `graph_id`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`graphs` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`communities`
+-- Table `communities`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`communities` (
+DROP TABLE IF EXISTS `communities` ;
+
+CREATE  TABLE IF NOT EXISTS `communities` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  PRIMARY KEY (`id`) ,
-  INDEX `graph_id` () ,
-  CONSTRAINT `graph_id`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`graphs` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`community_members`
+-- Table `community_members`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`community_members` (
+DROP TABLE IF EXISTS `community_members` ;
+
+CREATE  TABLE IF NOT EXISTS `community_members` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  PRIMARY KEY (`id`) ,
-  INDEX `com_id` () ,
-  INDEX `node_id` () ,
-  CONSTRAINT `com_id`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`communities` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `node_id`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`nodes` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `socialSimBD`.`evolution`
+-- Table `evolution`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `socialSimBD`.`evolution` (
+DROP TABLE IF EXISTS `evolution` ;
+
+CREATE  TABLE IF NOT EXISTS `evolution` (
   `id` INT NOT NULL ,
   `step` INT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `from_com` () ,
-  INDEX `to_com` () ,
-  CONSTRAINT `from_com`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`communities` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `to_com`
-    FOREIGN KEY ()
-    REFERENCES `socialSimBD`.`communities` ()
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
