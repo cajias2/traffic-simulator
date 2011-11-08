@@ -3,6 +3,7 @@ package sim.app.social;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,7 +50,6 @@ public class SocialSim<V, E> extends SocialSimState {
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
 	String simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
-
 	initializeThis(simXml);
     }
 
@@ -80,7 +80,6 @@ public class SocialSim<V, E> extends SocialSimState {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -100,31 +99,25 @@ public class SocialSim<V, E> extends SocialSimState {
     }
 
     /**
-     * @author biggie
-     * @name acceptablePosition Purpose Validate new position: Make sure not
-     *       over the boundaries.
-     * @param node_
-     *            a given node
-     * @param location_
-     *            proposed location
-     * @return boolean
-     */
-    public boolean acceptablePosition(final V node_, final Double2D location_) {
-	if (location_.x < DIAMETER / 2 || location_.x > (XMAX - XMIN) - DIAMETER / 2 || location_.y < DIAMETER / 2
-		|| location_.y > (YMAX - YMIN) - DIAMETER / 2)
-	    return false;
-	return true;
-    }
-
-    /**
      * Start the Simulation.
      */
     @Override
     public void start() {
 	super.start();
 	schedule.reset(); // clear out the schedule
-	scheduleAgents();
+	List<V> agList = scheduleAgents();
+	persistAgents((List<Agent>) agList);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
+    }
+
+    /**
+     * 
+     */
+    private void persistAgents(List<Agent> agentList_) {
+
+	for (Agent ag : agentList_) {
+	    //TODO Persist
+	}
     }
 
     /**
@@ -133,30 +126,62 @@ public class SocialSim<V, E> extends SocialSimState {
      * @param
      * @return void
      */
-    private void scheduleAgents() {
+    private List<V> scheduleAgents() {
+	List<V> agentList = new LinkedList<V>();
 	for (int i = 0; i < AGENT_COUNT; i++) {
 	    double ticket = random.nextDouble() * 100;
 	    double winner = 0.0;
-	    V ag;
 
 	    Iterator<Entry<Class<V>, Double>> it = _agentMap.entrySet().iterator();
 	    while (it.hasNext()) {
 		Entry<Class<V>, Double> entry = it.next();
 		winner += entry.getValue();
 		if (winner >= ticket) {
-		    try {
-			ag = instantiateAgentObj(entry.getKey());
-			env.setObjectLocation(ag, new Double2D(random.nextDouble() * (XMAX - XMIN - DIAMETER) + XMIN
-				+ DIAMETER / 2, random.nextDouble() * (YMAX - YMIN - DIAMETER) + YMIN + DIAMETER / 2));
-			network.addVertex(ag);
-			schedule.scheduleRepeating(Schedule.EPOCH, 1, (Agent) ag, 1);
-		    } catch (Exception e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		    }
+		    agentList.add(scheduleAgentOfType(entry.getKey()));
 		}
 	    }
 	}
+	return agentList;
+    }
+
+    /**
+     * @param entry
+     * @return
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private V scheduleAgentOfType(Class<V> entry) {
+	V ag = null;
+	try {
+	    ag = instantiateAgentObj(entry);
+	    env.setObjectLocation(ag, intialLoc());
+	    scheduleAgent(ag);
+	} catch (Exception e) {
+	    System.err.println(e.getMessage());
+	    System.exit(-1);
+	}
+	return ag;
+    }
+
+    /**
+     * @return
+     */
+    private Double2D intialLoc() {
+	return new Double2D(random.nextDouble() * (XMAX - XMIN - DIAMETER) + XMIN + DIAMETER / 2, random.nextDouble()
+		* (YMAX - YMIN - DIAMETER) + YMIN + DIAMETER / 2);
+    }
+
+    /**
+     * Schedule a single agent.
+     * 
+     * @param ag
+     */
+    private void scheduleAgent(V ag) {
+	network.addVertex(ag);
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, (Agent) ag, 1);
     }
 
     /**
@@ -186,8 +211,11 @@ public class SocialSim<V, E> extends SocialSimState {
     }
 
     /**
+     * Reflective instantiation of whatever class name was passed in the xml
+     * description file
+     * 
      * @author biggie
-     * @name instantiateAgentObj Purpose TODO
+     * @name instantiateAgentObj
      * @param
      * @return V
      */
