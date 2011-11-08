@@ -21,7 +21,6 @@ import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
- * 
  */
 public class Agent implements Steppable {
 
@@ -52,8 +51,7 @@ public class Agent implements Steppable {
 	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
 	beforeStep(socSim);
 	Double2D currLoc = socSim.env.getObjectLocation(this);
-	Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y),
-		_actionDim);
+	Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y), _actionDim);
 
 	@SuppressWarnings("unchecked")
 	Iterator<Agent> iter = objs.iterator();
@@ -73,7 +71,6 @@ public class Agent implements Steppable {
     /**
      * @author biggie
      * @name interactWithAgent
-     * 
      * @param
      * @return void
      */
@@ -83,7 +80,6 @@ public class Agent implements Steppable {
     /**
      * @author biggie
      * @name afterStep Purpose: Hook method to prepare child agents for step
-     * 
      * @param SimState
      *            The state of the simulation
      * @return void
@@ -94,7 +90,6 @@ public class Agent implements Steppable {
     /**
      * @author biggie
      * @name beforeStep Purpose:Hook method to perform actions after step
-     * 
      * @param SimState
      *            The state of the simulation
      * @return void
@@ -105,7 +100,6 @@ public class Agent implements Steppable {
     /**
      * @author biggie
      * @name setRandomEngine
-     * 
      * @param
      * @return void
      */
@@ -121,10 +115,8 @@ public class Agent implements Steppable {
     }
 
     /**
-     * 
      * @author biggie
      * @name move
-     * 
      * @param
      * @return Double2D
      */
@@ -151,13 +143,7 @@ public class Agent implements Steppable {
 	    dy /= temp;
 	}
 
-	if (!socSim.acceptablePosition(this, new Double2D(currLoc.x + dx, currLoc.y + dy))) {
-	    steps = 0;
-	} else {
-	    currLoc = new Double2D(currLoc.x + dx, currLoc.y + dy);
-	}
-
-	return currLoc;
+	return new Double2D(currLoc.x + dx, currLoc.y + dy);
     }
 
     /**
@@ -199,10 +185,8 @@ public class Agent implements Steppable {
     }
 
     /**
-     * 
      * @author biggie
      * @name befriend
-     * 
      * @param
      * @return void
      */

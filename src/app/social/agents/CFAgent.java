@@ -156,6 +156,7 @@ public class CFAgent extends Agent {
 
     @Override
     protected Double2D move(SimState state_) {
+	@SuppressWarnings("unchecked")
 	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
 	return socSim.env.getObjectLocation(this);
     }
