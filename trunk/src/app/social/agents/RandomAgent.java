@@ -13,7 +13,7 @@ public class RandomAgent extends Agent {
 
     private static final long serialVersionUID = -519454272167626554L;
     private static int COUNT = 0;
-    private final static int DIM = 10000;
+    private final static int DIM = 10;
 
     /**
      * @author biggie RandomAgent
@@ -47,7 +47,7 @@ public class RandomAgent extends Agent {
      * (non-Javadoc)
      * 
      * @see sim.agents.Agent#interactWithAgent(sim.agents.Agent,
-     * sim.engine.SimState)
+     * sim.engine.SimState)ÿ
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
