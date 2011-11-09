@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import sim.agents.Agent;
 import sim.app.SocialSimState;
+import sim.app.social.db.DBManager;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -29,6 +30,7 @@ public class SocialSim<V, E> extends SocialSimState {
     // private static GraphGatherer<V, E> _gatherer = null;
     private int AGENT_COUNT;
     private Map<Class<V>, Double> _agentMap;
+    private DBManager _dbMgr;
     public static final double DIAMETER = 8;
     public int SIM_TIME;
     public static int XMIN = 0;
@@ -105,19 +107,29 @@ public class SocialSim<V, E> extends SocialSimState {
     public void start() {
 	super.start();
 	schedule.reset(); // clear out the schedule
-	List<V> agList = scheduleAgents();
-	persistAgents((List<Agent>) agList);
+	_dbMgr = new DBManager();
+	int simID = _dbMgr.newSimulation();
+	initiateAgents(simID);
+    }
+
+    /**
+     * @param simID
+     */
+    private void initiateAgents(int simID) {
+	@SuppressWarnings("unchecked")
+	List<Agent> agList = (List<Agent>) scheduleAgents();
+	persistAgents(simID, agList);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
     }
 
     /**
-     * 
+     * @param simID_
      */
-    private void persistAgents(List<Agent> agentList_) {
-
+    private void persistAgents(int simID_, List<Agent> agentList_) {
 	for (Agent ag : agentList_) {
-	    //TODO Persist
+	    _dbMgr.addNode(simID_, ag.getID());
 	}
+	_dbMgr.insertNodes();
     }
 
     /**
@@ -205,7 +217,6 @@ public class SocialSim<V, E> extends SocialSimState {
     public static void main(String[] args) {
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
-
 	_simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
 	doLoop(SocialSim.class, args);
     }
