@@ -7,33 +7,35 @@ CREATE SCHEMA IF NOT EXISTS `socSimDB` DEFAULT CHARACTER SET latin1 COLLATE lati
 USE `socSimDB` ;
 
 -- -----------------------------------------------------
--- Table `simulations`
+-- Table `socSimDB`.`simulations`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `simulations` ;
+DROP TABLE IF EXISTS `socSimDB`.`simulations` ;
 
-CREATE  TABLE IF NOT EXISTS `simulations` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`simulations` (
   `id` INT NOT NULL AUTO_INCREMENT ,
+  `time_start` MEDIUMTEXT  NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `nodes`
+-- Table `socSimDB`.`nodes`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `nodes` ;
+DROP TABLE IF EXISTS `socSimDB`.`nodes` ;
 
-CREATE  TABLE IF NOT EXISTS `nodes` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`nodes` (
   `id` INT NOT NULL AUTO_INCREMENT ,
+  `node` INT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `graphs`
+-- Table `socSimDB`.`graphs`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `graphs` ;
+DROP TABLE IF EXISTS `socSimDB`.`graphs` ;
 
-CREATE  TABLE IF NOT EXISTS `graphs` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`graphs` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `step` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`id`, `step`) )
@@ -41,11 +43,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `metrics`
+-- Table `socSimDB`.`metrics`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `metrics` ;
+DROP TABLE IF EXISTS `socSimDB`.`metrics` ;
 
-CREATE  TABLE IF NOT EXISTS `metrics` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`metrics` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `avg_ci` FLOAT NULL ,
   `cpl` FLOAT NULL ,
@@ -54,42 +56,38 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `communities`
+-- Table `socSimDB`.`communities`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `communities` ;
+DROP TABLE IF EXISTS `socSimDB`.`communities` ;
 
-CREATE  TABLE IF NOT EXISTS `communities` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`communities` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `community_members`
+-- Table `socSimDB`.`community_members`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `community_members` ;
+DROP TABLE IF EXISTS `socSimDB`.`community_members` ;
 
-CREATE  TABLE IF NOT EXISTS `community_members` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`community_members` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `evolution`
+-- Table `socSimDB`.`evolution`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `evolution` ;
+DROP TABLE IF EXISTS `socSimDB`.`evolution` ;
 
-CREATE  TABLE IF NOT EXISTS `evolution` (
+CREATE  TABLE IF NOT EXISTS `socSimDB`.`evolution` (
   `id` INT NOT NULL ,
   `step` INT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
-
-CREATE USER `rolf` IDENTIFIED BY 'miramar';
-
-CREATE USER `antonio` IDENTIFIED BY 'antonio';
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
