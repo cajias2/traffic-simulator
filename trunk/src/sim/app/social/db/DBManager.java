@@ -104,19 +104,21 @@ public class DBManager {
      * @param from_
      * @param to_
      */
-    public void addEdge(Integer simID_, Integer step_, Integer from_, Integer to_) {
+    public void addEdge(Integer simID_, Integer step_, Integer from_, Integer to_, boolean isNewEdge_) {
 	try {
 	    if (_pstmtEdge == null) {
-		_pstmtEdge = _conn.prepareStatement("insert into graphs (sim_id, step, from_node, to_node) "
+		_pstmtEdge = _conn
+			.prepareStatement("insert into graphs (sim_id, step, from_node, to_node, is_new_edge) "
 			+ "values (?,?,(SELECT id FROM nodes where node = ? and sim_id = ? ),"
-			+ "(SELECT id FROM nodes where node = ? and sim_id = ? ))");
+				+ "(SELECT id FROM nodes where node = ? and sim_id = ? ), ?)");
 	    }
 	    _pstmtEdge.setInt(1, simID_);
 	    _pstmtEdge.setInt(2, step_);
 	    _pstmtEdge.setInt(3, from_);
-	    _pstmtEdge.setInt(1, simID_);
-	    _pstmtEdge.setInt(4, to_);
-	    _pstmtEdge.setInt(1, simID_);
+	    _pstmtEdge.setInt(4, simID_);
+	    _pstmtEdge.setInt(5, to_);
+	    _pstmtEdge.setInt(6, simID_);
+	    _pstmtEdge.setBoolean(7, isNewEdge_);
 	    _pstmtEdge.addBatch();
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
