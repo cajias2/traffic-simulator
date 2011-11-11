@@ -10,9 +10,12 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 import sim.agents.Agent;
+import sim.agents.social.DBWriterAgent;
 import sim.app.SocialSimState;
 import sim.app.social.db.DBManager;
+import sim.graph.utils.Edge;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -39,6 +42,7 @@ public class SocialSim<V, E> extends SocialSimState {
     public static int YMAX;
 
     public Graph<V, E> network = null;
+    public Graph<V, Edge> _temporalNetwork = null;
     public Continuous2D env;
 
     /**
@@ -97,6 +101,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	XMAX = parseSrv.getWidth();
 	YMAX = parseSrv.getLen();
 	network = new UndirectedSparseGraph<V, E>();
+	_temporalNetwork = new UndirectedSparseGraph<V,Edge>();
 	env = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
     }
 
@@ -119,6 +124,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	@SuppressWarnings("unchecked")
 	List<Agent> agList = (List<Agent>) scheduleAgents();
 	persistAgents(simID, agList);
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, new DBWriterAgent(), 1);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
     }
 
@@ -152,7 +158,7 @@ public class SocialSim<V, E> extends SocialSimState {
 		    agentList.add(scheduleAgentOfType(entry.getKey()));
 		}
 	    }
-	}
+	}	
 	return agentList;
     }
 
@@ -207,6 +213,14 @@ public class SocialSim<V, E> extends SocialSimState {
 	doLoop(SocialSim.class, args_);
 	return null;
     }
+    
+    /**
+     * 
+     * @return The DBManager of this instance
+     */
+    public DBManager getDBManager(){
+    	return _dbMgr;
+    }
 
     /**
      * @author biggie
@@ -240,7 +254,11 @@ public class SocialSim<V, E> extends SocialSimState {
 	Object obj = cons.newInstance(argObj);
 	return (V) obj;
     }
-
+    
+    public void resetTemporalNetwork(){
+    	_temporalNetwork = new UndirectedSparseGraph<V,Edge>();
+    }
+    
     /**
      * Kills the simulation after <code>SIM_TIME</code> steps
      * 

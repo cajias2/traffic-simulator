@@ -11,6 +11,7 @@ import java.util.Iterator;
 
 import sim.app.networktest.NetworkTest;
 import sim.app.social.SocialSim;
+import sim.graph.utils.Edge;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.portrayal.DrawInfo2D;
@@ -29,6 +30,7 @@ public class Agent implements Steppable {
     private Double2D desiredLocation = null;
     protected MersenneTwisterFast _rand = null;
     protected Graph<Agent, String> _net;
+    protected Graph<Agent, Edge> _temp;
     private static int _agentCount = 0;
 
     protected int _id;
@@ -36,7 +38,7 @@ public class Agent implements Steppable {
 
     public Agent(final SimState state_) {
 	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
-	_net = socSim.network;
+	_net = socSim.network;	
 	_rand = socSim.random;
 	_id = _agentCount;
 	_agentCount++;
@@ -49,6 +51,7 @@ public class Agent implements Steppable {
 
 	@SuppressWarnings("unchecked")
 	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
+	_temp = socSim._temporalNetwork;
 	beforeStep(socSim);
 	Double2D currLoc = socSim.env.getObjectLocation(this);
 	Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y), _actionDim);
@@ -191,7 +194,25 @@ public class Agent implements Steppable {
      * @return void
      */
     protected void befriend(Agent ag_) {
+    
 	_net.addEdge(this + "_" + ag_, this, ag_);
+	
+	if(!_temp.containsVertex(this)){
+		_temp.addVertex(this);
+	}
+	
+	if(!_temp.containsVertex(ag_)){
+		_temp.addVertex(ag_);
+	}
+	
+	Edge e = new Edge(this.getID(), ag_.getID(), true);
+	boolean result = _temp.addEdge(e, this, ag_);
+	
+	if(!result){		
+		Edge toDelete = _temp.findEdge(this, ag_);
+		_temp.removeEdge(toDelete);
+	}
+	
     }
 
     /**
@@ -199,6 +220,22 @@ public class Agent implements Steppable {
      */
     protected void unfriend(Agent ag_) {
 	_net.removeEdge(_net.findEdge(this, ag_));
+	
+	if(!_temp.containsVertex(this)){
+		_temp.addVertex(this);
+	}
+	if(!_temp.containsVertex(ag_)){
+		_temp.addVertex(ag_);
+	}
+	
+	Edge e = new Edge(this.getID(), ag_.getID(), false);
+	boolean result = _temp.addEdge(e, this, ag_);
+	
+	if(!result){	
+		Edge toDelete = _temp.findEdge(this, ag_);
+		_temp.removeEdge(toDelete);
+	}
+	
     }
 
     @Override
