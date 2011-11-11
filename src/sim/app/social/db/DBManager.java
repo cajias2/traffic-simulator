@@ -24,6 +24,8 @@ public class DBManager {
     private PreparedStatement _pstmtEdge;
 
     private Connection _conn;
+    
+    private Integer _simID;
 
     /**
      * Constructor
@@ -45,21 +47,20 @@ public class DBManager {
      */
     public Integer newSimulation() {
 	PreparedStatement pstmt = null;
-	Integer newSimRowID = null;
+	
 	try {
-	    pstmt = _conn.prepareStatement("insert into simulations (time_start) values (?)",
-		    Statement.RETURN_GENERATED_KEYS);
+	    pstmt = _conn.prepareStatement("insert into simulations (time_start) values (?)", Statement.RETURN_GENERATED_KEYS);
 	    pstmt.setLong(1, System.currentTimeMillis());
 	    pstmt.addBatch();
 	    pstmt.executeBatch();
 	    ResultSet resultSet = pstmt.getGeneratedKeys();
 	    if (resultSet != null && resultSet.next()) {
-		newSimRowID = resultSet.getInt(1);
+		_simID = resultSet.getInt(1);
 	    }
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
 	}
-	return newSimRowID;
+	return _simID;
     }
 
     /**
@@ -94,6 +95,9 @@ public class DBManager {
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
 	}
+	catch(NullPointerException e){
+		System.err.println("Problema");
+	}
     }
 
     /**
@@ -108,7 +112,7 @@ public class DBManager {
 	try {
 	    if (_pstmtEdge == null) {
 		_pstmtEdge = _conn
-			.prepareStatement("insert into graphs (sim_id, step, from_node, to_node, is_new_edge) "
+			.prepareStatement("insert into graphs (sim_id, step, from_node, to_node, is_create_edge) "
 			+ "values (?,?,(SELECT id FROM nodes where node = ? and sim_id = ? ),"
 				+ "(SELECT id FROM nodes where node = ? and sim_id = ? ), ?)");
 	    }
@@ -144,6 +148,10 @@ public class DBManager {
 	System.out.println("SQLException:\t" + e_.getMessage());
 	System.out.println("SQLState:\t" + e_.getSQLState());
 	System.out.println("VendorError:\t" + e_.getErrorCode());
+    }
+    
+    public int getSimID(){
+    	return _simID;
     }
 
 }
