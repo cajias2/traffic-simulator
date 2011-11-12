@@ -3,18 +3,13 @@
  */
 package sim.agents;
 
-import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
 import java.util.Iterator;
 
-import sim.app.networktest.NetworkTest;
 import sim.app.social.SocialSim;
-import sim.graph.utils.Edge;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.portrayal.DrawInfo2D;
+import sim.graph.utils.Edge;
 import sim.util.Bag;
 import sim.util.Double2D;
 import ec.util.MersenneTwisterFast;
@@ -149,39 +144,6 @@ public class Agent implements Steppable {
 	return new Double2D(currLoc.x + dx, currLoc.y + dy);
     }
 
-    /**
-     * @param object
-     * @param graphics
-     * @param info
-     */
-    public final void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
-	double diamx = info.draw.width * SocialSim.DIAMETER;
-	double diamy = info.draw.height * SocialSim.DIAMETER;
-
-	graphics.setColor(Color.red);
-	graphics.fillOval((int) (info.draw.x - diamx / 2), (int) (info.draw.y - diamy / 2), (int) (diamx),
-		(int) (diamy));
-	graphics.drawOval((int) (info.draw.x - diamx / 2), (int) (info.draw.y - diamy / 2),
-		(int) (diamx + _actionDim / 2), (int) (diamy + _actionDim / 2));
-	graphics.setFont(nodeFont.deriveFont(nodeFont.getSize2D() * (float) info.draw.width));
-	graphics.setColor(Color.blue);
-	// graphics.drawString(toString(), (int) (info.draw.x - diamx / 2),
-	// (int) (info.draw.y - diamy / 2));
-    }
-
-    /**
-     * @param object
-     * @param info
-     * @return
-     */
-    public boolean hitObject(Object object, DrawInfo2D info) {
-	double diamx = info.draw.width * NetworkTest.DIAMETER;
-	double diamy = info.draw.height * NetworkTest.DIAMETER;
-
-	Ellipse2D.Double ellipse = new Ellipse2D.Double((int) (info.draw.x - diamx / 2),
-		(int) (info.draw.y - diamy / 2), (int) (diamx), (int) (diamy));
-	return (ellipse.intersects(info.clip.x, info.clip.y, info.clip.width, info.clip.height));
-    }
 
     public final int getID() {
 	return _id;
@@ -194,48 +156,40 @@ public class Agent implements Steppable {
      * @return void
      */
     protected void befriend(Agent ag_) {
-    
 	_net.addEdge(this + "_" + ag_, this, ag_);
-	
-	if(!_temp.containsVertex(this)){
-		_temp.addVertex(this);
-	}
-	
-	if(!_temp.containsVertex(ag_)){
-		_temp.addVertex(ag_);
-	}
-	
-	Edge e = new Edge(this.getID(), ag_.getID(), true);
-	boolean result = _temp.addEdge(e, this, ag_);
-	
-	if(!result){		
-		Edge toDelete = _temp.findEdge(this, ag_);
-		_temp.removeEdge(toDelete);
-	}
-	
+	updateDeltaGraph(ag_, true);
     }
 
     /**
      * @param ag_
      */
     protected void unfriend(Agent ag_) {
-	_net.removeEdge(_net.findEdge(this, ag_));
-	
+        _net.removeEdge(_net.findEdge(this, ag_));
+        updateDeltaGraph(ag_, false);
+    }
+
+    /**
+     * Updates delta graph.
+     * 
+     * @param ag_
+     * @param isCreateEdge_
+     */
+    private void updateDeltaGraph(Agent ag_, boolean isCreateEdge_) {
 	if(!_temp.containsVertex(this)){
 		_temp.addVertex(this);
 	}
+	
 	if(!_temp.containsVertex(ag_)){
 		_temp.addVertex(ag_);
 	}
 	
-	Edge e = new Edge(this.getID(), ag_.getID(), false);
+	Edge e = new Edge(getID(), ag_.getID(), isCreateEdge_);
 	boolean result = _temp.addEdge(e, this, ag_);
-	
-	if(!result){	
+	// Removed negated edge.
+	if(!result){		
 		Edge toDelete = _temp.findEdge(this, ag_);
 		_temp.removeEdge(toDelete);
 	}
-	
     }
 
     @Override

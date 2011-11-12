@@ -10,16 +10,15 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import sim.agents.Agent;
 import sim.agents.social.DBWriterAgent;
 import sim.app.SocialSimState;
 import sim.app.social.db.DBManager;
-import sim.graph.utils.Edge;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
+import sim.graph.utils.Edge;
 import sim.util.Double2D;
 import sim.utils.xml.social.SocialInputParseService;
 import edu.uci.ics.jung.graph.Graph;
@@ -41,6 +40,7 @@ public class SocialSim<V, E> extends SocialSimState {
     public static int YMIN = 0;
     public static int YMAX;
 
+    private int simID_ = -1;
     public Graph<V, E> network = null;
     public Graph<V, Edge> _temporalNetwork = null;
     public Continuous2D env;
@@ -113,8 +113,8 @@ public class SocialSim<V, E> extends SocialSimState {
 	super.start();
 	schedule.reset(); // clear out the schedule
 	_dbMgr = new DBManager();
-	int simID = _dbMgr.newSimulation();
-	initiateAgents(simID);
+	simID_ = _dbMgr.newSimulation();
+	initiateAgents(simID_);
     }
 
     /**
@@ -220,6 +220,10 @@ public class SocialSim<V, E> extends SocialSimState {
      */
     public DBManager getDBManager(){
     	return _dbMgr;
+    }
+
+    public int getSimID() {
+	return simID_;
     }
 
     /**

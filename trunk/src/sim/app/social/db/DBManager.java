@@ -25,7 +25,6 @@ public class DBManager {
 
     private Connection _conn;
     
-    private Integer _simID;
 
     /**
      * Constructor
@@ -47,7 +46,7 @@ public class DBManager {
      */
     public Integer newSimulation() {
 	PreparedStatement pstmt = null;
-	
+	Integer newSimRowID = null;
 	try {
 	    pstmt = _conn.prepareStatement("insert into simulations (time_start) values (?)", Statement.RETURN_GENERATED_KEYS);
 	    pstmt.setLong(1, System.currentTimeMillis());
@@ -55,12 +54,12 @@ public class DBManager {
 	    pstmt.executeBatch();
 	    ResultSet resultSet = pstmt.getGeneratedKeys();
 	    if (resultSet != null && resultSet.next()) {
-		_simID = resultSet.getInt(1);
+		newSimRowID = resultSet.getInt(1);
 	    }
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
 	}
-	return _simID;
+	return newSimRowID;
     }
 
     /**
@@ -148,10 +147,6 @@ public class DBManager {
 	System.out.println("SQLException:\t" + e_.getMessage());
 	System.out.println("SQLState:\t" + e_.getSQLState());
 	System.out.println("VendorError:\t" + e_.getErrorCode());
-    }
-    
-    public int getSimID(){
-    	return _simID;
     }
 
 }
