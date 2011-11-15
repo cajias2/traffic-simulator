@@ -33,7 +33,7 @@ public class Agent implements Steppable {
 
     public Agent(final SimState state_) {
 	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
-	_net = socSim.network;	
+	_net = socSim.network;
 	_rand = socSim.random;
 	_id = _agentCount;
 	_agentCount++;
@@ -144,7 +144,6 @@ public class Agent implements Steppable {
 	return new Double2D(currLoc.x + dx, currLoc.y + dy);
     }
 
-
     public final int getID() {
 	return _id;
     }
@@ -164,8 +163,8 @@ public class Agent implements Steppable {
      * @param ag_
      */
     protected void unfriend(Agent ag_) {
-        _net.removeEdge(_net.findEdge(this, ag_));
-        updateDeltaGraph(ag_, false);
+	_net.removeEdge(_net.findEdge(this, ag_));
+	updateDeltaGraph(ag_, false);
     }
 
     /**
@@ -175,20 +174,18 @@ public class Agent implements Steppable {
      * @param isCreateEdge_
      */
     private void updateDeltaGraph(Agent ag_, boolean isCreateEdge_) {
-	if(!_temp.containsVertex(this)){
-		_temp.addVertex(this);
+	if (!_temp.containsVertex(this)) {
+	    _temp.addVertex(this);
 	}
-	
-	if(!_temp.containsVertex(ag_)){
-		_temp.addVertex(ag_);
+
+	if (!_temp.containsVertex(ag_)) {
+	    _temp.addVertex(ag_);
 	}
-	
-	Edge e = new Edge(getID(), ag_.getID(), isCreateEdge_);
-	boolean result = _temp.addEdge(e, this, ag_);
+
+	boolean result = _temp.addEdge(new Edge(isCreateEdge_), this, ag_);
 	// Removed negated edge.
-	if(!result){		
-		Edge toDelete = _temp.findEdge(this, ag_);
-		_temp.removeEdge(toDelete);
+	if (!result) {
+	    _temp.removeEdge(_temp.findEdge(this, ag_));
 	}
     }
 

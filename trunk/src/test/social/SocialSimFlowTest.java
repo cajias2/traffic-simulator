@@ -41,7 +41,7 @@ public class SocialSimFlowTest {
 	    }
 	}
 	long durTime = System.currentTimeMillis();
-	runSim(args, kSize, snapshotInterval, totalSimRuns);
+	runSim(args, kSize, totalSimRuns);
 	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
     }
 
@@ -49,14 +49,13 @@ public class SocialSimFlowTest {
      * 
      * @param args
      * @param kSize
-     * @param snapshotInterval
      * @param totalSimRuns
      */
-    private static void runSim(String[] args, int kSize, int snapshotInterval, int totalSimRuns) {
+    private static void runSim(String[] args, int kSize, int totalSimRuns) {
 	for (int i = 0; i < totalSimRuns; i++) {
 	    System.out.println("******\n* Run: " + i + "\n******\n");
 	    SocialSim<Agent, String> sim = new SocialSim<Agent, String>(SEED);
-	    sim.runSim(args, snapshotInterval);
+	    sim.runSim(args);
 	    System.out.println("Done.");
 	}
     }
