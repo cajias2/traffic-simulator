@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import sim.agents.Agent;
+
 import com.mysql.jdbc.Statement;
 
 /**
@@ -18,7 +20,7 @@ public class DBManager {
     private static final String HOST = "localhost:3306";
     private static final String SCHEMA = "socSimDB";
     private static final String USR = "root";
-    private static final String PWD = "";
+    private static final String PWD = "miramar";
     private static final String DB_URL = "jdbc:mysql://" + HOST + "/" + SCHEMA + "?user=" + USR + "&password=" + PWD;
     private PreparedStatement _pstmtNode;
     private PreparedStatement _pstmtEdge;
@@ -107,7 +109,7 @@ public class DBManager {
      * @param from_
      * @param to_
      */
-    public void addEdge(Integer simID_, Integer step_, Integer from_, Integer to_, boolean isNewEdge_) {
+    public void addEdge(Integer simID_, Integer step_, Agent from_, Agent to_, boolean isNewEdge_) {
 	try {
 	    if (_pstmtEdge == null) {
 		_pstmtEdge = _conn
@@ -117,9 +119,9 @@ public class DBManager {
 	    }
 	    _pstmtEdge.setInt(1, simID_);
 	    _pstmtEdge.setInt(2, step_);
-	    _pstmtEdge.setInt(3, from_);
+	    _pstmtEdge.setInt(3, from_.getID());
 	    _pstmtEdge.setInt(4, simID_);
-	    _pstmtEdge.setInt(5, to_);
+	    _pstmtEdge.setInt(5, to_.getID());
 	    _pstmtEdge.setInt(6, simID_);
 	    _pstmtEdge.setBoolean(7, isNewEdge_);
 	    _pstmtEdge.addBatch();

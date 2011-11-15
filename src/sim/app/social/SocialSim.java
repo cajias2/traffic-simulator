@@ -14,6 +14,7 @@ import sim.agents.Agent;
 import sim.agents.social.DBWriterAgent;
 import sim.app.SocialSimState;
 import sim.app.social.db.DBManager;
+import sim.engine.AsynchronousSteppable;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -44,6 +45,7 @@ public class SocialSim<V, E> extends SocialSimState {
     public Graph<V, E> network = null;
     public Graph<V, Edge> _temporalNetwork = null;
     public Continuous2D env;
+    private static int _snapshotSize = 1;
 
     /**
      * TODO Purpose
@@ -55,7 +57,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	super(seed);
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
-	String simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
+	String simXml = SocialInputParseService.parseCmdLnArgs(args, _log).get("-sim");
 	initializeThis(simXml);
     }
 
@@ -124,7 +126,13 @@ public class SocialSim<V, E> extends SocialSimState {
 	@SuppressWarnings("unchecked")
 	List<Agent> agList = (List<Agent>) scheduleAgents();
 	persistAgents(simID, agList);
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, new DBWriterAgent(), 1);
+	final AsynchronousSteppable asynStep = new DBWriterAgent(_snapshotSize); 
+	Steppable stopper = new Steppable() {
+	    public void step(SimState state) {
+		asynStep.stop();
+	    }
+	};
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, stopper, 1);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
     }
 
@@ -208,10 +216,11 @@ public class SocialSim<V, E> extends SocialSimState {
      * @param
      * @return List<Graph<V,FriendLink>> A list of the graph evoltuion o
      */
-    public List<Graph<V, E>> runSim(String[] args_, int snapshotSize_) {
-	_simXml = SocialInputParseService.parseCmdLnArgs(args_, _log);
-	doLoop(SocialSim.class, args_);
-	return null;
+    public void runSim(String[] args_) {
+	Map<String, String> args = SocialInputParseService.parseCmdLnArgs(args_, _log);
+	_simXml = args.get("-sim");
+	_snapshotSize = Integer.parseInt(args.get("-i"));
+	doLoop(this.getClass(), args_);
     }
     
     /**
@@ -235,7 +244,7 @@ public class SocialSim<V, E> extends SocialSimState {
     public static void main(String[] args) {
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
-	_simXml = SocialInputParseService.parseCmdLnArgs(args, _log);
+	_simXml = SocialInputParseService.parseCmdLnArgs(args, _log).get("-sim");
 	doLoop(SocialSim.class, args);
     }
 

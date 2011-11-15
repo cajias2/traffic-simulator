@@ -164,25 +164,27 @@ public class SocialInputParseService<V> {
      * @param
      * @return String
      */
-    public static String parseCmdLnArgs(String[] args_, Logger log_) {
-	String simXml = "";
+    public static Map<String, String> parseCmdLnArgs(String[] args_, Logger log_) {
+	Map<String, String> argMap = new HashMap<String, String>();
 	if (args_.length < 2) {
 	    printMsgAndExit();
 	}
 
 	for (int i = 0; i < args_.length; i++) {
+	    argMap.put(args_[i], args_[i + 1]);
 	    if ("-sim".equals(args_[i])) {
-		simXml = args_[++i];
+		argMap.put(args_[i], System.getProperty("user.dir") + args_[i + 1]);
 	    } else if ("-verbose".equals(args_[i]) || "-v".equals(args_[i])) {
 		log_.setLevel(Level.INFO);
 	    } else if ("-debug".equals(args_[i])) {
 		log_.setLevel(Level.FINE);
 	    }
+	    i++;
 	}
-	if (null == simXml || "".equals(simXml)) {
+	if (null == argMap.get("-sim")) {
 	    printMsgAndExit();
 	}
-	return System.getProperty("user.dir") + simXml;
+	return argMap;
     }
 
     /**
