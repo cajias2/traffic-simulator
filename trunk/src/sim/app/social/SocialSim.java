@@ -14,7 +14,6 @@ import sim.agents.Agent;
 import sim.agents.social.DBWriterAgent;
 import sim.app.SocialSimState;
 import sim.app.social.db.DBManager;
-import sim.engine.AsynchronousSteppable;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -41,7 +40,7 @@ public class SocialSim<V, E> extends SocialSimState {
     public static int YMIN = 0;
     public static int YMAX;
 
-    private int simID_ = -1;
+    private static Integer _simID = null;
     public Graph<V, E> network = null;
     public Graph<V, Edge> _temporalNetwork = null;
     public Continuous2D env;
@@ -115,8 +114,8 @@ public class SocialSim<V, E> extends SocialSimState {
 	super.start();
 	schedule.reset(); // clear out the schedule
 	_dbMgr = new DBManager();
-	simID_ = _dbMgr.newSimulation();
-	initiateAgents(simID_);
+	_simID = _dbMgr.newSimulation();
+	initiateAgents(_simID);
     }
 
     /**
@@ -126,13 +125,14 @@ public class SocialSim<V, E> extends SocialSimState {
 	@SuppressWarnings("unchecked")
 	List<Agent> agList = (List<Agent>) scheduleAgents();
 	persistAgents(simID, agList);
-	final AsynchronousSteppable asynStep = new DBWriterAgent(_snapshotSize); 
-	Steppable stopper = new Steppable() {
-	    public void step(SimState state) {
-		asynStep.stop();
-	    }
-	};
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, stopper, 1);
+	// final AsynchronousSteppable asynStep = new
+	// DBWriterAgent(_snapshotSize);
+	// Steppable stopper = new Steppable() {
+	// public void step(SimState state) {
+	// asynStep.stop();
+	// }
+	// };
+	schedule.scheduleRepeating(Schedule.EPOCH, 1, new DBWriterAgent(_snapshotSize), 1);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
     }
 
@@ -141,7 +141,7 @@ public class SocialSim<V, E> extends SocialSimState {
      */
     private void persistAgents(int simID_, List<Agent> agentList_) {
 	for (Agent ag : agentList_) {
-	    _dbMgr.addNode(simID_, ag.getID());
+	    _dbMgr.addNode(simID_, ag.getID(), 0);
 	}
 	_dbMgr.insertNodes();
     }
@@ -231,8 +231,13 @@ public class SocialSim<V, E> extends SocialSimState {
     	return _dbMgr;
     }
 
-    public int getSimID() {
-	return simID_;
+    /**
+     * Id of the last simulation run. null if no simulation has run yet
+     * 
+     * @return
+     */
+    public Integer getSimID() {
+	return _simID;
     }
 
     /**
