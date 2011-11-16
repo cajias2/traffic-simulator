@@ -48,37 +48,34 @@ public class SocialSimFlowTest {
 		totalSimRuns = Integer.parseInt(args[++i]);
 	    }
 	}
-	// long durTime = System.currentTimeMillis();
-	// List<Integer> simIDs = runSim(args, kSize, totalSimRuns);
-	// System.out.println("DURATION: " + (System.currentTimeMillis() -
-	// durTime) / 60000 + " mins");
+	long durTime = System.currentTimeMillis();
+	List<Integer> simIDs = runSim(args, kSize, totalSimRuns);
+	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
 	System.out.println("Clustering Snapshots....");
 
-	List<Integer> testList = new LinkedList<Integer>();
-	testList.add(46);
-	clusterGraphs(testList);
+	clusterGraphs(simIDs, kSize);
     }
 
     /**
      * @param simIDs_
      */
-    private static void clusterGraphs(List<Integer> simIDs_) {
+    private static void clusterGraphs(List<Integer> simIDs_, int k_) {
 	DBManager dbMgr = new DBManager();
 	for (Integer simID : simIDs_) {
 	    UndirectedSparseDynamicGraph dynGraph = new UndirectedSparseDynamicGraph(simID, dbMgr);
 	    dynGraph.init();
-	    clusterGraph((Graph) dynGraph);
+	    Collection<Set<Integer>> communities = clusterGraph((Graph) dynGraph, k_);
 	}
     }
 
     /**
      * @param dynGraph_
      */
-    private static void clusterGraph(Graph<Integer, Edge> dynGraph_) {
+    private static Collection<Set<Integer>> clusterGraph(Graph<Integer, Edge> dynGraph_, int k_) {
 	BronKerboschKCliqueFinder<Integer, Edge> kFinder = new BronKerboschKCliqueFinder<Integer, Edge>(dynGraph_);
-	Collection<Set<Integer>> maxKClique = kFinder.getAllMaxKCliques(4);
+	Collection<Set<Integer>> maxKClique = kFinder.getAllMaxKCliques(k_);
 	CPMCommunityFinder<Integer> cpmFinder = new CPMCommunityFinder<Integer>(maxKClique);
-	
+	return cpmFinder.findCommunities(k_);
     }
 
     /**

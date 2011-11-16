@@ -3,6 +3,8 @@
  */
 package sim.graph;
 
+import java.util.List;
+
 import sim.app.social.db.DBManager;
 import sim.graph.utils.Edge;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -37,10 +39,12 @@ public class UndirectedSparseDynamicGraph extends UndirectedSparseGraph<Integer,
      * Initializes the graph.
      */
     public void init() {
-	for (Integer nodeID : _dbMgr.getNodes(SIM_ID, _currentStep)) {
-	    addVertex(nodeID);
+	int nodeCount = _dbMgr.getAgentCount(SIM_ID);
+	for (int i = 0; i < nodeCount; i++) {
+	    addVertex(i);
 	}
-	for(Edge<Integer> e : _dbMgr.getEdges(SIM_ID, _currentStep)){
+	List<Edge<Integer>> edges = _dbMgr.getEdges(SIM_ID, _currentStep);
+	for (Edge<Integer> e : edges) {
 	    addEdge(e, e.v1, e.v2);
 	}
     }

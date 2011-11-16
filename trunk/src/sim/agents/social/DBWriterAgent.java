@@ -29,10 +29,11 @@ public class DBWriterAgent implements Steppable {
      * @param socSim
      */
     private void writeDeltaToDB(SocialSim<Agent, String> socSim) {
+	socSim.getDBManager().insertNewSimStep(socSim.getSimID(), socSim.schedule.getSteps());
 	for (Edge e : socSim._temporalNetwork.getEdges()) {
 	    socSim.getDBManager().addEdge(socSim.getSimID(), socSim.schedule.getSteps(),
-		    socSim._temporalNetwork.getEndpoints(e).getFirst(),
-		    socSim._temporalNetwork.getEndpoints(e).getSecond(), e.isCreate());
+		    socSim._temporalNetwork.getEndpoints(e).getFirst().getID(),
+		    socSim._temporalNetwork.getEndpoints(e).getSecond().getID(), e.isCreate());
 	}
 	socSim.getDBManager().insertEdges();
     }

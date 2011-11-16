@@ -3,8 +3,6 @@ package sim.app.social;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -102,7 +100,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	XMAX = parseSrv.getWidth();
 	YMAX = parseSrv.getLen();
 	network = new UndirectedSparseGraph<V, E>();
-	_temporalNetwork = new UndirectedSparseGraph<V,Edge>();
+	_temporalNetwork = new UndirectedSparseGraph<V, Edge>();
 	env = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
     }
 
@@ -114,7 +112,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	super.start();
 	schedule.reset(); // clear out the schedule
 	_dbMgr = new DBManager();
-	_simID = _dbMgr.newSimulation();
+	_simID = _dbMgr.newSimulation(AGENT_COUNT);
 	initiateAgents(_simID);
     }
 
@@ -122,16 +120,8 @@ public class SocialSim<V, E> extends SocialSimState {
      * @param simID
      */
     private void initiateAgents(int simID) {
-	@SuppressWarnings("unchecked")
-	List<Agent> agList = (List<Agent>) scheduleAgents();
-	persistAgents(simID, agList);
-	// final AsynchronousSteppable asynStep = new
-	// DBWriterAgent(_snapshotSize);
-	// Steppable stopper = new Steppable() {
-	// public void step(SimState state) {
-	// asynStep.stop();
-	// }
-	// };
+	scheduleAgents();
+	persistAgents(simID, AGENT_COUNT);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new DBWriterAgent(_snapshotSize), 1);
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
     }
@@ -139,11 +129,14 @@ public class SocialSim<V, E> extends SocialSimState {
     /**
      * @param simID_
      */
-    private void persistAgents(int simID_, List<Agent> agentList_) {
-	for (Agent ag : agentList_) {
-	    _dbMgr.addNode(simID_, ag.getID(), 0);
+    private void persistAgents(int simID_, int totalSimAgents_) {
+	int nodeCnt = _dbMgr.getDBNodeCnt();
+	if (totalSimAgents_ > nodeCnt) {
+	    for (int i = nodeCnt; i < totalSimAgents_; i++) {
+		_dbMgr.addNode(i);
+	    }
+	    _dbMgr.insertNodes();
 	}
-	_dbMgr.insertNodes();
     }
 
     /**
@@ -152,8 +145,7 @@ public class SocialSim<V, E> extends SocialSimState {
      * @param
      * @return void
      */
-    private List<V> scheduleAgents() {
-	List<V> agentList = new LinkedList<V>();
+    private void scheduleAgents() {
 	for (int i = 0; i < AGENT_COUNT; i++) {
 	    double ticket = random.nextDouble() * 100;
 	    double winner = 0.0;
@@ -163,11 +155,10 @@ public class SocialSim<V, E> extends SocialSimState {
 		Entry<Class<V>, Double> entry = it.next();
 		winner += entry.getValue();
 		if (winner >= ticket) {
-		    agentList.add(scheduleAgentOfType(entry.getKey()));
+		    scheduleAgentOfType(entry.getKey());
 		}
 	    }
-	}	
-	return agentList;
+	}
     }
 
     /**
@@ -222,13 +213,13 @@ public class SocialSim<V, E> extends SocialSimState {
 	_snapshotSize = Integer.parseInt(args.get("-i"));
 	doLoop(this.getClass(), args_);
     }
-    
+
     /**
      * 
      * @return The DBManager of this instance
      */
-    public DBManager getDBManager(){
-    	return _dbMgr;
+    public DBManager getDBManager() {
+	return _dbMgr;
     }
 
     /**
@@ -272,11 +263,11 @@ public class SocialSim<V, E> extends SocialSimState {
 	Object obj = cons.newInstance(argObj);
 	return (V) obj;
     }
-    
-    public void resetTemporalNetwork(){
-    	_temporalNetwork = new UndirectedSparseGraph<V,Edge>();
+
+    public void resetTemporalNetwork() {
+	_temporalNetwork = new UndirectedSparseGraph<V, Edge>();
     }
-    
+
     /**
      * Kills the simulation after <code>SIM_TIME</code> steps
      * 
