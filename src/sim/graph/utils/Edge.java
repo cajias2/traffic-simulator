@@ -1,8 +1,10 @@
 package sim.graph.utils;
 
-public class Edge {
+public class Edge<T> {
 
     private final boolean _isCreateEdge;
+    public T v1;
+    public T v2;
 
     /**
      * 

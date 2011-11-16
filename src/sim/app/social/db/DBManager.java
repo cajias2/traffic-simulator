@@ -8,8 +8,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import sim.agents.Agent;
+import sim.graph.utils.Edge;
 
 import com.mysql.jdbc.Statement;
 
@@ -17,6 +20,20 @@ import com.mysql.jdbc.Statement;
  * @author biggie
  */
 public class DBManager {
+    /**
+     * 
+     */
+    private static final String INSERT_EDGES_PER_STEP_STMT = "insert into graphs (sim_id, step, from_node, to_node, is_create_edge) "
+	    + "values (?,?,(SELECT id FROM nodes where node = ? and sim_id = ? ),"
+	    + "(SELECT id FROM nodes where node = ? and sim_id = ? ), ?)";
+    /**
+     * 
+     */
+    private static final String SELECT_NODES_PER_STEP_STMT = "select node from nodes where sim_id = ? and step_created = ?";
+    /**
+     * 
+     */
+    private static final String SELECT_EDGES_PER_STEP_STMT = "select from_node, to_node, is_create_edge from graphs where sim_id = ? and step = ?";
     private static final String HOST = "localhost:3306";
     private static final String SCHEMA = "socSimDB";
     private static final String USR = "root";
@@ -26,10 +43,10 @@ public class DBManager {
     private PreparedStatement _pstmtEdge;
 
     private Connection _conn;
-    
 
     /**
      * Constructor
+     * Instantiates a new DB Connection.
      */
     public DBManager() {
 	try {
@@ -44,13 +61,16 @@ public class DBManager {
     }
 
     /**
+     * Creates a new simulation record in the DB
+     * 
      * @return new simulation row id.
      */
     public Integer newSimulation() {
 	PreparedStatement pstmt = null;
 	Integer newSimRowID = null;
 	try {
-	    pstmt = _conn.prepareStatement("insert into simulations (time_start) values (?)", Statement.RETURN_GENERATED_KEYS);
+	    pstmt = _conn.prepareStatement("insert into simulations (time_start) values (?)",
+		    Statement.RETURN_GENERATED_KEYS);
 	    pstmt.setLong(1, System.currentTimeMillis());
 	    pstmt.addBatch();
 	    pstmt.executeBatch();
@@ -60,6 +80,7 @@ public class DBManager {
 	    }
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
+	    System.exit(-1);
 	}
 	return newSimRowID;
     }
@@ -70,14 +91,15 @@ public class DBManager {
      * @param simID_
      * @param node_
      */
-    public void addNode(Integer simID_, Integer node_) {
+    public void addNode(Integer simID_, Integer node_, long stepCreated_) {
 
 	try {
 	    if (_pstmtNode == null) {
-		_pstmtNode = _conn.prepareStatement("insert into nodes (sim_id, node) values (?, ?)");
+		_pstmtNode = _conn.prepareStatement("insert into nodes (sim_id, node, step_created) values (?, ?, ?)");
 	    }
 	    _pstmtNode.setLong(1, simID_);
 	    _pstmtNode.setLong(2, node_);
+	    _pstmtNode.setLong(3, stepCreated_);
 	    _pstmtNode.addBatch();
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
@@ -89,15 +111,11 @@ public class DBManager {
      */
     public void insertNodes() {
 	try {
-	    int[] update = _pstmtNode.executeBatch();
-	    System.out.println("Added " + _pstmtNode.getUpdateCount());
+	    _pstmtNode.executeBatch();
 	    _pstmtNode.close();
 	    _pstmtNode = null;
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
-	}
-	catch(NullPointerException e){
-		System.err.println("Problema");
 	}
     }
 
@@ -109,16 +127,13 @@ public class DBManager {
      * @param from_
      * @param to_
      */
-    public void addEdge(Integer simID_, Integer step_, Agent from_, Agent to_, boolean isNewEdge_) {
+    public void addEdge(Integer simID_, long step_, Agent from_, Agent to_, boolean isNewEdge_) {
 	try {
 	    if (_pstmtEdge == null) {
-		_pstmtEdge = _conn
-			.prepareStatement("insert into graphs (sim_id, step, from_node, to_node, is_create_edge) "
-			+ "values (?,?,(SELECT id FROM nodes where node = ? and sim_id = ? ),"
-				+ "(SELECT id FROM nodes where node = ? and sim_id = ? ), ?)");
+		_pstmtEdge = _conn.prepareStatement(INSERT_EDGES_PER_STEP_STMT);
 	    }
 	    _pstmtEdge.setInt(1, simID_);
-	    _pstmtEdge.setInt(2, step_);
+	    _pstmtEdge.setLong(2, step_);
 	    _pstmtEdge.setInt(3, from_.getID());
 	    _pstmtEdge.setInt(4, simID_);
 	    _pstmtEdge.setInt(5, to_.getID());
@@ -131,12 +146,13 @@ public class DBManager {
     }
 
     /**
-     * 
+     * Batch insert of all edges added so far.
+     * <p>
+     * see {@link sim.app.social.db.DBManager.addEdge}
      */
     public void insertEdges() {
 	try {
 	    _pstmtEdge.executeBatch();
-	    _pstmtEdge = null;
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
 	}
@@ -151,4 +167,96 @@ public class DBManager {
 	System.out.println("VendorError:\t" + e_.getErrorCode());
     }
 
+    /**
+     * @param rs
+     * @param stmt_
+     * @param conn
+     */
+    public static void close(ResultSet rs, PreparedStatement stmt_, Connection conn) {
+	if (rs != null) {
+	    try {
+		rs.close();
+	    } catch (SQLException e) {
+		displaySQLErrors(e);
+	    }
+	}
+	if (stmt_ != null) {
+	    try {
+		stmt_.close();
+	    } catch (SQLException e) {
+		displaySQLErrors(e);
+	    }
+	}
+	if (conn != null) {
+	    try {
+		conn.close();
+	    } catch (SQLException e) {
+		displaySQLErrors(e);
+	    }
+	}
+    }
+
+    /**
+     * @param simID_
+     * @param simStep_
+     * @return
+     */
+    public List<Integer> getNodes(int simID_, int simStep_) {
+	List<Integer> nodeIds = null;
+	PreparedStatement stmt = null;
+	ResultSet rs = null;
+
+	try {
+	    stmt = _conn.prepareStatement(SELECT_NODES_PER_STEP_STMT);
+	    stmt.setLong(1, simID_);
+	    stmt.setLong(2, simStep_);
+	    stmt.addBatch();
+	    rs = stmt.executeQuery();
+	    nodeIds = new LinkedList<Integer>();
+	    while (rs.next()) {
+		nodeIds.add(rs.getInt("node"));
+	    }
+	} catch (SQLException e) {
+	    displaySQLErrors(e);
+	    System.exit(-1);
+	} finally {
+	    close(rs, stmt, null);
+	}
+	return nodeIds;
+
+    }
+
+    /**
+     * Returns a list of edges created in a given step
+     * 
+     * @param simID_
+     * @param simStep_
+     * @return
+     */
+    public List<Edge<Integer>> getEdges(int simID_, int simStep_) {
+	List<Edge<Integer>> edgeList = null;
+	PreparedStatement stmt = null;
+	ResultSet rs = null;
+
+	try {
+	    stmt = _conn.prepareStatement(SELECT_EDGES_PER_STEP_STMT);
+	    stmt.setLong(1, simID_);
+	    stmt.setLong(2, simStep_);
+	    stmt.addBatch();
+	    rs = stmt.executeQuery();
+	    edgeList = new LinkedList<Edge<Integer>>();
+	    while (rs.next()) {
+		Edge<Integer> edge = new Edge<Integer>(rs.getBoolean("is_create_edge"));
+		edge.v1 = rs.getInt("from_node");
+		edge.v2 = rs.getInt("to_node");
+		edgeList.add(edge);
+	    }
+	} catch (SQLException e) {
+	    displaySQLErrors(e);
+	    System.exit(-1);
+	} finally {
+	    close(rs, stmt, null);
+	}
+	return edgeList;
+    }
 }

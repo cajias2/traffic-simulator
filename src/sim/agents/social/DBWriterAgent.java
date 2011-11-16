@@ -2,11 +2,11 @@ package sim.agents.social;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
-import sim.engine.AsynchronousSteppable;
+import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.graph.utils.Edge;
-import edu.uci.ics.jung.graph.Graph;
 
-public class DBWriterAgent extends AsynchronousSteppable {
+public class DBWriterAgent implements Steppable {
 
     /**
      * 
@@ -15,7 +15,6 @@ public class DBWriterAgent extends AsynchronousSteppable {
     private final int SNAPSHOT;
 
     /**
-     * 
      * TODO Purpose
      * 
      * @param Number
@@ -26,20 +25,14 @@ public class DBWriterAgent extends AsynchronousSteppable {
 	SNAPSHOT = ss_;
     }
 
-
-
     /**
      * @param socSim
      */
     private void writeDeltaToDB(SocialSim<Agent, String> socSim) {
-	Graph<Agent, Edge> deltaGraph = socSim._temporalNetwork;
-	int id = socSim.getSimID();
-	int step = (int) socSim.schedule.getSteps();
-
-
-	for (Edge e : deltaGraph.getEdges()) {
-	    socSim.getDBManager().addEdge(id, step, deltaGraph.getEndpoints(e).getFirst(),
-		    deltaGraph.getEndpoints(e).getSecond(), e.isCreate());
+	for (Edge e : socSim._temporalNetwork.getEdges()) {
+	    socSim.getDBManager().addEdge(socSim.getSimID(), socSim.schedule.getSteps(),
+		    socSim._temporalNetwork.getEndpoints(e).getFirst(),
+		    socSim._temporalNetwork.getEndpoints(e).getSecond(), e.isCreate());
 	}
 	socSim.getDBManager().insertEdges();
     }
@@ -47,27 +40,15 @@ public class DBWriterAgent extends AsynchronousSteppable {
     /*
      * (non-Javadoc)
      * 
-     * @see sim.engine.AsynchronousSteppable#halt(boolean)
+     * @see sim.engine.Steppable#step(sim.engine.SimState)
      */
     @Override
-    protected void halt(boolean arg0_) {
-	// TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sim.engine.AsynchronousSteppable#run(boolean)
-     */
-    @Override
-    protected void run(boolean arg0_) {
+    public void step(SimState state_) {
 	@SuppressWarnings("unchecked")
-	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state;
+	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
 	if (0 == (socSim.schedule.getSteps() % SNAPSHOT)) {
 	    writeDeltaToDB(socSim);
 	    socSim.resetTemporalNetwork();
 	}
-
     }
 }
