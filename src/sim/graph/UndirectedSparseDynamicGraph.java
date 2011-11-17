@@ -25,18 +25,21 @@ public class UndirectedSparseDynamicGraph extends UndirectedSparseGraph<Integer,
     private final int SIM_ID;
     private final DBManager _dbMgr;
     private int _currentStep;
-    
+
+    private int _stepCount;
+
     public UndirectedSparseDynamicGraph(int simID_, DBManager dbManager_) {
 	super();
 	SIM_ID = simID_;
 	_dbMgr = dbManager_;
-	_currentStep = 0;
+	_currentStep = -1;
     }
-    
+
     /**
      * Initializes the graph.
      */
     public void init() {
+	_stepCount = _dbMgr.getSimStepCount(SIM_ID);
 	int nodeCount = _dbMgr.getAgentCount(SIM_ID);
 	for (int i = 0; i < nodeCount; i++) {
 	    addVertex(i);
@@ -50,19 +53,26 @@ public class UndirectedSparseDynamicGraph extends UndirectedSparseGraph<Integer,
      * @return
      */
     public boolean nextStep() {
-	boolean movedFwd = false;
-	for (Edge<Integer> e : _dbMgr.getEdges(SIM_ID, _currentStep)) {
-	    movedFwd = true;
+	boolean hasNextStep = false;
+	if (_stepCount > _currentStep) {
+	    hasNextStep = true;
+	    _currentStep = updateGraph(_currentStep);
+	}
+	return hasNextStep;
+    }
+
+    /**
+     * 
+     */
+    private int updateGraph(int step_) {
+	for (Edge<Integer> e : _dbMgr.getEdges(SIM_ID, ++step_)) {
 	    if (e.isCreate()) {
 		addEdge(e, e.v1, e.v2);
 	    } else {
 		removeEdge(findEdge(e.v1, e.v2));
 	    }
 	}
-	if (movedFwd) {
-	    _currentStep++;
-	}
-	return movedFwd;
+	return step_;
     }
 
     /**

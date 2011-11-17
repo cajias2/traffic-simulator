@@ -20,11 +20,15 @@ import com.mysql.jdbc.Statement;
  * @author biggie
  */
 public class DBManager {
+    /**
+     * 
+     */
+    private static final String SELECT_STEP_CNT = "select max(step) cnt  from graphs where sim_id = ?";
     private static final String NEW_SIMULATION_STMT = "insert into simulations (time_start, agent_count) values (?, ?)";
     private static final String INSERT_NODE_STMT = "insert into nodes (id) values(?)";
     private static final String INSERT_EDGES_PER_STEP_STMT = "insert into graph_edges (sim_id, graph_id, from_node, to_node, is_create_edge) "
 	    + "values (?,?,?,?,?)";
-    private static final String SIM_AGENT_COUNT_STMT = "select agent_count from simulations where id = ?";
+    private static final String SIM_AGENT_COUNT_STMT = "select agent_count cnt from simulations where id = ?";
     private static final String SELECT_EDGES_PER_STEP_STMT = "select from_node, to_node, is_create_edge from graph_edges where sim_id = ? and graph_id = ?";
     private static final String INSERT_SIM_STEP_STMT = "insert into graphs (sim_id, step, created) values (?, ?, ?)";
     private static final String NEW_COMM_STMT = "insert into communities (sim_id, graph_id) values (?,?)";
@@ -217,24 +221,7 @@ public class DBManager {
      * @return
      */
     public int getAgentCount(int simID_) {
-	int agentCount = 0;
-	PreparedStatement stmt = null;
-	ResultSet rs = null;
-
-	try {
-	    stmt = _conn.prepareStatement(SIM_AGENT_COUNT_STMT);
-	    stmt.setLong(1, simID_);
-	    stmt.addBatch();
-	    rs = stmt.executeQuery();
-	    rs.next();
-	    agentCount = rs.getInt("agent_count");
-	} catch (SQLException e) {
-	    displaySQLErrors(e);
-	    System.exit(-1);
-	} finally {
-	    close(rs, stmt, null);
-	}
-	return agentCount;
+	return getCount(simID_, SIM_AGENT_COUNT_STMT);
 
     }
 
@@ -301,6 +288,40 @@ public class DBManager {
     }
 
     /**
+     * @param simID_
+     * @return
+     */
+    public int getSimStepCount(int simID_) {
+	return getCount(simID_, SELECT_STEP_CNT);
+    }
+
+    /**
+     * @param simID_
+     * @param qry_
+     * @return
+     */
+    private int getCount(int simID_, String qry_) {
+	PreparedStatement stmt = null;
+	ResultSet rs = null;
+	int cnt = 0;
+	try {
+	    stmt = _conn.prepareStatement(qry_);
+	    stmt.setInt(1, simID_);
+	    stmt.addBatch();
+	    rs = stmt.executeQuery();
+	    rs.next();
+	    cnt = rs.getInt("cnt");
+
+	} catch (SQLException e) {
+	    displaySQLErrors(e);
+	    System.exit(-1);
+	} finally {
+	    close(rs, stmt, null);
+	}
+	return cnt;
+    }
+
+    /**
      * Adds communities to the insert batch
      * 
      * @param simID_
@@ -329,7 +350,9 @@ public class DBManager {
      */
     public void insertCommMembers() {
 	try {
+	    if (null != _pstmtComm) {
 	    _pstmtComm.executeBatch();
+	    }
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
 	    System.exit(-1);
@@ -360,5 +383,7 @@ public class DBManager {
 	}
 	return commId;
     }
+
+
 
 }

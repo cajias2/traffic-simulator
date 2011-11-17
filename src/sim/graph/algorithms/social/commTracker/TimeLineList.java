@@ -31,6 +31,13 @@ public class TimeLineList<V, E> {
     }
 
     /**
+     * 
+     */
+    public TimeLineList() {
+	_timeLine = new ArrayList<List<Community<V, E>>>();
+    }
+
+    /**
      * TODO Purpose
      * 
      * @params
@@ -53,31 +60,6 @@ public class TimeLineList<V, E> {
 	    buildCommTrace(newComm);
 	}
 
-    }
-
-    /**
-     * TEST
-     * 
-     * @param pos_
-     * @return
-     * @author ANTONIO
-     */
-    public void set(int time_, Community<V, E> comm_) {
-
-	if (_timeLine.isEmpty() || (time_ == _timeLine.size() + 1)) {
-	    List<Community<V, E>> aux = new ArrayList<Community<V, E>>();
-	    _timeLine.add(aux);
-	}
-
-	if (time_ >= 1) {
-	    if (time_ > _timeLine.size() + 1) {
-		for (int i = _timeLine.size(); i < time_; i++) {
-		    List<Community<V, E>> aux = new ArrayList<Community<V, E>>();
-		    _timeLine.add(aux);
-		}
-	    }
-	    _timeLine.get(time_ - 1).add(comm_);
-	}
     }
 
     /**

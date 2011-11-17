@@ -11,6 +11,7 @@ import java.util.List;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
+import sim.app.social.db.DBManager;
 import sim.graph.algorithms.ClusterFinder;
 
 /**
@@ -45,13 +46,15 @@ public class SocialSimFlowTest {
 	List<Integer> simIDs = runSim(args, kSize, totalSimRuns);
 	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
 	System.out.println("Clustering Snapshots....");
-	ClusterFinder.findSimClusters(simIDs, kSize);
+	for (Integer simID : simIDs) {
+	    ClusterFinder cf = new ClusterFinder(new DBManager());
+	    cf.clusterSim(simID);
+	    cf.writeMetrics();
+	}
 	System.out.println("Running CommTracker....");
 	System.out.println("** TODO **");
 	System.out.println("All done. Buh-bye!");
     }
-
-
 
     /**
      * @param args

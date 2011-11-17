@@ -4,11 +4,11 @@
 package sim.graph.algorithms;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import sim.app.social.db.DBManager;
 import sim.graph.UndirectedSparseDynamicGraph;
+import sim.graph.algorithms.social.commTracker.TimeLineList;
 import sim.graph.utils.Edge;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -17,40 +17,61 @@ import edu.uci.ics.jung.graph.Graph;
  *
  */
 public class ClusterFinder {
+    private final DBManager _dbMgr;
+    private TimeLineList<Integer, Edge> _timeLine;
+    private final int K_SIZE;
+
     /**
-     * @param simIDs_
+     * @param dbMgr_
+     * @param kSize_
      */
-    public static void findSimClusters(List<Integer> simIDs_, int k_) {
-	DBManager dbMgr = new DBManager();
-	for (Integer simID : simIDs_) {
-	    clusterGraph(k_, dbMgr, simID);
-	}
+    public ClusterFinder(DBManager dbMgr_, int kSize_) {
+	_dbMgr = dbMgr_;
+	K_SIZE = kSize_;
+
+    }
+
+    /**
+     * @param dbMgr_
+     */
+    public ClusterFinder(DBManager dbMgr_) {
+	this(dbMgr_, 4);
     }
 
     /**
      * @param k_
      * @param dbMgr
-     * @param simID
+     * @param simID_
      */
-    private static void clusterGraph(int k_, DBManager dbMgr, Integer simID) {
-	UndirectedSparseDynamicGraph dynGraph = new UndirectedSparseDynamicGraph(simID, dbMgr);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void clusterSim(Integer simID_) {
+	UndirectedSparseDynamicGraph dynGraph = new UndirectedSparseDynamicGraph(simID_, _dbMgr);
+	_timeLine = new TimeLineList<Integer, Edge>();
 	dynGraph.init();
 	while (dynGraph.nextStep()) {
-	    Collection<Set<Integer>> comms = clusterGraph((Graph) dynGraph, k_);
+	    Collection<Set<Integer>> comms = clusterGraph((Graph) dynGraph);
 	    for (Set<Integer> comm : comms) {
-		dbMgr.addCommunityToBatch(simID, dynGraph.getCurrentStep(), comm);
+		_timeLine.add(dynGraph.getCurrentStep(), comm, (Graph) dynGraph);
+		_dbMgr.addCommunityToBatch(simID_, dynGraph.getCurrentStep(), comm);
 	    }
-	    dbMgr.insertCommMembers();
+	    _dbMgr.insertCommMembers();
 	}
     }
 
     /**
      * @param dynGraph_
      */
-    private static Collection<Set<Integer>> clusterGraph(Graph<Integer, Edge> dynGraph_, int k_) {
+    private Collection<Set<Integer>> clusterGraph(Graph<Integer, Edge> dynGraph_) {
 	BronKerboschKCliqueFinder<Integer, Edge> kFinder = new BronKerboschKCliqueFinder<Integer, Edge>(dynGraph_);
-	Collection<Set<Integer>> maxKClique = kFinder.getAllMaxKCliques(k_);
+	Collection<Set<Integer>> maxKClique = kFinder.getAllMaxKCliques(K_SIZE);
 	CPMCommunityFinder<Integer> cpmFinder = new CPMCommunityFinder<Integer>(maxKClique);
-	return cpmFinder.findCommunities(k_);
+	return cpmFinder.findCommunities(K_SIZE);
+    }
+
+    /**
+     * 
+     */
+    public void writeMetrics() {
+	_timeLine.writeMetrics();
     }
 }
