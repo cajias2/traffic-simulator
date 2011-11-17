@@ -20,13 +20,14 @@ public class TimeLineList<V, E> {
     private final List<List<Community<V, E>>> _timeLine;
 
     /**
-     * TODO Purpose
+     * Class constructor
      * 
-     * @param
+     * @param number
+     *            of sim snapshots captured.
      * @author antonio
      */
-    public TimeLineList(int size_) {
-	_timeLine = new ArrayList<List<Community<V, E>>>(size_);
+    public TimeLineList(int length_) {
+	_timeLine = new ArrayList<List<Community<V, E>>>(length_);
     }
 
     /**
@@ -36,11 +37,11 @@ public class TimeLineList<V, E> {
      * @return void
      * @author antonio
      */
-    public void add(int idx_, Set<V> comm_, Graph<V, E> graph_) {
+    public void add(int step_, Set<V> comm_, Graph<V, E> graph_) {
 
 	// Fill gaps in the timeline if there are any.
-	if (idx_ + 1 > _timeLine.size()) {
-	    for (int i = _timeLine.size(); i < idx_; i++) {
+	if (step_ + 1 > _timeLine.size()) {
+	    for (int i = _timeLine.size(); i < step_; i++) {
 		_timeLine.add(null);
 	    }
 	    _timeLine.add(new ArrayList<Community<V, E>>());
@@ -48,7 +49,7 @@ public class TimeLineList<V, E> {
 	// Add value
 	if (null != comm_ && !comm_.isEmpty()) {
 	    Community<V, E> newComm = new Community<V, E>(comm_, graph_);
-	    _timeLine.get(idx_).add(newComm);
+	    _timeLine.get(step_).add(newComm);
 	    buildCommTrace(newComm);
 	}
 
@@ -223,9 +224,7 @@ public class TimeLineList<V, E> {
      */
     private void buildCommTrace(Community<V, E> currCom_, List<Community<V, E>> parentComs_) {
 	for (Community<V, E> pred : parentComs_) {
-	    Set<Community<V, E>> ancestors = pred.getPredecessors();
-
-	    if (null == ancestors) {
+	    if (null == pred.getPredecessors()) {
 		createComLink(currCom_, pred);
 	    } else if (isPredecessor(currCom_, pred)) {
 		createComLink(currCom_, pred);
@@ -272,9 +271,8 @@ public class TimeLineList<V, E> {
      */
     private boolean hasCores(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
-	List<V> aCorNods = commA_.getCoreNodes();
-	for (V corNod : aCorNods) {
-	    if (commB_.getAllNodes().contains(corNod)) {
+	for (V corNod : commA_.getCoreNodes()) {
+	    if (commB_.isMember(corNod)) {
 		isPred = true;
 		break;
 	    }
@@ -312,14 +310,11 @@ public class TimeLineList<V, E> {
      * @author biggie
      */
     private List<Community<V, E>> findPredCandidates(Community<V, E> currCom_, List<Community<V, E>> previousSnapshot) {
-
 	List<Community<V, E>> predecessors = new ArrayList<Community<V, E>>();
-	Set<V> newNodes = currCom_.getAllNodes();
 
 	for (Community<V, E> read : previousSnapshot) {
-	    List<V> readCores = read.getCoreNodes();
-	    for (V node : readCores) {
-		if (newNodes.contains(node) && null != predecessors && !predecessors.contains(read)) {
+	    for (V node : read.getCoreNodes()) {
+		if (currCom_.isMember(node) && null != predecessors && !predecessors.contains(read)) {
 		    predecessors.add(read);
 		}
 	    }

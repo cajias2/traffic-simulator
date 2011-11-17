@@ -133,7 +133,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	int nodeCnt = _dbMgr.getDBNodeCnt();
 	if (totalSimAgents_ > nodeCnt) {
 	    for (int i = nodeCnt; i < totalSimAgents_; i++) {
-		_dbMgr.addNode(i);
+		_dbMgr.addNodeToBatch(i);
 	    }
 	    _dbMgr.insertNodes();
 	}

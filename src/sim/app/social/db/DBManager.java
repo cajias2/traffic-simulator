@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import sim.graph.utils.Edge;
 
@@ -26,6 +27,9 @@ public class DBManager {
     private static final String SIM_AGENT_COUNT_STMT = "select agent_count from simulations where id = ?";
     private static final String SELECT_EDGES_PER_STEP_STMT = "select from_node, to_node, is_create_edge from graph_edges where sim_id = ? and graph_id = ?";
     private static final String INSERT_SIM_STEP_STMT = "insert into graphs (sim_id, step, created) values (?, ?, ?)";
+    private static final String NEW_COMM_STMT = "insert into communities (sim_id, graph_id) values (?,?)";
+    private static final String INSERT_COMM_MEMBERS_STMT = "insert into community_members (comm_id, node_id) values (?,?)";
+
     private static final String NODE_CNT = "select count(*) cnt from nodes";
     private static final String HOST = "localhost:3306";
     private static final String SCHEMA = "socSimDB";
@@ -34,7 +38,7 @@ public class DBManager {
     private static final String DB_URL = "jdbc:mysql://" + HOST + "/" + SCHEMA + "?user=" + USR + "&password=" + PWD;
     private PreparedStatement _pstmtNode;
     private PreparedStatement _pstmtEdge;
-
+    private PreparedStatement _pstmtComm;
     private Connection _conn;
 
     /**
@@ -46,6 +50,7 @@ public class DBManager {
 	    _conn = DriverManager.getConnection(DB_URL);
 	} catch (SQLException e) {
 	    displaySQLErrors(e);
+	    System.exit(-1);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    System.exit(-1);
@@ -78,12 +83,12 @@ public class DBManager {
     }
 
     /**
-     * Add individual node insert statments for batch insert.
+     * Add individual node insert statements for batch insert.
      * 
      * @param simID_
      * @param node_
      */
-    public void addNode(int nodeID_) {
+    public void addNodeToBatch(int nodeID_) {
 
 	try {
 	    if (_pstmtNode == null) {
@@ -110,14 +115,14 @@ public class DBManager {
     }
 
     /**
-     * Creates a new graph edge
+     * Adds an edge to the insert batch
      * 
      * @param simID_
      * @param step_
      * @param from_
      * @param to_
      */
-    public void addEdge(int simID_, long graphID_, int fromID_, int toID_, boolean isNewEdge_) {
+    public void addEdgeToBatch(int simID_, long graphID_, int fromID_, int toID_, boolean isNewEdge_) {
 	try {
 	    if (_pstmtEdge == null) {
 		_pstmtEdge = _conn.prepareStatement(INSERT_EDGES_PER_STEP_STMT);
@@ -147,7 +152,6 @@ public class DBManager {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -295,4 +299,66 @@ public class DBManager {
 	}
 	return nodeCnt;
     }
+
+    /**
+     * Adds communities to the insert batch
+     * 
+     * @param simID_
+     * @param graphID_
+     * @param commMembers_
+     */
+    public void addCommunityToBatch(int simID_, long graphID_, Set<Integer> commMembers_) {
+	int commID = insertCommunity(simID_, graphID_);
+	try {
+	    if (_pstmtComm == null) {
+		_pstmtComm = _conn.prepareStatement(INSERT_COMM_MEMBERS_STMT);
+	    }
+	    for (Integer mbr : commMembers_) {
+		_pstmtComm.setInt(1, commID);
+		_pstmtComm.setLong(2, mbr);
+		_pstmtComm.addBatch();
+	    }
+	} catch (SQLException e) {
+	    displaySQLErrors(e);
+	    System.exit(-1);
+	}
+    }
+
+    /**
+     * Inserts a community to the db.
+     */
+    public void insertCommMembers() {
+	try {
+	    _pstmtComm.executeBatch();
+	} catch (SQLException e) {
+	    displaySQLErrors(e);
+	    System.exit(-1);
+	}
+    }
+
+    /**
+     * @param simID_
+     * @param graphID_
+     * @return newly created community ID
+     */
+    private int insertCommunity(int simID_, long graphID_) {
+	PreparedStatement pstmt = null;
+	int commId = -1;
+	try {
+	    pstmt = _conn.prepareStatement(NEW_COMM_STMT, Statement.RETURN_GENERATED_KEYS);
+	    pstmt.setInt(1, simID_);
+	    pstmt.setLong(2, graphID_);
+	    pstmt.addBatch();
+	    pstmt.executeBatch();
+	    ResultSet resultSet = pstmt.getGeneratedKeys();
+	    if (resultSet != null && resultSet.next()) {
+		commId = resultSet.getInt(1);
+	    }
+	} catch (SQLException e) {
+	    displaySQLErrors(e);
+	    System.exit(-1);
+	}
+	return commId;
+    }
+
 }

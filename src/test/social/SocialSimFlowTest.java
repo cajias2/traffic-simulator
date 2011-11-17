@@ -6,19 +6,12 @@
 
 package test.social;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSim;
-import sim.app.social.db.DBManager;
-import sim.graph.UndirectedSparseDynamicGraph;
-import sim.graph.algorithms.BronKerboschKCliqueFinder;
-import sim.graph.algorithms.CPMCommunityFinder;
-import sim.graph.utils.Edge;
-import edu.uci.ics.jung.graph.Graph;
+import sim.graph.algorithms.ClusterFinder;
 
 /**
  * TODO Purpose
@@ -52,31 +45,13 @@ public class SocialSimFlowTest {
 	List<Integer> simIDs = runSim(args, kSize, totalSimRuns);
 	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
 	System.out.println("Clustering Snapshots....");
-
-	clusterGraphs(simIDs, kSize);
+	ClusterFinder.findSimClusters(simIDs, kSize);
+	System.out.println("Running CommTracker....");
+	System.out.println("** TODO **");
+	System.out.println("All done. Buh-bye!");
     }
 
-    /**
-     * @param simIDs_
-     */
-    private static void clusterGraphs(List<Integer> simIDs_, int k_) {
-	DBManager dbMgr = new DBManager();
-	for (Integer simID : simIDs_) {
-	    UndirectedSparseDynamicGraph dynGraph = new UndirectedSparseDynamicGraph(simID, dbMgr);
-	    dynGraph.init();
-	    Collection<Set<Integer>> communities = clusterGraph((Graph) dynGraph, k_);
-	}
-    }
 
-    /**
-     * @param dynGraph_
-     */
-    private static Collection<Set<Integer>> clusterGraph(Graph<Integer, Edge> dynGraph_, int k_) {
-	BronKerboschKCliqueFinder<Integer, Edge> kFinder = new BronKerboschKCliqueFinder<Integer, Edge>(dynGraph_);
-	Collection<Set<Integer>> maxKClique = kFinder.getAllMaxKCliques(k_);
-	CPMCommunityFinder<Integer> cpmFinder = new CPMCommunityFinder<Integer>(maxKClique);
-	return cpmFinder.findCommunities(k_);
-    }
 
     /**
      * @param args
@@ -94,6 +69,5 @@ public class SocialSimFlowTest {
 	}
 	return simIDs;
     }
-    
-    
+
 }

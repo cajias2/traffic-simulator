@@ -204,17 +204,6 @@ public class Community<V, E> {
     }
 
     /**
-     * Returns a list of all successors
-     * 
-     * @params
-     * @return List<Community>
-     * @author antonio
-     */
-    public final Set<Community<V, E>> getSuccessors() {
-	return _succList;
-    }
-
-    /**
      * Returns the core nodes of the community.
      * See sectio 3 {@link http://arxiv.org/abs/0804.4356v1}
      * 
@@ -327,6 +316,14 @@ public class Community<V, E> {
      */
     public boolean isTimelineLast() {
 	return null == _succList;
+    }
+
+    /**
+     * @param v_
+     * @return
+     */
+    public boolean isMember(V v_) {
+	return _members.contains(v_);
     }
 
     /**
