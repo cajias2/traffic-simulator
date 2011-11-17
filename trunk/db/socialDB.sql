@@ -12,8 +12,9 @@ USE `socSimDB` ;
 DROP TABLE IF EXISTS `socSimDB`.`communities` ;
 
 CREATE  TABLE IF NOT EXISTS `socSimDB`.`communities` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT ,
   `graph_id` BIGINT NULL ,
+  `sim_id` INT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = latin1;
@@ -26,6 +27,8 @@ DROP TABLE IF EXISTS `socSimDB`.`community_members` ;
 
 CREATE  TABLE IF NOT EXISTS `socSimDB`.`community_members` (
   `id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `comm_id` INT NULL ,
+  `node_id` INT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = latin1;
