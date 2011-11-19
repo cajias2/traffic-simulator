@@ -178,7 +178,10 @@ public class SocialInputParseService<V> {
 		log_.setLevel(Level.INFO);
 	    } else if ("-debug".equals(args_[i])) {
 		log_.setLevel(Level.FINE);
+	    } else if ("-test".equals(args_[i])) {
+		argMap.put(args_[i], String.class.toString());
 	    }
+
 	    i++;
 	}
 	if (null == argMap.get("-sim")) {

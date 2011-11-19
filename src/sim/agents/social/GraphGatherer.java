@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sim.app.social.SocialSim;
+import sim.agents.Agent;
+import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
-import sim.engine.Steppable;
 import sim.graph.utils.GraphUtils;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.io.GraphMLWriter;
@@ -21,15 +21,14 @@ import edu.uci.ics.jung.io.GraphMLWriter;
  * @param <V>
  * @param <E>
  */
-public class GraphGatherer<V, E> implements Steppable {
+public class GraphGatherer extends Agent {
     private static final long serialVersionUID = -1284600767084977696L;
-    private final int SNAPSHOT;
     private final String OUT_FOLDR = System.getProperty("user.dir") + "/tmp";
     private final File _outDir;
-    List<Graph<V, E>> _graphEvol = new ArrayList<Graph<V, E>>();
+    List<Graph<Agent, String>> _graphEvol = new ArrayList<Graph<Agent, String>>();
 
-    public GraphGatherer(int snapshotSize_) {
-	SNAPSHOT = snapshotSize_;
+    public GraphGatherer(SimState state_) {
+	super(state_);
 	_outDir = new File(OUT_FOLDR);
 	if (_outDir.exists()) {
 	    _outDir.delete();
@@ -37,17 +36,18 @@ public class GraphGatherer<V, E> implements Steppable {
 	_outDir.mkdir();
     }
 
-    /**
-	 * 
-	 */
+
+        /**
+     * 
+     */
     @Override
     public void step(SimState state_) {
 	@SuppressWarnings("unchecked")
-	SocialSim<V, E> socSim = (SocialSim<V, E>) state_;
+	SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
 	if (0 == socSim.schedule.getSteps() % SNAPSHOT) {
-	    if (null != socSim.network && null != socSim.network) {
-		writeGraph(socSim.network);
-		_graphEvol.add(GraphUtils.cloneGraph(socSim.network));
+	    if (null != _socGraph && null != _socGraph) {
+		writeGraph(_socGraph);
+		_graphEvol.add(GraphUtils.cloneGraph(_socGraph));
 	    } else {
 		writeGraph(null);
 		_graphEvol.add(null);
@@ -63,9 +63,9 @@ public class GraphGatherer<V, E> implements Steppable {
      * @return void
      * @author biggie
      */
-    private void writeGraph(Graph<V, E> g_) {
+    private void writeGraph(Graph<Agent, String> g_) {
 	FileWriter outFileWrt;
-	GraphMLWriter<V, E> gWriter = new GraphMLWriter<V, E>();
+	GraphMLWriter<Agent, String> gWriter = new GraphMLWriter<Agent, String>();
 	try {
 	    outFileWrt = new FileWriter(OUT_FOLDR + System.getProperty("file.separator") + System.currentTimeMillis()
 		    + ".xml");
@@ -82,7 +82,7 @@ public class GraphGatherer<V, E> implements Steppable {
      * @return the graphEvol
      * @author biggie
      */
-    public List<Graph<V, E>> getGraphEvol() {
+    public List<Graph<Agent, String>> getGraphEvol() {
 	return _graphEvol;
     }
 }

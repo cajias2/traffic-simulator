@@ -51,7 +51,7 @@ public class RandomAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (_net.findEdge(this, ag_) == null) {
+	if (_socGraph.findEdge(this, ag_) == null) {
 	    if (isNewFriend(ag_)) {
 		befriend(ag_);
 	    }

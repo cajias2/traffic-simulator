@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import sim.agents.Agent;
-import sim.app.social.SocialSim;
+import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
 
 /**
@@ -65,7 +65,7 @@ public class MsgrAgent extends Agent {
      * @see sim.agents.Agent#beforeStep(sim.engine.SimState)
      */
     @Override
-    protected void beforeStep(SocialSim state_) {
+    protected void beforeStep(SocialSimBatchRunner state_) {
 	while (!_msgs.isEmpty()) {
 	    Agent ag = _msgs.remove();
 	    if (isNewFriend(ag)) {
