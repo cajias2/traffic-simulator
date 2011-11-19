@@ -5,7 +5,7 @@ package app.social.agents;
 
 import static app.social.agents.utils.Movements.brownianMotion;
 import sim.agents.Agent;
-import sim.app.social.SocialSim;
+import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
 import sim.util.Double2D;
 
@@ -55,7 +55,7 @@ public class BrownianAgent extends Agent {
 
     @Override
     protected Double2D move(SimState state_) {
-	SocialSim socSim = (SocialSim) state_;
+	SocialSimBatchRunner socSim = (SocialSimBatchRunner) state_;
 	Double2D currLoc = socSim.env.getObjectLocation(this);
 	return brownianMotion(T, N, currLoc, _rand);
     }
@@ -78,7 +78,7 @@ public class BrownianAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (_net.findEdge(this, ag_) == null) {
+	if (_socGraph.findEdge(this, ag_) == null) {
 	    if (isNewFriend(ag_)) {
 		befriend(ag_);
 	    }

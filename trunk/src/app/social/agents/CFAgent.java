@@ -7,9 +7,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import sim.agents.Agent;
-import sim.app.social.SocialSim;
+import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
-import sim.util.Double2D;
+import sim.field.network.Edge;
+import sim.util.Bag;
 
 /**
  * @author biggie
@@ -77,16 +78,38 @@ public class CFAgent extends Agent {
      * 
      */
     @Override
-    protected void afterStep(SocialSim state_) {
-	_friends = state_.network.getNeighbors(this);
+    protected void afterStep(SocialSimBatchRunner state_) {
+	if (IS_TEST) {
+	    updateFriendsTestMode();
+	} else {
+	    _friends = _socGraph.getNeighbors(this);
+
+	}
 	updatePersonality();
     }
 
     /**
      * 
      */
+    private void updateFriendsTestMode() {
+	_friends = new LinkedList<Agent>();
+	Bag bg = new Bag();
+	_testNet.getEdges(this, bg);
+	for (Object obj : bg) {
+	    Edge e = (Edge) obj;
+	    if (this == e.from()) {
+		_friends.add((Agent) e.to());
+	    } else {
+		_friends.add((Agent) e.from());
+	    }
+	}
+    }
+
+    /**
+     * 
+     */
     @Override
-    protected void beforeStep(SocialSim state_) {
+    protected void beforeStep(SocialSimBatchRunner state_) {
 	reEvalFriends();
     }
 
@@ -98,7 +121,7 @@ public class CFAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (_net.findEdge(this, ag_) == null) {
+	if (_socGraph.findEdge(this, ag_) == null) {
 	    if (isNewFriend(ag_)) {
 		befriend(ag_);
 	    }
@@ -153,12 +176,4 @@ public class CFAgent extends Agent {
 	_personality = _personality + (_rand.nextGaussian()) * 5;
 
     }
-
-    @Override
-    protected Double2D move(SimState state_) {
-	@SuppressWarnings("unchecked")
-	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
-	return socSim.env.getObjectLocation(this);
-    }
-
 }

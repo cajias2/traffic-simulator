@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import sim.agents.Agent;
-import sim.app.social.SocialSim;
+import sim.app.social.SocialSimBatchRunner;
 import sim.app.social.db.DBManager;
 import sim.graph.algorithms.ClusterFinder;
 
@@ -44,14 +44,16 @@ public class SocialSimFlowTest {
 	}
 	long durTime = System.currentTimeMillis();
 	List<Integer> simIDs = runSim(args, kSize, totalSimRuns);
+	System.out.println("New Simulations: " + simIDs);
 	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
 	System.out.println("Clustering Snapshots....");
+	System.out.println("Running CommTracker....");
 	for (Integer simID : simIDs) {
 	    ClusterFinder cf = new ClusterFinder(new DBManager());
 	    cf.clusterSim(simID);
 	    cf.writeMetrics();
 	}
-	System.out.println("Running CommTracker....");
+
 	System.out.println("** TODO **");
 	System.out.println("All done. Buh-bye!");
     }
@@ -65,7 +67,7 @@ public class SocialSimFlowTest {
 	List<Integer> simIDs = new LinkedList<Integer>();
 	for (int i = 0; i < totalSimRuns; i++) {
 	    System.out.println("******\n* Run: " + i + "\n******\n");
-	    SocialSim<Agent, String> sim = new SocialSim<Agent, String>(SEED);
+	    SocialSimBatchRunner<Agent, String> sim = new SocialSimBatchRunner<Agent, String>(SEED);
 	    sim.runSim(args);
 	    simIDs.add(sim.getSimID());
 	    System.out.println("Done.");

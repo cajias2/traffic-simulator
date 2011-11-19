@@ -16,17 +16,16 @@ import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
-import sim.graph.utils.Edge;
 import sim.util.Double2D;
 import sim.utils.xml.social.SocialInputParseService;
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 @SuppressWarnings("serial")
-public class SocialSim<V, E> extends SocialSimState {
+public class SocialSimBatchRunner<V, E> extends SocialSimState {
 
     private static Logger _log;
     private static String _simXml;
+    private static boolean _isTest;
+
     // private static GraphGatherer<V, E> _gatherer = null;
     private int AGENT_COUNT;
     private Map<Class<V>, Double> _agentMap;
@@ -39,10 +38,8 @@ public class SocialSim<V, E> extends SocialSimState {
     public static int YMAX;
 
     private static Integer _simID = null;
-    public Graph<V, E> network = null;
-    public Graph<V, Edge> _temporalNetwork = null;
     public Continuous2D env;
-    private static int _snapshotSize = 1;
+    private int _snapshotInterval = 1;
 
     /**
      * TODO Purpose
@@ -50,7 +47,7 @@ public class SocialSim<V, E> extends SocialSimState {
      * @param
      * @author biggie
      */
-    public SocialSim(Long seed, String[] args) {
+    public SocialSimBatchRunner(Long seed, String[] args) {
 	super(seed);
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
@@ -64,11 +61,12 @@ public class SocialSim<V, E> extends SocialSimState {
      * @param
      * @author biggie
      */
-    public SocialSim(Long seed, String simXml_) {
+    public SocialSimBatchRunner(Long seed, Map<String, String> argMap_) {
 	super(seed);
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
-	initializeThis(simXml_);
+	_isTest = argMap_.containsKey("-test");
+	initializeThis(argMap_.get("-sim"));
     }
 
     /**
@@ -77,7 +75,7 @@ public class SocialSim<V, E> extends SocialSimState {
      * 
      * @author biggie
      */
-    public SocialSim(long seed) {
+    public SocialSimBatchRunner(long seed) {
 	super(seed);
 	if (null != _simXml) {
 	    initializeThis(_simXml);
@@ -99,8 +97,6 @@ public class SocialSim<V, E> extends SocialSimState {
 	SIM_TIME = parseSrv.getSimDuration();
 	XMAX = parseSrv.getWidth();
 	YMAX = parseSrv.getLen();
-	network = new UndirectedSparseGraph<V, E>();
-	_temporalNetwork = new UndirectedSparseGraph<V, Edge>();
 	env = new Continuous2D(25, (XMAX - XMIN), (YMAX - YMIN));
     }
 
@@ -111,8 +107,13 @@ public class SocialSim<V, E> extends SocialSimState {
     public void start() {
 	super.start();
 	schedule.reset(); // clear out the schedule
-	_dbMgr = new DBManager();
-	_simID = _dbMgr.newSimulation(AGENT_COUNT);
+	if (!isTest()) {
+	    _dbMgr = new DBManager();
+
+	    _simID = _dbMgr.newSimulation(AGENT_COUNT);
+	} else {
+	    _simID = -1;
+	}
 	initiateAgents(_simID);
     }
 
@@ -121,8 +122,10 @@ public class SocialSim<V, E> extends SocialSimState {
      */
     private void initiateAgents(int simID) {
 	scheduleAgents();
-	persistAgents(simID, AGENT_COUNT);
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, new DBWriterAgent(_snapshotSize), 1);
+	if (!_isTest) {
+	    persistAgents(simID, AGENT_COUNT);
+	    schedule.scheduleRepeating(Schedule.EPOCH, 1, new DBWriterAgent(this), 1);
+	}
 	schedule.scheduleRepeating(Schedule.EPOCH, 1, new SimKiller(), 1);
     }
 
@@ -175,7 +178,7 @@ public class SocialSim<V, E> extends SocialSimState {
 	try {
 	    ag = instantiateAgentObj(entry);
 	    env.setObjectLocation(ag, intialLoc());
-	    scheduleAgent(ag);
+	    schedule.scheduleRepeating(Schedule.EPOCH, 1, (Agent) ag, 1);
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    System.exit(-1);
@@ -192,16 +195,6 @@ public class SocialSim<V, E> extends SocialSimState {
     }
 
     /**
-     * Schedule a single agent.
-     * 
-     * @param ag
-     */
-    private void scheduleAgent(V ag) {
-	network.addVertex(ag);
-	schedule.scheduleRepeating(Schedule.EPOCH, 1, (Agent) ag, 1);
-    }
-
-    /**
      * Allows the simulation to be called as part of s
      * 
      * @param
@@ -210,12 +203,12 @@ public class SocialSim<V, E> extends SocialSimState {
     public void runSim(String[] args_) {
 	Map<String, String> args = SocialInputParseService.parseCmdLnArgs(args_, _log);
 	_simXml = args.get("-sim");
-	_snapshotSize = Integer.parseInt(args.get("-i"));
+	_snapshotInterval = Integer.parseInt(args.get("-i"));
+	_isTest = args.containsKey("-test");
 	doLoop(this.getClass(), args_);
     }
 
     /**
-     * 
      * @return The DBManager of this instance
      */
     public DBManager getDBManager() {
@@ -232,6 +225,20 @@ public class SocialSim<V, E> extends SocialSimState {
     }
 
     /**
+     * @return the isTest
+     */
+    public final boolean isTest() {
+	return _isTest;
+    }
+
+    /**
+     * @return the snapshotInterval
+     */
+    public final int getSnapshotInterval() {
+	return this._snapshotInterval;
+    }
+
+    /**
      * @author biggie
      * @name main Purpose TODO
      * @param
@@ -240,8 +247,10 @@ public class SocialSim<V, E> extends SocialSimState {
     public static void main(String[] args) {
 	_log = Logger.getLogger("SimLogger");
 	_log.setLevel(Level.SEVERE);
-	_simXml = SocialInputParseService.parseCmdLnArgs(args, _log).get("-sim");
-	doLoop(SocialSim.class, args);
+	Map<String, String> argMap = SocialInputParseService.parseCmdLnArgs(args, _log);
+	_simXml = argMap.get("-sim");
+	_isTest = argMap.containsKey("-test");
+	doLoop(SocialSimBatchRunner.class, args);
     }
 
     /**
@@ -264,9 +273,6 @@ public class SocialSim<V, E> extends SocialSimState {
 	return (V) obj;
     }
 
-    public void resetTemporalNetwork() {
-	_temporalNetwork = new UndirectedSparseGraph<V, Edge>();
-    }
 
     /**
      * Kills the simulation after <code>SIM_TIME</code> steps

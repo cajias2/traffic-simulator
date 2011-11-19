@@ -12,21 +12,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import sim.agents.Agent;
-import sim.app.social.SocialSim;
+import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
-import sim.engine.Steppable;
 import sim.graph.algorithms.metrics.SimpleMetrics;
 
 /**
  * @author biggie
  * 
  */
-public class MetricsAgent implements Steppable {
+public class MetricsAgent extends Agent {
 
     private static final long serialVersionUID = 4508519047587954841L;
     private BufferedWriter _outWrt = null;
 
-    public MetricsAgent() {
+    public MetricsAgent(SimState state_) {
+	super(state_);
 	File outDir = new File(System.getProperty("user.dir") + System.getProperty("file.separator") + "output");
 	if (!outDir.exists())
 	    outDir.mkdir();
@@ -46,16 +46,17 @@ public class MetricsAgent implements Steppable {
      * 
      * @see sim.engine.Steppable#step(sim.engine.SimState)
      */
+    @Override
     public void step(SimState state_) {
 	if (null != _outWrt) {
-	    SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
-	    int nodeCount = socSim.network.getVertexCount();
+	    SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
+	    int nodeCount = _socGraph.getVertexCount();
 
 	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
 	    double ts = socSim.schedule.time() + 1;
-	    double avgCi = SimpleMetrics.avgClusterCoeff(socSim.network);
-	    double avgDeg = SimpleMetrics.avgDeg(socSim.network);
-	    double edgepnct = socSim.network.getEdgeCount() / maxEdges;
+	    double avgCi = SimpleMetrics.avgClusterCoeff(_socGraph);
+	    double avgDeg = SimpleMetrics.avgDeg(_socGraph);
+	    double edgepnct = _socGraph.getEdgeCount() / maxEdges;
 	    /*
 	     * Print a log line
 	     */

@@ -1,12 +1,12 @@
 package sim.agents.social;
 
 import sim.agents.Agent;
-import sim.app.social.SocialSim;
+import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
-import sim.engine.Steppable;
 import sim.graph.utils.Edge;
+import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
-public class DBWriterAgent implements Steppable {
+public class DBWriterAgent extends Agent {
 
     /**
      * 
@@ -21,19 +21,20 @@ public class DBWriterAgent implements Steppable {
      *            of steps to capture in each write.
      * @author biggie
      */
-    public DBWriterAgent(int ss_) {
-	SNAPSHOT = ss_;
+    public DBWriterAgent(SimState state_) {
+	super(state_);
+	SNAPSHOT = ((SocialSimBatchRunner) state_).getSnapshotInterval();
     }
 
     /**
      * @param socSim
      */
-    private void writeDeltaToDB(SocialSim<Agent, String> socSim) {
+    private void writeDeltaToDB(SocialSimBatchRunner<Agent, String> socSim) {
 	socSim.getDBManager().insertNewSimStep(socSim.getSimID(), socSim.schedule.getSteps());
-	for (Edge e : socSim._temporalNetwork.getEdges()) {
+	for (Edge e : _deltaGraph.getEdges()) {
 	    socSim.getDBManager().addEdgeToBatch(socSim.getSimID(), socSim.schedule.getSteps(),
-		    socSim._temporalNetwork.getEndpoints(e).getFirst().getID(),
-		    socSim._temporalNetwork.getEndpoints(e).getSecond().getID(), e.isCreate());
+		    _deltaGraph.getEndpoints(e).getFirst().getID(), _deltaGraph.getEndpoints(e).getSecond().getID(),
+		    e.isCreate());
 	}
 	socSim.getDBManager().insertEdges();
     }
@@ -46,10 +47,20 @@ public class DBWriterAgent implements Steppable {
     @Override
     public void step(SimState state_) {
 	@SuppressWarnings("unchecked")
-	SocialSim<Agent, String> socSim = (SocialSim<Agent, String>) state_;
+	SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
 	if (0 == (socSim.schedule.getSteps() % SNAPSHOT)) {
 	    writeDeltaToDB(socSim);
-	    socSim.resetTemporalNetwork();
 	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sim.agents.Agent#afterStep(sim.app.social.SocialSimBatchRunner)
+     */
+    @Override
+    protected void afterStep(SocialSimBatchRunner<Agent, String> state_) {
+	super.afterStep(state_);
+	    _deltaGraph = new UndirectedSparseGraph<Agent, Edge>();
     }
 }
