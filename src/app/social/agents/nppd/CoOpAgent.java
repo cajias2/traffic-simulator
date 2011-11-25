@@ -1,7 +1,7 @@
 /**
  * 
  */
-package app.social.agents;
+package app.social.agents.nppd;
 
 import sim.engine.SimState;
 

@@ -1,8 +1,12 @@
 <?sim.xml version="1.0" encoding="UTF-8"?>
-<simulation type="test.social" simDuration="1000" width="1000" length="1000" agents="300"
+<simulation type="test.social" simDuration="100" width="1000" length="1000" agents="6"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">
 	<agents>
-		<agent classpath="app.social.agents.CoOpAgent" pct="100" />
+		<agent classpath="app.social.agents.nppd.CoOpAgent" pct="100" />
+
+<!-- 		<agent classpath="app.social.agents.nppd.DefectAgent" pct="33" />
+		<agent classpath="app.social.agents.nppd.MixedAgent" pct="34" />
+ -->
 	</agents>
 </simulation>
