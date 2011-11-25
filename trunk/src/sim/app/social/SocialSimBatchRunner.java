@@ -159,6 +159,7 @@ public class SocialSimBatchRunner<V, E> extends SocialSimState {
 		winner += entry.getValue();
 		if (winner >= ticket) {
 		    scheduleAgentOfType(entry.getKey());
+		    break;
 		}
 	    }
 	}

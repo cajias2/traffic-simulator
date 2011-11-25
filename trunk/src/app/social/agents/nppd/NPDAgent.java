@@ -1,7 +1,7 @@
 /**
  * 
  */
-package app.social.agents;
+package app.social.agents.nppd;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +31,7 @@ public abstract class NPDAgent extends Agent {
     private static final int COST = 3;
     private static final double ALPHA = 1.5;
     private static final double BETA = 0.1;
-    private static final int GAME_SIZE = 10;
+    private static final int GAME_SIZE = 2;
     private static MersenneTwisterFast _rand;
     private static long _lastStepUpdated = 0;
 
@@ -65,15 +65,14 @@ public abstract class NPDAgent extends Agent {
      */
     private void updateStrategies() {
 	for (int i = 0; i < _agentList.size() * UPDATE_PROB; i++) {
-	    NPDAgent agentA = (NPDAgent) _agentList.get(_rand.nextInt(_agentList.size()));
-	    NPDAgent agentB = (NPDAgent) _agentList.get(_rand.nextInt(_agentList.size()));
+	    NPDAgent agentA = getRandomPlayer();
+	    NPDAgent agentB = getRandomPlayer();
 	    while (agentA == agentB) {
-		agentB = (NPDAgent) _agentList.get(_rand.nextInt(_agentList.size()));
+		agentB = getRandomPlayer();
 	    }
-
-	    if (agentA.getUtility() > agentB.getUtility()) {
+	    if (0 < Double.compare(agentA.getUtility(), agentB.getUtility())) {
 		agentB.setType(agentA.getType());
-	    } else {
+	    } else if (0 > Double.compare(agentA.getUtility(), agentB.getUtility())) {
 		agentA.setType(agentB.getType());
 	    }
 	}
@@ -131,7 +130,7 @@ public abstract class NPDAgent extends Agent {
      * @param gameUtility
      */
     private void addToUtil(double gameUtility) {
-	_utility += gameUtility;
+	_utility = _utility + gameUtility;
 
     }
 
@@ -154,13 +153,13 @@ public abstract class NPDAgent extends Agent {
      */
     private void updateLinks(NPDAgent p1_, NPDAgent p2_) {
 	if (_agentPlay.get(p1_) && _agentPlay.get(p2_)) {
-	    if (!p1_.isFriend(p2_)) {
-		p1_.befriend(p2_, 1);
+	    if (!isFriend(p1_, p2_)) {
+		befriend(p1_, p2_, 1);
 	    } else {
-		p1_.updateWeight(p2_, getEdgeWeight(p2_) + 1);
+		updateWeight(p1_, p2_, getEdgeWeight(p1_, p2_) + 1);
 	    }
-	} else {
-	    p1_.unfriend(p2_);
+	} else if (isFriend(p1_, p2_)) {
+	    unfriend(p1_, p2_);
 	}
 
     }
@@ -233,25 +232,40 @@ public abstract class NPDAgent extends Agent {
     protected Set<NPDAgent> createGame() {
 	Set<NPDAgent> game = new HashSet<NPDAgent>();
 	Collection<Agent> neighbours = null;
-	if (null != getNeighbours()) {
+	if (null != getNeighbours() && 0 < getNeighbours().size()) {
 	    neighbours = new ArrayList<Agent>(getNeighbours());
 	}
 
 	for (int i = 0; game.size() < GAME_SIZE - 1; i++) {
 	    if (_rand.nextFloat() < EPSILON) {
-		game.add((NPDAgent) _agentList.get(_rand.nextInt(_agentList.size())));
+		game.add(getRandomPlayer());
 	    } else {
 		if (null != neighbours && !neighbours.isEmpty()) {
 		    NPDAgent player = (NPDAgent) neighbours.toArray()[_rand.nextInt(neighbours.size())];
 		    neighbours.remove(player);
 		    game.add(player);
 		} else {
-		    game.add((NPDAgent) _agentList.get(_rand.nextInt(_agentList.size())));
+		    game.add(getRandomPlayer());
 		}
 	    }
 	}
 	game.add(this);
 	return game;
+    }
+
+    /**
+     * TODO Purpose
+     * 
+     * @params
+     * @return Agent
+     * @author biggie
+     */
+    private NPDAgent getRandomPlayer() {
+	Agent player = _agentList.get(_rand.nextInt(_agentList.size()));
+	while (!(player instanceof NPDAgent)) {
+	    player = _agentList.get(_rand.nextInt(_agentList.size()));
+	}
+	return (NPDAgent) player;
     }
 
     /**

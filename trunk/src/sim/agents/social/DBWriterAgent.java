@@ -3,7 +3,7 @@ package sim.agents.social;
 import sim.agents.Agent;
 import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
-import sim.graph.utils.Edge;
+import sim.field.network.Edge;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 public class DBWriterAgent extends Agent {
@@ -30,13 +30,15 @@ public class DBWriterAgent extends Agent {
      * @param socSim
      */
     private void writeDeltaToDB(SocialSimBatchRunner<Agent, String> socSim) {
-	socSim.getDBManager().insertNewSimStep(socSim.getSimID(), socSim.schedule.getSteps());
-	for (Edge e : _deltaGraph.getEdges()) {
-	    socSim.getDBManager().addEdgeToBatch(socSim.getSimID(), socSim.schedule.getSteps(),
-		    _deltaGraph.getEndpoints(e).getFirst().getID(), _deltaGraph.getEndpoints(e).getSecond().getID(),
-		    e.isCreate());
+	if (_deltaGraph.getEdgeCount() > 0) {
+	    socSim.getDBManager().insertNewSimStep(socSim.getSimID(), socSim.schedule.getSteps());
+	    for (Object obj : _deltaGraph.getEdges()) {
+		Edge e = (Edge) obj;
+		socSim.getDBManager().addEdgeToBatch(socSim.getSimID(), socSim.schedule.getSteps(),
+			((Agent) e.getFrom()).getID(), ((Agent) e.getTo()).getID(), (Boolean) e.getInfo());
+	    }
+	    socSim.getDBManager().insertEdges();
 	}
-	socSim.getDBManager().insertEdges();
     }
 
     /*
@@ -61,6 +63,6 @@ public class DBWriterAgent extends Agent {
     @Override
     protected void afterStep(SocialSimBatchRunner<Agent, String> state_) {
 	super.afterStep(state_);
-	    _deltaGraph = new UndirectedSparseGraph<Agent, Edge>();
+	_deltaGraph = new UndirectedSparseGraph<Agent, Edge>();
     }
 }
