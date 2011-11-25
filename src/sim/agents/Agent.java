@@ -177,6 +177,7 @@ public class Agent implements Steppable {
 	Edge e = new Edge(this, ag_, true);
 	if (IS_TEST) {
 	    _testNet.addEdge(this, ag_, e);
+	    _socGraph.addEdge(e, this, ag_);
 	} else {
 	    _socGraph.addEdge(e, this, ag_);
 	    updateDeltaGraph(ag_, true);
@@ -197,6 +198,7 @@ public class Agent implements Steppable {
 	Edge e = new Edge(ag1_, ag2_, weight_);
 	if (IS_TEST) {
 	    _testNet.addEdge(ag1_, ag2_, e);
+	    _socGraph.addEdge(e, ag1_, ag2_);
 	} else {
 	    _socGraph.addEdge(e, ag1_, ag2_);
 	    updateDeltaGraph(ag1_, ag2_, true);
@@ -369,7 +371,8 @@ public class Agent implements Steppable {
 	return (o_ instanceof Agent && getID() == ((Agent) o_).getID());
     }
 
-    protected final Graph getSocGraph() {
+    public final static Graph getSocGraph() {
 	return _socGraph;
     }
+
 }
