@@ -26,9 +26,9 @@ public class SocialSimBatchRunner<V, E> extends SocialSimState {
     private static String _simXml;
     private static boolean _isTest;
 
-    // private static GraphGatherer<V, E> _gatherer = null;
+
     private int AGENT_COUNT;
-    private Map<Class<V>, Double> _agentMap;
+    private Map<Class<V>, Double> _agentTypeProbMap;
     private DBManager _dbMgr;
     public static final double DIAMETER = 8;
     public int SIM_TIME;
@@ -92,7 +92,7 @@ public class SocialSimBatchRunner<V, E> extends SocialSimState {
     private void initializeThis(String _simXml) {
 	SocialInputParseService<V> parseSrv = new SocialInputParseService<V>(_simXml, _log);
 	parseSrv.parseSim();
-	_agentMap = parseSrv.parseAgents();
+	_agentTypeProbMap = parseSrv.parseAgents();
 	AGENT_COUNT = parseSrv.getAgentNum();
 	SIM_TIME = parseSrv.getSimDuration();
 	XMAX = parseSrv.getWidth();
@@ -153,7 +153,7 @@ public class SocialSimBatchRunner<V, E> extends SocialSimState {
 	    double ticket = random.nextDouble() * 100;
 	    double winner = 0.0;
 
-	    Iterator<Entry<Class<V>, Double>> it = _agentMap.entrySet().iterator();
+	    Iterator<Entry<Class<V>, Double>> it = _agentTypeProbMap.entrySet().iterator();
 	    while (it.hasNext()) {
 		Entry<Class<V>, Double> entry = it.next();
 		winner += entry.getValue();

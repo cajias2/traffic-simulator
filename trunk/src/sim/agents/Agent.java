@@ -4,7 +4,10 @@
 package sim.agents;
 
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
@@ -26,9 +29,10 @@ public class Agent implements Steppable {
     private int steps = 0;
     private Double2D desiredLocation = null;
     protected MersenneTwisterFast _rand = null;
-    protected static Graph<Agent, String> _socGraph = new UndirectedSparseGraph<Agent, String>();
+    private static Graph<Agent, Edge> _socGraph = new UndirectedSparseGraph<Agent, Edge>();
     protected static Graph<Agent, sim.graph.utils.Edge> _deltaGraph = new UndirectedSparseGraph<Agent, sim.graph.utils.Edge>();
-    protected static Network _testNet = new Network();
+    private static Network _testNet = new Network();
+    protected static List<Agent> _agentList = new ArrayList<Agent>();
     protected final int SNAPSHOT;
     private static int _agentCount = 0;
     protected int _id;
@@ -46,6 +50,7 @@ public class Agent implements Steppable {
 	} else {
 	    _socGraph.addVertex(this);
 	}
+	_agentList.add(this);
 	_agentCount++;
     }
 
@@ -116,7 +121,7 @@ public class Agent implements Steppable {
     /**
      * @return
      */
-    protected boolean isNewFriend(Agent ag_) {
+    protected boolean shouldBefriend(Agent ag_) {
 	return false;
     }
 
@@ -164,12 +169,37 @@ public class Agent implements Steppable {
      * @return void
      */
     protected void befriend(Agent ag_) {
+	Edge e = new Edge(this, ag_, true);
 	if (IS_TEST) {
-	    Edge e = new Edge(this, ag_, true);
-	    // e.)
 	    _testNet.addEdge(this, ag_, e);
 	} else {
-	    _socGraph.addEdge(this + "_" + ag_, this, ag_);
+	    _socGraph.addEdge(e, this, ag_);
+	    updateDeltaGraph(ag_, true);
+	}
+    }
+
+    /**
+     * @author biggie
+     * @name befriend
+     * @param
+     * @return void
+     */
+    protected void befriend(Agent ag_, double weight_) {
+	Edge e = new Edge(this, ag_, weight_);
+	if (IS_TEST) {
+	    _testNet.addEdge(this, ag_, e);
+	} else {
+	    _socGraph.addEdge(e, this, ag_);
+	    updateDeltaGraph(ag_, true);
+	}
+    }
+
+    protected void updateWeight(Agent ag_, double weight_) {
+	if (IS_TEST) {
+	    removeEdgeNetwork(this, ag_);
+	    befriend(ag_, weight_);
+	} else {
+	    _socGraph.findEdge(this, ag_).setInfo(weight_);
 	    updateDeltaGraph(ag_, true);
 	}
     }
@@ -183,9 +213,103 @@ public class Agent implements Steppable {
 	} else {
 	    _socGraph.removeEdge(_socGraph.findEdge(this, ag_));
 	    updateDeltaGraph(ag_, false);
-
 	}
+    }
 
+    /**
+     * @param ag_
+     * @return
+     */
+    protected boolean isFriend(Agent ag_) {
+	boolean isFriend = false;
+	if (IS_TEST) {
+	    isFriend = isFriendTestMode(ag_);
+	} else {
+	    isFriend = isFriendBatchMode(ag_);
+	}
+	return isFriend;
+    }
+
+    /**
+     * @param ag_
+     * @return
+     */
+    protected double getEdgeWeight(Agent ag_) {
+	double weight = -1;
+	if (IS_TEST) {
+	    weight = getWeightTestMode(ag_);
+	} else {
+	    weight = getWeightBatchMode(ag_);
+	}
+	return weight;
+    }
+
+    protected Collection<Agent> getNeighbours() {
+	return _socGraph.getNeighbors(this);
+
+    }
+
+    /**
+     * @param ag_
+     * @return
+     */
+    private double getWeightBatchMode(Agent ag_) {
+	return findEdgeBatchMode(ag_).getWeight();
+    }
+
+    /**
+     * @param ag_
+     * @return
+     */
+    private double getWeightTestMode(Agent ag_) {
+	if (!isFriend(ag_)) {
+	    System.out.println("WHYYYYYY");
+	}
+	return findEdgeTestMode(ag_).getWeight();
+    }
+
+    /**
+     * @param ag_
+     * @return
+     */
+    private boolean isFriendBatchMode(Agent ag_) {
+	return findEdgeBatchMode(ag_) != null;
+    }
+
+    /**
+     * @param ag_
+     * @return
+     */
+    private Edge findEdgeBatchMode(Agent ag_) {
+	return _socGraph.findEdge(this, ag_);
+    }
+
+    /**
+     * @param ag_
+     * @param isFriend
+     * @return
+     */
+    private boolean isFriendTestMode(Agent ag_) {
+	return findEdgeTestMode(ag_) != null;
+    }
+
+    /**
+     * @param ag_
+     * @return
+     */
+    private Edge findEdgeTestMode(Agent ag_) {
+	Edge edge = null;
+	Bag bag = _testNet.getEdges(this, null);
+	{
+	    for (Object obj : bag) {
+		Edge e = (Edge) obj;
+		if (e.from() == ag_ || e.to() == ag_) {
+		    edge = e;
+		    break;
+		}
+	    }
+	}
+	return edge;
     }
 
     /**
@@ -236,5 +360,9 @@ public class Agent implements Steppable {
     @Override
     public boolean equals(Object o_) {
 	return (o_ instanceof Agent && getID() == ((Agent) o_).getID());
+    }
+
+    protected final Graph getSocGraph() {
+	return _socGraph;
     }
 }

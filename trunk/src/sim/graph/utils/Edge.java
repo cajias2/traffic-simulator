@@ -3,8 +3,8 @@ package sim.graph.utils;
 public class Edge<T> {
 
     private final boolean _isCreateEdge;
-    public T v1;
-    public T v2;
+    private T v1;
+    private T v2;
 
     /**
      * 
@@ -17,6 +17,12 @@ public class Edge<T> {
 	_isCreateEdge = creation_;
     }
 
+    public Edge(T a, T b, boolean creation_) {
+	this(creation_);
+	v1 = a;
+	v2 = b;
+    }
+
     /**
      * 
      * TODO Purpose
@@ -27,5 +33,13 @@ public class Edge<T> {
      */
     public boolean isCreate() {
 	return _isCreateEdge;
+    }
+    
+    public T getFrom() {
+	return v1;
+    }
+    
+    public T getTo(){
+	return v2;
     }
 }

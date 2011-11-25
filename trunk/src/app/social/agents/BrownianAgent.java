@@ -66,7 +66,7 @@ public class BrownianAgent extends Agent {
      * @see sim.agents.Agent#makeFriend(sim.engine.SimState)
      */
     @Override
-    protected boolean isNewFriend(Agent ag_) {
+    protected boolean shouldBefriend(Agent ag_) {
 	return _rand.nextBoolean(FRIEND_P);
     }
 
@@ -78,8 +78,8 @@ public class BrownianAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (_socGraph.findEdge(this, ag_) == null) {
-	    if (isNewFriend(ag_)) {
+	if (isFriend(ag_)) {
+	    if (shouldBefriend(ag_)) {
 		befriend(ag_);
 	    }
 	}
