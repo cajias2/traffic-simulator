@@ -40,7 +40,7 @@ public class MsgrAgent extends Agent {
      * @see sim.agents.Agent#makeFriend(sim.agents.Agent, sim.engine.SimState)
      */
     @Override
-    protected boolean isNewFriend(Agent ag_) {
+    protected boolean shouldBefriend(Agent ag_) {
 	return _rand.nextBoolean();
     }
 
@@ -68,7 +68,7 @@ public class MsgrAgent extends Agent {
     protected void beforeStep(SocialSimBatchRunner state_) {
 	while (!_msgs.isEmpty()) {
 	    Agent ag = _msgs.remove();
-	    if (isNewFriend(ag)) {
+	    if (shouldBefriend(ag)) {
 		befriend(ag);
 	    }
 	}

@@ -50,13 +50,13 @@ public class MetricsAgent extends Agent {
     public void step(SimState state_) {
 	if (null != _outWrt) {
 	    SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
-	    int nodeCount = _socGraph.getVertexCount();
+	    int nodeCount = _agentList.size();
 
 	    double maxEdges = nodeCount * (nodeCount - 1) / 2;
 	    double ts = socSim.schedule.time() + 1;
-	    double avgCi = SimpleMetrics.avgClusterCoeff(_socGraph);
-	    double avgDeg = SimpleMetrics.avgDeg(_socGraph);
-	    double edgepnct = _socGraph.getEdgeCount() / maxEdges;
+	    double avgCi = SimpleMetrics.avgClusterCoeff(getSocGraph());
+	    double avgDeg = SimpleMetrics.avgDeg(getSocGraph());
+	    double edgepnct = getSocGraph().getEdgeCount() / maxEdges;
 	    /*
 	     * Print a log line
 	     */

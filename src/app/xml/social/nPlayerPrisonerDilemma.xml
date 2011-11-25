@@ -3,6 +3,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="Simulation.xsd">
 	<agents>
-		<agent classpath="app.social.agents.CFAgent" pct="100" />
+		<agent classpath="app.social.agents.CoOpAgent" pct="100" />
 	</agents>
 </simulation>

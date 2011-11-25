@@ -44,7 +44,7 @@ public class PersonalityAgent extends Agent {
      * @see sim.agents.Agent#makeFriend(sim.engine.SimState)
      */
     @Override
-    protected boolean isNewFriend(Agent ag_) {
+    protected boolean shouldBefriend(Agent ag_) {
 	boolean isNewFriend = _rand.nextBoolean();
 	if (ag_ instanceof PersonalityAgent) {
 	    PersonalityAgent pa = (PersonalityAgent) ag_;
@@ -64,8 +64,8 @@ public class PersonalityAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (_socGraph.findEdge(this, ag_) == null) {
-	    if (isNewFriend(ag_)) {
+	if (isFriend(ag_)) {
+	    if (shouldBefriend(ag_)) {
 		befriend(ag_);
 	    }
 	}

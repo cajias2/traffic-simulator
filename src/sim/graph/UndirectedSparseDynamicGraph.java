@@ -67,9 +67,9 @@ public class UndirectedSparseDynamicGraph extends UndirectedSparseGraph<Integer,
     private int updateGraph(int step_) {
 	for (Edge<Integer> e : _dbMgr.getEdges(SIM_ID, ++step_)) {
 	    if (e.isCreate()) {
-		addEdge(e, e.v1, e.v2);
+		addEdge(e, e.getFrom(), e.getTo());
 	    } else {
-		removeEdge(findEdge(e.v1, e.v2));
+		removeEdge(findEdge(e.getFrom(), e.getTo()));
 	    }
 	}
 	return step_;

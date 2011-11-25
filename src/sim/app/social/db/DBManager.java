@@ -245,9 +245,8 @@ public class DBManager {
 	    rs = stmt.executeQuery();
 	    edgeList = new LinkedList<Edge<Integer>>();
 	    while (rs.next()) {
-		Edge<Integer> edge = new Edge<Integer>(rs.getBoolean("is_create_edge"));
-		edge.v1 = rs.getInt("from_node");
-		edge.v2 = rs.getInt("to_node");
+		Edge<Integer> edge = new Edge<Integer>(rs.getInt("from_node"), rs.getInt("to_node"),
+			rs.getBoolean("is_create_edge"));
 		edgeList.add(edge);
 	    }
 	} catch (SQLException e) {

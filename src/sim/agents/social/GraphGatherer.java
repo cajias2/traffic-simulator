@@ -45,9 +45,9 @@ public class GraphGatherer extends Agent {
 	@SuppressWarnings("unchecked")
 	SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
 	if (0 == socSim.schedule.getSteps() % SNAPSHOT) {
-	    if (null != _socGraph && null != _socGraph) {
-		writeGraph(_socGraph);
-		_graphEvol.add(GraphUtils.cloneGraph(_socGraph));
+	    if (null != getSocGraph() && null != getSocGraph()) {
+		writeGraph(getSocGraph());
+		_graphEvol.add(GraphUtils.cloneGraph(getSocGraph()));
 	    } else {
 		writeGraph(null);
 		_graphEvol.add(null);

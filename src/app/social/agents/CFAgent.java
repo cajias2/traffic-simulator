@@ -9,8 +9,6 @@ import java.util.LinkedList;
 import sim.agents.Agent;
 import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
-import sim.field.network.Edge;
-import sim.util.Bag;
 
 /**
  * @author biggie
@@ -79,30 +77,8 @@ public class CFAgent extends Agent {
      */
     @Override
     protected void afterStep(SocialSimBatchRunner state_) {
-	if (IS_TEST) {
-	    updateFriendsTestMode();
-	} else {
-	    _friends = _socGraph.getNeighbors(this);
-
-	}
+	_friends = getNeighbours();
 	updatePersonality();
-    }
-
-    /**
-     * 
-     */
-    private void updateFriendsTestMode() {
-	_friends = new LinkedList<Agent>();
-	Bag bg = new Bag();
-	_testNet.getEdges(this, bg);
-	for (Object obj : bg) {
-	    Edge e = (Edge) obj;
-	    if (this == e.from()) {
-		_friends.add((Agent) e.to());
-	    } else {
-		_friends.add((Agent) e.from());
-	    }
-	}
     }
 
     /**
@@ -121,8 +97,8 @@ public class CFAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (_socGraph.findEdge(this, ag_) == null) {
-	    if (isNewFriend(ag_)) {
+	if (isFriend(ag_)) {
+	    if (shouldBefriend(ag_)) {
 		befriend(ag_);
 	    }
 	}
@@ -137,7 +113,7 @@ public class CFAgent extends Agent {
      * @see sim.agents.Agent#makeFriend(sim.engine.SimState)
      */
     @Override
-    protected boolean isNewFriend(Agent ag_) {
+    protected boolean shouldBefriend(Agent ag_) {
 	boolean isNewFriend = false;
 	if (ag_ instanceof CFAgent) {
 	    CFAgent alter = (CFAgent) ag_;
@@ -159,7 +135,7 @@ public class CFAgent extends Agent {
 	for (Agent ag : _friends) {
 	    if (ag instanceof CFAgent) {
 		CFAgent alter = (CFAgent) ag;
-		if (!isNewFriend(alter)) {
+		if (!shouldBefriend(alter)) {
 		    unfriends.add(alter);
 		}
 	    }
