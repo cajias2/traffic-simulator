@@ -309,7 +309,6 @@ public class Agent implements Steppable {
 	return edge;
     }
 
-
     /**
      * @param from_
      * @param to_
@@ -352,7 +351,8 @@ public class Agent implements Steppable {
 	    _deltaGraph.addVertex(ag2_);
 	}
 	// Remove negated edge
-	if (null != findEdgeTestMode(ag1_, ag2_) && ((Boolean) findEdgeTestMode(ag1_, ag2_).getInfo()) != isCreateEdge_) {
+	if (_deltaGraph.findEdge(ag1_, ag2_) != null
+		&& ((Boolean) _deltaGraph.findEdge(ag1_, ag2_).getInfo()) != isCreateEdge_) {
 	    _deltaGraph.removeEdge(_deltaGraph.findEdge(ag1_, ag2_));
 	}else{
 	    _deltaGraph.addEdge(new Edge(ag1_, ag2_, isCreateEdge_), ag1_, ag2_);

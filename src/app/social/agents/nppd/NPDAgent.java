@@ -31,7 +31,7 @@ public abstract class NPDAgent extends Agent {
     private static final int COST = 3;
     private static final double ALPHA = 1.5;
     private static final double BETA = 0.1;
-    private static final int GAME_SIZE = 10;
+    private static final int GAME_SIZE = 4;
     private static MersenneTwisterFast _rand;
     private static long _lastStepUpdated = 0;
 
@@ -97,6 +97,7 @@ public abstract class NPDAgent extends Agent {
     /**
      * 
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void step(final SimState state_) {
 	beforeStep((SocialSimBatchRunner) state_);
