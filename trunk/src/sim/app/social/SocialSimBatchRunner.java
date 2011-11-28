@@ -39,7 +39,7 @@ public class SocialSimBatchRunner<V, E> extends SocialSimState {
 
     private static Integer _simID = null;
     public Continuous2D env;
-    private int _snapshotInterval = 1;
+    private static int _snapshotInterval = 1;
 
     /**
      * TODO Purpose
