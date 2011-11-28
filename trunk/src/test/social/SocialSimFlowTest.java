@@ -11,8 +11,6 @@ import java.util.List;
 
 import sim.agents.Agent;
 import sim.app.social.SocialSimBatchRunner;
-import sim.app.social.db.DBManager;
-import sim.graph.algorithms.ClusterFinder;
 
 /**
  * TODO Purpose
@@ -22,7 +20,6 @@ import sim.graph.algorithms.ClusterFinder;
 public class SocialSimFlowTest {
     private static final long SEED = 320320486;
     private static final String K_FLAG = "-k";
-    private static final String INTERVAL_FLAG = "-i";
     private static final String TOTAL_RUN_FLAG = "-rep";
 
     /**
@@ -43,27 +40,22 @@ public class SocialSimFlowTest {
 	    }
 	}
 	long durTime = System.currentTimeMillis();
-	List<Integer> simIDs = runSim(args, kSize, totalSimRuns);
+	List<Integer> simIDs = runSim(args, totalSimRuns);
 	System.out.println("New Simulations: " + simIDs);
 	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
 	System.out.println("Clustering Snapshots....");
 	System.out.println("Running CommTracker....");
 	for (Integer simID : simIDs) {
-	    ClusterFinder cf = new ClusterFinder(new DBManager());
-	    cf.clusterSim(simID);
-	    cf.writeMetrics();
+	    ClusterGraphTest.cluster(simID, kSize);
 	}
-
-	System.out.println("** TODO **");
 	System.out.println("All done. Buh-bye!");
     }
 
     /**
      * @param args
-     * @param kSize
      * @param totalSimRuns
      */
-    private static List<Integer> runSim(String[] args, int kSize, int totalSimRuns) {
+    private static List<Integer> runSim(String[] args, int totalSimRuns) {
 	List<Integer> simIDs = new LinkedList<Integer>();
 	for (int i = 0; i < totalSimRuns; i++) {
 	    System.out.println("******\n* Run: " + i + "\n******\n");

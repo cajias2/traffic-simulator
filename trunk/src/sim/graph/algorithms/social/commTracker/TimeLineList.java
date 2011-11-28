@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections15.CollectionUtils;
+
 import edu.uci.ics.jung.graph.Graph;
 
 public class TimeLineList<V, E> {
@@ -152,7 +154,7 @@ public class TimeLineList<V, E> {
 		    }
 
 		    sumSize = sumSize + comm.getSize();
-		    sumCores = sumCores + comm.getCoreNodes().size();
+		    sumCores = sumCores + comm.getCoreMembers().size();
 		}
 	    }
 	}
@@ -253,7 +255,7 @@ public class TimeLineList<V, E> {
      */
     private boolean hasCores(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
-	for (V corNod : commA_.getCoreNodes()) {
+	for (V corNod : commA_.getCoreMembers()) {
 	    if (commB_.isMember(corNod)) {
 		isPred = true;
 		break;
@@ -274,13 +276,20 @@ public class TimeLineList<V, E> {
      */
     private boolean isPredAtAll(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
-	if (hasCores(commA_, commB_)) {
+	if (CollectionUtils.intersection(commA_.getCoreMembers(), commB_.getCurrMembers()) != null) {
 	    isPred = true;
-	} else if (null != commB_.getPredecessors()) {
-	    for (Community<V, E> bPred : commB_.getPredecessors()) {
-		isPredAtAll(commA_, bPred);
-	    }
+	} else if (CollectionUtils.intersection(commA_.getCoreMembers(), commB_.getPastMembers()) != null) {
+	    isPred = true;
 	}
+
+	// KILLL ALL
+	// if (hasCores(commA_, commB_)) {
+	// isPred = true;
+	// } else if (null != commB_.getPredecessors()) {
+	// for (Community<V, E> bPred : commB_.getPredecessors()) {
+	// isPredAtAll(commA_, bPred);
+	// }
+	// }
 	return isPred;
     }
 
@@ -295,7 +304,7 @@ public class TimeLineList<V, E> {
 	List<Community<V, E>> predecessors = new ArrayList<Community<V, E>>();
 
 	for (Community<V, E> read : previousSnapshot) {
-	    for (V node : read.getCoreNodes()) {
+	    for (V node : read.getCoreMembers()) {
 		if (currCom_.isMember(node) && null != predecessors && !predecessors.contains(read)) {
 		    predecessors.add(read);
 		}

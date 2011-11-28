@@ -52,9 +52,10 @@ public class ClusterFinder {
 	    Collection<Set<Integer>> comms = clusterGraph((Graph) dynGraph);
 	    for (Set<Integer> comm : comms) {
 		_timeLine.add(dynGraph.getCurrentStep(), comm, (Graph) dynGraph);
-		_dbMgr.addCommunityToBatch(simID_, dynGraph.getCurrentStep(), comm);
+		// _dbMgr.addCommunityToBatch(simID_, dynGraph.getCurrentStep(),
+		// comm);
 	    }
-	    _dbMgr.insertCommMembers();
+	    // _dbMgr.insertCommMembers();
 	}
     }
 
