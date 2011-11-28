@@ -28,7 +28,7 @@ public class Community<V, E> {
     private Community<V, E> _mainPred;
     private Community<V, E> _mainTimelineFirst;
     private Double _memberStability;
-
+    private Set<V> _pastMembers;
     /**
      * TODO Purpose
      * 
@@ -95,8 +95,12 @@ public class Community<V, E> {
 	    } else {
 		_mainTimelineFirst = pred_;
 	    }
-
 	}
+	if (null == _pastMembers) {
+	    _pastMembers = new HashSet<V>();
+	}
+	_pastMembers.addAll(pred_.getCurrMembers());
+	_pastMembers.addAll(pred_.getPastMembers());
     }
 
     /**
@@ -141,7 +145,7 @@ public class Community<V, E> {
 	    Set<V> succUnion = new HashSet<V>();
 
 	    for (Community<V, E> com : _succList) {
-		succUnion.addAll(com.getAllNodes());
+		succUnion.addAll(com.getCurrMembers());
 	    }
 
 	    Set<V> intersectMembers = new HashSet<V>(_members);
@@ -211,7 +215,7 @@ public class Community<V, E> {
      * @return List<Integer>
      * @author antonio
      */
-    public final List<V> getCoreNodes() {
+    public final List<V> getCoreMembers() {
 	return _core;
     }
 
@@ -222,8 +226,20 @@ public class Community<V, E> {
      * @return List<Integer>
      * @author antonio
      */
-    public final Set<V> getAllNodes() {
+    public final Set<V> getCurrMembers() {
 	return _members;
+    }
+
+    /**
+     * 
+     * TODO Purpose
+     * 
+     * @params
+     * @return Set<V>
+     * @author biggie
+     */
+    public final Set<V> getPastMembers() {
+	return _pastMembers;
     }
 
     /**
