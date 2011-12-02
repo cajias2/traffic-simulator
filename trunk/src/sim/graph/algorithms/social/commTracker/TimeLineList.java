@@ -179,24 +179,30 @@ public class TimeLineList<V, E> {
      * @author antonio
      */
     private void buildCommTrace(Community<V, E> comm_) {
-	List<Community<V, E>> previousSnapshot = null;
-
 	if (!_timeLine.isEmpty()) {
-	    if (_timeLine.size() > 1) {
-		previousSnapshot = _timeLine.get(_timeLine.size() - 2);
-	    }
-	    List<Community<V, E>> predecessors = null;
-	    if (null != previousSnapshot) {
-		predecessors = findPredCandidates(comm_, previousSnapshot);
-	    }
-	    if (null != predecessors) {
-		buildCommTrace(comm_, predecessors);
-	    }
-
-	} else {
-	    System.out.println("*****Empty Snapshot****");
+	    List<Community<V, E>> predecessors = findPredCandidates(comm_, findPrevSnapShotInTimeline());
+	    buildCommTrace(comm_, predecessors);
 	}
+    }
 
+    /**
+     * TODO Purpose
+     * 
+     * @params
+     * @return List<Community<V,E>>
+     * @author biggie
+     */
+    public List<Community<V, E>> findPrevSnapShotInTimeline() {
+	List<Community<V, E>> previousSnapshot = null;
+	if (_timeLine.size() > 1) {
+	    for (int i = 2; 0 < _timeLine.size() - i; i++) {
+		previousSnapshot = _timeLine.get(_timeLine.size() - i);
+		if (previousSnapshot != null) {
+		    break;
+		}
+	    }
+	}
+	return previousSnapshot;
     }
 
     /**
@@ -255,11 +261,8 @@ public class TimeLineList<V, E> {
      */
     private boolean hasCores(Community<V, E> commA_, Community<V, E> commB_) {
 	boolean isPred = false;
-	for (V corNod : commA_.getCoreMembers()) {
-	    if (commB_.isMember(corNod)) {
-		isPred = true;
-		break;
-	    }
+	if (!CollectionUtils.intersection(commA_.getCoreMembers(), commB_.getCurrMembers()).isEmpty()) {
+	    isPred = true;
 	}
 	return isPred;
     }
@@ -281,15 +284,6 @@ public class TimeLineList<V, E> {
 	} else if (CollectionUtils.intersection(commA_.getCoreMembers(), commB_.getPastMembers()) != null) {
 	    isPred = true;
 	}
-
-	// KILLL ALL
-	// if (hasCores(commA_, commB_)) {
-	// isPred = true;
-	// } else if (null != commB_.getPredecessors()) {
-	// for (Community<V, E> bPred : commB_.getPredecessors()) {
-	// isPredAtAll(commA_, bPred);
-	// }
-	// }
 	return isPred;
     }
 
@@ -300,18 +294,14 @@ public class TimeLineList<V, E> {
      * @return List<Community<V, E>>
      * @author biggie
      */
-    private List<Community<V, E>> findPredCandidates(Community<V, E> currCom_, List<Community<V, E>> previousSnapshot) {
+    private List<Community<V, E>> findPredCandidates(Community<V, E> currCom_, List<Community<V, E>> prevSS_) {
 	List<Community<V, E>> predecessors = new ArrayList<Community<V, E>>();
-
-	for (Community<V, E> read : previousSnapshot) {
-	    for (V node : read.getCoreMembers()) {
-		if (currCom_.isMember(node) && null != predecessors && !predecessors.contains(read)) {
+	if (null != prevSS_) {
+	    for (Community<V, E> read : prevSS_) {
+		if (!CollectionUtils.intersection(currCom_.getCurrMembers(), read.getCoreMembers()).isEmpty()) {
 		    predecessors.add(read);
 		}
 	    }
-	}
-	if (predecessors.isEmpty()) {
-	    predecessors = null;
 	}
 	return predecessors;
     }
