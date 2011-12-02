@@ -1,5 +1,6 @@
 package sim.graph.algorithms.social.commTracker;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,11 +25,12 @@ public class Community<V, E> {
     private Set<Community<V, E>> _succList;
     private long _bckwdTimelineLen = 0;
     private long _fwdTimelineLen = -1;
-    private long _evolTrace = -1;
+    private BigInteger _evolTrace = new BigInteger("-1");
     private Community<V, E> _mainPred;
     private Community<V, E> _mainTimelineFirst;
     private Double _memberStability;
     private Set<V> _pastMembers;
+
     /**
      * TODO Purpose
      * 
@@ -100,7 +102,9 @@ public class Community<V, E> {
 	    _pastMembers = new HashSet<V>();
 	}
 	_pastMembers.addAll(pred_.getCurrMembers());
-	_pastMembers.addAll(pred_.getPastMembers());
+	if (null != pred_.getPastMembers()) {
+	    _pastMembers.addAll(pred_.getPastMembers());
+	}
     }
 
     /**
@@ -186,9 +190,8 @@ public class Community<V, E> {
     }
 
     /**
-     * Evolution trace.
-     * The number of
-     * Definition 1--see {@link http://arxiv.org/abs/0804.4356v1}
+     * Evolution trace. The number of Definition 1--see {@link http
+     * ://arxiv.org/abs/0804.4356v1}
      * 
      * @return
      */
@@ -208,8 +211,8 @@ public class Community<V, E> {
     }
 
     /**
-     * Returns the core nodes of the community.
-     * See sectio 3 {@link http://arxiv.org/abs/0804.4356v1}
+     * Returns the core nodes of the community. See sectio 3 {@link http
+     * ://arxiv.org/abs/0804.4356v1}
      * 
      * @params
      * @return List<Integer>
@@ -272,8 +275,8 @@ public class Community<V, E> {
      * @return long
      * @author biggie
      */
-    public long getEvolTrace() {
-	if (_evolTrace < 0) {
+    public BigInteger getEvolTrace() {
+	if (_evolTrace.intValue() < 0) {
 	    _evolTrace = findEvolTrace(_succList);
 	}
 	return _evolTrace;
@@ -283,11 +286,13 @@ public class Community<V, E> {
      * @param succList_
      * @return
      */
-    private long findEvolTrace(Set<Community<V, E>> succList_) {
-	long evolutionTrace = 0;
+    private BigInteger findEvolTrace(Set<Community<V, E>> succList_) {
+	BigInteger evolutionTrace = new BigInteger("0");
 	if (null != succList_) {
+
 	    for (Community<V, E> succ : succList_) {
-		evolutionTrace = evolutionTrace + succ.getEvolTrace() + 1;
+		evolutionTrace = evolutionTrace.add(succ.getEvolTrace());
+		evolutionTrace = evolutionTrace.add(new BigInteger("1"));
 	    }
 	}
 	return evolutionTrace;
@@ -335,22 +340,14 @@ public class Community<V, E> {
     }
 
     /**
-     * @param v_
-     * @return
-     */
-    public boolean isMember(V v_) {
-	return _members.contains(v_);
-    }
-
-    /**
      * @return
      */
     public Double getAvgMemberStability() {
-        Double totalMemberStab = 0.0;
+	Double totalMemberStab = 0.0;
 	for (Community<V, E> currCom = getMainPred(); null != currCom; currCom = currCom.getMainPred()) {
-            totalMemberStab = totalMemberStab + currCom.getMemberStability();
-        }
-        return totalMemberStab / getAge();
+	    totalMemberStab = totalMemberStab + currCom.getMemberStability();
+	}
+	return totalMemberStab / getAge();
     }
 
     /**
@@ -361,7 +358,7 @@ public class Community<V, E> {
      * @author antonio
      */
     private long getBckwdTimelineLen() {
-        return _bckwdTimelineLen;
+	return _bckwdTimelineLen;
     }
 
     /**
@@ -374,16 +371,16 @@ public class Community<V, E> {
      */
     private long findFwdTimelineLen(Set<Community<V, E>> succList_) {
 	long longestPathLen = 0;
-        if (null != succList_) {
+	if (null != succList_) {
 	    for (Community<V, E> succ : succList_) {
 		long pathLen = 1 + succ.getFwdTimelineLen();// (longestPathLen,
-        						   // succ.getSuccessors());
-        	if (longestPathLen < pathLen) {
-        	    longestPathLen = pathLen;
-        	}
-            }
-        }
-        return longestPathLen;
+							    // succ.getSuccessors());
+		if (longestPathLen < pathLen) {
+		    longestPathLen = pathLen;
+		}
+	    }
+	}
+	return longestPathLen;
     }
 
     /**
@@ -402,19 +399,19 @@ public class Community<V, E> {
     private List<V> getCommunityCores(Set<V> comNodSet_, Graph<V, E> graph_) {
 	List<V> coreNodList = null;
 	List<V> comNodeList = new ArrayList<V>(comNodSet_);
-    
-        if (isSameDegComm(comNodeList, graph_)) {
-            coreNodList = comNodeList;
-        } else {
-            int[] centralDeg = calculateNodCentrality(comNodeList, graph_);
-    
+
+	if (isSameDegComm(comNodeList, graph_)) {
+	    coreNodList = comNodeList;
+	} else {
+	    int[] centralDeg = calculateNodCentrality(comNodeList, graph_);
+
 	    coreNodList = new ArrayList<V>();
-            for (int i = 0; i < comNodSet_.size(); i++) {
-        	if (centralDeg[i] >= 0)
-        	    coreNodList.add(comNodeList.get(i));
-            }
-        }
-        return coreNodList;
+	    for (int i = 0; i < comNodSet_.size(); i++) {
+		if (centralDeg[i] >= 0)
+		    coreNodList.add(comNodeList.get(i));
+	    }
+	}
+	return coreNodList;
     }
 
     /**
@@ -433,33 +430,33 @@ public class Community<V, E> {
      * @author biggie
      */
     private int[] calculateNodCentrality(List<V> comNodList_, Graph<V, E> graph_) {
-        int[] centralDeg = new int[comNodList_.size()];
-        for (int i = 0; i < centralDeg.length; i++) {
-            centralDeg[i] = 0;
-        }
-    
-        for (int i = 0; i < comNodList_.size(); i++) {
-            for (int j = (i + 1); j < comNodList_.size(); j++) {
+	int[] centralDeg = new int[comNodList_.size()];
+	for (int i = 0; i < centralDeg.length; i++) {
+	    centralDeg[i] = 0;
+	}
+
+	for (int i = 0; i < comNodList_.size(); i++) {
+	    for (int j = (i + 1); j < comNodList_.size(); j++) {
 		V node1 = comNodList_.get(i);
 		V node2 = comNodList_.get(j);
-    
+
 		E edge1 = graph_.findEdge(node1, node2);
 		E edge2 = graph_.findEdge(node2, node1);
-        	if ((edge1 != null) || (edge2 != null)) {
-        	    int grado1 = graph_.degree(node1);
-        	    int grado2 = graph_.degree(node2);
-    
-        	    if (grado1 < grado2) {
-        		centralDeg[i] = centralDeg[i] - Math.abs((grado1 - grado2));
-        		centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
-        	    } else {
-        		centralDeg[i] = centralDeg[i] + Math.abs((grado1 - grado2));
-        		centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
-        	    }
-        	}
-            }
-        }
-        return centralDeg;
+		if ((edge1 != null) || (edge2 != null)) {
+		    int grado1 = graph_.degree(node1);
+		    int grado2 = graph_.degree(node2);
+
+		    if (grado1 < grado2) {
+			centralDeg[i] = centralDeg[i] - Math.abs((grado1 - grado2));
+			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+		    } else {
+			centralDeg[i] = centralDeg[i] + Math.abs((grado1 - grado2));
+			centralDeg[j] = centralDeg[j] + Math.abs((grado1 - grado2));
+		    }
+		}
+	    }
+	}
+	return centralDeg;
     }
 
     /**
@@ -475,21 +472,21 @@ public class Community<V, E> {
      * @author biggie
      */
     private boolean isSameDegComm(List<V> comNodList, Graph<V, E> graph_) {
-        boolean sameDegree = true;
-        boolean firstNode = true;
-        int degree = 0;
-    
+	boolean sameDegree = true;
+	boolean firstNode = true;
+	int degree = 0;
+
 	for (V node : comNodList) {
-            if (!sameDegree) {
-        	break;
-            }
-            if (firstNode) {
-        	degree = graph_.degree(node);
-        	firstNode = false;
-            } else
-        	sameDegree = (graph_.degree(node) == degree);
-        }
-        return sameDegree;
+	    if (!sameDegree) {
+		break;
+	    }
+	    if (firstNode) {
+		degree = graph_.degree(node);
+		firstNode = false;
+	    } else
+		sameDegree = (graph_.degree(node) == degree);
+	}
+	return sameDegree;
     }
 
 }

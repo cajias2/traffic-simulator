@@ -14,7 +14,7 @@ import edu.uci.ics.jung.graph.Graph;
 
 /**
  * @author biggie
- *
+ * 
  */
 public class ClusterFinder {
     private final DBManager _dbMgr;
@@ -49,11 +49,14 @@ public class ClusterFinder {
 	_timeLine = new TimeLineList<Integer, Edge>();
 	dynGraph.init();
 	while (dynGraph.nextStep()) {
-	    Collection<Set<Integer>> comms = clusterGraph((Graph) dynGraph);
-	    for (Set<Integer> comm : comms) {
-		_timeLine.add(dynGraph.getCurrentStep(), comm, (Graph) dynGraph);
-		// _dbMgr.addCommunityToBatch(simID_, dynGraph.getCurrentStep(),
-		// comm);
+	    if (dynGraph.getCurrentStep() % 25 == 0) {
+		Collection<Set<Integer>> comms = clusterGraph((Graph) dynGraph);
+		for (Set<Integer> comm : comms) {
+		    _timeLine.add(dynGraph.getCurrentStep(), comm, (Graph) dynGraph);
+		    // _dbMgr.addCommunityToBatch(simID_,
+		    // dynGraph.getCurrentStep(),
+		    // comm);
+		}
 	    }
 	    // _dbMgr.insertCommMembers();
 	}
