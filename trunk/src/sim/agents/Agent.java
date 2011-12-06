@@ -30,7 +30,7 @@ public class Agent implements Steppable {
     private Double2D desiredLocation = null;
     protected MersenneTwisterFast _rand = null;
     private static Graph<Agent, Edge> _socGraph = new UndirectedSparseGraph<Agent, Edge>();
-    protected static Graph<Agent, Edge> _deltaGraph = new UndirectedSparseGraph<Agent, Edge>();
+    protected static Graph<Agent, Edge> _deltaGraph;
     private static Network _testNet = new Network();
     protected static List<Agent> _agentList = new ArrayList<Agent>();
     protected final int SNAPSHOT;
@@ -49,6 +49,7 @@ public class Agent implements Steppable {
 	    _testNet.addNode(this);
 	} else {
 	    _socGraph.addVertex(this);
+	    resetDeltaGraph();
 	}
 	_agentList.add(this);
 	_agentCount++;
@@ -62,20 +63,23 @@ public class Agent implements Steppable {
 	SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
 	beforeStep(socSim);
 	Double2D currLoc = socSim.env.getObjectLocation(this);
-	Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y), _actionDim);
+	if (currLoc != null) {
+	    Bag objs = socSim.env.getObjectsExactlyWithinDistance(new Double2D(currLoc.x, currLoc.y), _actionDim);
 
-	@SuppressWarnings("unchecked")
-	Iterator<Agent> iter = objs.iterator();
-	while (iter.hasNext()) {
-	    Agent ag = iter.next();
-	    // make sure not the same obj, and an edge does not already exist.
-	    if (this != ag) {
-		interactWithAgent(ag);
+	    @SuppressWarnings("unchecked")
+	    Iterator<Agent> iter = objs.iterator();
+	    while (iter.hasNext()) {
+		Agent ag = iter.next();
+		// make sure not the same obj, and an edge does not already
+		// exist.
+		if (this != ag) {
+		    interactWithAgent(ag);
+		}
 	    }
-	}
 
-	Double2D newLoc = move(state_);
-	socSim.env.setObjectLocation(this, newLoc);
+	    Double2D newLoc = move(state_);
+	    socSim.env.setObjectLocation(this, newLoc);
+	}
 	afterStep(socSim);
     }
 
@@ -204,6 +208,7 @@ public class Agent implements Steppable {
 	    updateDeltaGraph(ag1_, ag2_, true);
 	}
     }
+
     protected void updateWeight(Agent ag1_, Agent ag2_, double weight_) {
 	if (IS_TEST) {
 	    removeEdgeNetwork(ag1_, ag2_);
@@ -233,6 +238,7 @@ public class Agent implements Steppable {
 	    updateDeltaGraph(ag1_, ag2_, false);
 	}
     }
+
     /**
      * @param ag_
      * @return
@@ -277,17 +283,27 @@ public class Agent implements Steppable {
 	return getNeighbours(this);
     }
 
-    protected Collection<Agent> getNeighbours(Agent ag_) {
-	return _socGraph.getNeighbors(ag_);
-    }
-
-
     /**
      * @param ag_
      * @return
      */
-    private Edge findEdgeTestMode(Agent ag_) {
-	return findEdgeTestMode(this, ag_);
+    protected Collection<Agent> getNeighbours(Agent ag_) {
+	Collection<Agent> neighb = null;
+	if (IS_TEST) {
+	    neighb = new ArrayList<Agent>();
+	    Bag bg = _testNet.getEdges(ag_, null);
+	    for (Object obj : bg) {
+		Edge e = (Edge) obj;
+		if (e.from() == ag_) {
+		    neighb.add((Agent) e.to());
+		} else {
+		    neighb.add((Agent) e.from());
+		}
+	    }
+	} else {
+	    neighb = _socGraph.getNeighbors(ag_);
+	}
+	return neighb;
     }
 
     /**
@@ -336,7 +352,6 @@ public class Agent implements Steppable {
     }
 
     /**
-     * 
      * TODO Purpose
      * 
      * @params
@@ -354,11 +369,12 @@ public class Agent implements Steppable {
 	if (_deltaGraph.findEdge(ag1_, ag2_) != null
 		&& ((Boolean) _deltaGraph.findEdge(ag1_, ag2_).getInfo()) != isCreateEdge_) {
 	    _deltaGraph.removeEdge(_deltaGraph.findEdge(ag1_, ag2_));
-	}else{
+	} else {
 	    _deltaGraph.addEdge(new Edge(ag1_, ag2_, isCreateEdge_), ag1_, ag2_);
 	}
 
     }
+
     /**
      * @return the testNet
      */
@@ -373,6 +389,10 @@ public class Agent implements Steppable {
 
     public final static Graph getSocGraph() {
 	return _socGraph;
+    }
+
+    protected void resetDeltaGraph() {
+	_deltaGraph = new UndirectedSparseGraph<Agent, Edge>();
     }
 
 }

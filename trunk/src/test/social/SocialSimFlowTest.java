@@ -6,11 +6,7 @@
 
 package test.social;
 
-import java.util.LinkedList;
 import java.util.List;
-
-import sim.agents.Agent;
-import sim.app.social.SocialSimBatchRunner;
 
 /**
  * TODO Purpose
@@ -40,7 +36,7 @@ public class SocialSimFlowTest {
 	    }
 	}
 	long durTime = System.currentTimeMillis();
-	List<Integer> simIDs = runSim(args, totalSimRuns);
+	List<Integer> simIDs = SimulationTest.runSim(args, totalSimRuns, SEED);
 	System.out.println("New Simulations: " + simIDs);
 	System.out.println("DURATION: " + (System.currentTimeMillis() - durTime) / 60000 + " mins");
 	System.out.println("Clustering Snapshots....");
@@ -51,20 +47,6 @@ public class SocialSimFlowTest {
 	System.out.println("All done. Buh-bye!");
     }
 
-    /**
-     * @param args
-     * @param totalSimRuns
-     */
-    private static List<Integer> runSim(String[] args, int totalSimRuns) {
-	List<Integer> simIDs = new LinkedList<Integer>();
-	for (int i = 0; i < totalSimRuns; i++) {
-	    System.out.println("******\n* Run: " + i + "\n******\n");
-	    SocialSimBatchRunner<Agent, String> sim = new SocialSimBatchRunner<Agent, String>(SEED);
-	    sim.runSim(args);
-	    simIDs.add(sim.getSimID());
-	    System.out.println("Done.");
-	}
-	return simIDs;
-    }
+
 
 }

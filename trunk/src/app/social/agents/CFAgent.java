@@ -97,7 +97,7 @@ public class CFAgent extends Agent {
      */
     @Override
     protected void interactWithAgent(Agent ag_) {
-	if (isFriend(ag_)) {
+	if (!isFriend(ag_)) {
 	    if (shouldBefriend(ag_)) {
 		befriend(ag_);
 	    }
@@ -152,4 +152,5 @@ public class CFAgent extends Agent {
 	_personality = _personality + (_rand.nextGaussian()) * 5;
 
     }
+
 }
