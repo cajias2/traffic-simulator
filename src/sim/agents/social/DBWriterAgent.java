@@ -4,7 +4,6 @@ import sim.agents.Agent;
 import sim.app.social.SocialSimBatchRunner;
 import sim.engine.SimState;
 import sim.field.network.Edge;
-import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 public class DBWriterAgent extends Agent {
 
@@ -41,17 +40,10 @@ public class DBWriterAgent extends Agent {
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sim.engine.Steppable#step(sim.engine.SimState)
-     */
     @Override
-    public void step(SimState state_) {
-	@SuppressWarnings("unchecked")
-	SocialSimBatchRunner<Agent, String> socSim = (SocialSimBatchRunner<Agent, String>) state_;
-	if (0 == (socSim.schedule.getSteps() % SNAPSHOT)) {
-	    writeDeltaToDB(socSim);
+    protected void beforeStep(SocialSimBatchRunner<Agent, String> state_) {
+	if (0 == (state_.schedule.getSteps() % SNAPSHOT)) {
+	    writeDeltaToDB(state_);
 	}
     }
 
@@ -62,7 +54,6 @@ public class DBWriterAgent extends Agent {
      */
     @Override
     protected void afterStep(SocialSimBatchRunner<Agent, String> state_) {
-	super.afterStep(state_);
-	_deltaGraph = new UndirectedSparseGraph<Agent, Edge>();
+	resetDeltaGraph();
     }
 }
