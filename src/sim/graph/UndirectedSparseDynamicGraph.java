@@ -81,4 +81,12 @@ public class UndirectedSparseDynamicGraph extends UndirectedSparseGraph<Integer,
     public final int getCurrentStep() {
 	return _currentStep;
     }
+
+    /**
+     * @return
+     */
+    public boolean isClustered() {
+	// _dbMgr.isClustered
+		return false;
+    }
 }

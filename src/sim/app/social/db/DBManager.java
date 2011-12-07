@@ -38,7 +38,7 @@ public class DBManager {
     private static final String HOST = "localhost:3306";
     private static final String SCHEMA = "socSimDB";
     private static final String USR = "root";
-    private static final String PWD = "miramar";
+    private static final String PWD = "";
     private static final String DB_URL = "jdbc:mysql://" + HOST + "/" + SCHEMA + "?user=" + USR + "&password=" + PWD;
     private PreparedStatement _pstmtNode;
     private PreparedStatement _pstmtEdge;
