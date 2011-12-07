@@ -49,7 +49,11 @@ public class ClusterFinder {
 	_timeLine = new TimeLineList<Integer, Edge>();
 	dynGraph.init();
 	while (dynGraph.nextStep()) {
-	    if (dynGraph.getCurrentStep() % 25 == 0) {
+	    if (dynGraph.getCurrentStep() % 1 == 0) {
+		System.out.println("At Step " + dynGraph.getCurrentStep());
+		if (dynGraph.isClustered()) {
+
+		}
 		Collection<Set<Integer>> comms = clusterGraph((Graph) dynGraph);
 		for (Set<Integer> comm : comms) {
 		    _timeLine.add(dynGraph.getCurrentStep(), comm, (Graph) dynGraph);
